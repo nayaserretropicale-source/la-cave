@@ -1,0 +1,54 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase";
+
+export default function AuthBar() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [user, setUser] = useState<string | null>(null);
+  const [msg, setMsg] = useState("");
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => setUser(data.user?.email ?? null));
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
+      setUser(session?.user?.email ?? null);
+    });
+    return () => sub.subscription.unsubscribe();
+  }, []);
+
+  async function signUp() {
+    const { error } = await supabase.auth.signUp({ email, password });
+    setMsg(error ? error.message : "Compte créé, tu es connecté.");
+  }
+  async function signIn() {
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    setMsg(error ? error.message : "");
+  }
+  async function signOut() {
+    await supabase.auth.signOut();
+  }
+
+  if (user) {
+    return (
+      <div className="mb-6 flex items-center justify-between rounded-lg border border-zinc-800 bg-zinc-900/50 px-4 py-2 text-sm">
+        <span className="text-zinc-400">Connecté : <span className="text-amber-500">{user}</span></span>
+        <button onClick={signOut} className="text-zinc-400 hover:text-zinc-100">Déconnexion</button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mb-6 space-y-2 rounded-lg border border-zinc-800 bg-zinc-900/50 p-4">
+      <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" type="email"
+        className="w-full rounded bg-zinc-800 px-3 py-2 text-sm outline-none" />
+      <input value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Mot de passe" type="password"
+        className="w-full rounded bg-zinc-800 px-3 py-2 text-sm outline-none" />
+      <div className="flex gap-2">
+        <button onClick={signIn} className="flex-1 rounded bg-amber-600 px-3 py-2 text-sm font-medium text-zinc-950 hover:bg-amber-500">Se connecter</button>
+        <button onClick={signUp} className="flex-1 rounded border border-zinc-700 px-3 py-2 text-sm hover:border-amber-500">Créer un compte</button>
+      </div>
+      {msg && <p className="text-xs text-zinc-400">{msg}</p>}
+    </div>
+  );
+}

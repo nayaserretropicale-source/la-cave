@@ -1,65 +1,199 @@
-import Image from "next/image";
+"use client";
+
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import AuthBar from "@/components/AuthBar";
+import { supabase } from "@/lib/supabase";
+
+type Fiche = {
+  identifie: boolean;
+  nom?: string;
+  marque?: string;
+  origine?: string;
+  format?: string;
+  cape?: string;
+  force?: string;
+  profil?: string[] | string;
+  prix_indicatif?: string;
+  degustation?: string;
+  confiance?: string;
+  commentaire?: string;
+};
+
+type CaveItem = { id: string; nom: string; marque?: string | null; origine?: string | null; force?: string | null };
 
 export default function Home() {
+  const [loading, setLoading] = useState(false);
+  const [fiche, setFiche] = useState<Fiche | null>(null);
+  const [preview, setPreview] = useState<string | null>(null);
+  const [cave, setCave] = useState<CaveItem[]>([]);
+  const [saveMsg, setSaveMsg] = useState("");
+
+  async function loadCave() {
+    const { data } = await supabase
+      .from("cave")
+      .select("id,nom,marque,origine,force")
+      .order("created_at", { ascending: false });
+    setCave((data ?? []) as CaveItem[]);
+  }
+
+  useEffect(() => {
+    loadCave();
+    const { data: sub } = supabase.auth.onAuthStateChange(() => loadCave());
+    return () => sub.subscription.unsubscribe();
+  }, []);
+
+  async function onFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setPreview(URL.createObjectURL(file));
+    setLoading(true);
+    setFiche(null);
+    setSaveMsg("");
+
+    const reader = new FileReader();
+    reader.onload = async () => {
+      const base64 = (reader.result as string).split(",")[1];
+      const res = await fetch("/api/scan", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ imageBase64: base64, mediaType: file.type }),
+      });
+      const data = (await res.json()) as Fiche;
+      setFiche(data);
+      setLoading(false);
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function reset() {
+    setFiche(null);
+    setPreview(null);
+    setSaveMsg("");
+  }
+
+  async function saveToCave() {
+    if (!fiche || !fiche.identifie) return;
+    setSaveMsg("");
+    const { error } = await supabase.from("cave").insert({
+      nom: fiche.nom || fiche.marque || "Cigare",
+      marque: fiche.marque,
+      origine: fiche.origine,
+      format: fiche.format,
+      cape: fiche.cape,
+      force: fiche.force,
+      profil: Array.isArray(fiche.profil) ? fiche.profil : fiche.profil ? [fiche.profil] : [],
+      source: "scan",
+    });
+    if (error) {
+      setSaveMsg("Connecte-toi d'abord pour sauvegarder.");
+      return;
+    }
+    setSaveMsg("Ajouté à ta cave ✓");
+    loadCave();
+  }
+
+  const profil = Array.isArray(fiche?.profil) ? fiche?.profil.join(", ") : fiche?.profil;
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+    <main className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col items-center px-6 py-12">
+      <div className="w-full max-w-md">
+        <p className="text-xs tracking-[0.3em] uppercase text-amber-500">Cave personnelle</p>
+        <h1 className="text-3xl font-semibold mt-1 mb-6">Ma cave à cigares 🔥</h1>
+
+        <AuthBar />
+
+        <Link
+          href="/caviste"
+          className="mb-6 inline-block rounded-lg border border-zinc-700 px-4 py-2 text-sm text-zinc-300 transition hover:border-amber-500 hover:text-amber-500"
+        >
+          Demander au caviste 🥃 →
+        </Link>
+
+        {!fiche && !loading && (
+          <label className="block cursor-pointer rounded-xl border border-dashed border-zinc-700 bg-zinc-900/40 px-6 py-10 text-center transition hover:border-amber-500">
+            <span className="text-zinc-300">Choisir / prendre une photo</span>
+            <span className="mt-1 block text-sm text-zinc-500">Cadre bien la bague.</span>
+            <input type="file" accept="image/*" capture="environment" onChange={onFile} className="hidden" />
+          </label>
+        )}
+
+        {preview && (
+          <img src={preview} alt="cigare" className="mb-6 w-full rounded-xl border border-zinc-800" />
+        )}
+
+        {loading && <p className="animate-pulse text-amber-500">Analyse en cours…</p>}
+
+        {fiche && !loading && (
+          <div>
+            {fiche.identifie ? (
+              <div className="space-y-5">
+                <div>
+                  <h2 className="text-2xl font-semibold">{fiche.nom || fiche.marque}</h2>
+                  <p className="text-sm uppercase tracking-wider text-amber-500">
+                    {fiche.marque}
+                    {fiche.confiance ? ` · confiance ${fiche.confiance}` : ""}
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-px overflow-hidden rounded-xl bg-zinc-800">
+                  <Field label="Origine" value={fiche.origine} />
+                  <Field label="Format" value={fiche.format} />
+                  <Field label="Cape" value={fiche.cape} />
+                  <Field label="Force" value={fiche.force} />
+                  <Field label="Prix indicatif" value={fiche.prix_indicatif} />
+                  <Field label="Profil" value={profil} />
+                </div>
+
+                {fiche.degustation && (
+                  <p className="rounded-r-lg border-l-2 border-amber-500 bg-zinc-900/50 px-4 py-3 italic text-zinc-300">
+                    {fiche.degustation}
+                  </p>
+                )}
+              </div>
+            ) : (
+              <p className="italic text-orange-400">
+                {fiche.commentaire || "Cigare non identifié, réessaie avec la bague bien visible."}
+              </p>
+            )}
+
+            <div className="mt-6 flex gap-2">
+              {fiche.identifie && (
+                <button onClick={saveToCave} className="rounded-lg bg-amber-600 px-5 py-2.5 font-medium text-zinc-950 transition hover:bg-amber-500">
+                  + Ajouter à ma cave
+                </button>
+              )}
+              <button onClick={reset} className="rounded-lg border border-zinc-700 px-5 py-2.5 transition hover:border-amber-500">
+                Scanner un autre
+              </button>
+            </div>
+            {saveMsg && <p className="mt-2 text-sm text-amber-500">{saveMsg}</p>}
+          </div>
+        )}
+
+        {cave.length > 0 && (
+          <div className="mt-10">
+            <p className="mb-3 text-xs tracking-[0.3em] uppercase text-amber-500">Ma cave</p>
+            <div className="space-y-2">
+              {cave.map((c) => (
+                <div key={c.id} className="flex items-center justify-between rounded-lg border border-zinc-800 bg-zinc-900/50 px-4 py-3">
+                  <span className="font-medium">{c.nom}</span>
+                  <span className="text-sm text-zinc-500">{[c.origine, c.force].filter(Boolean).join(" · ")}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </main>
+  );
+}
+
+function Field({ label, value }: { label: string; value?: string }) {
+  return (
+    <div className="bg-zinc-900 px-4 py-3">
+      <p className="text-[11px] uppercase tracking-wider text-zinc-500">{label}</p>
+      <p className="mt-0.5">{value || "—"}</p>
     </div>
   );
 }
