@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import AuthBar from "@/components/AuthBar";
 import { supabase } from "@/lib/supabase";
 
-type CaveLite = { id: string; nom: string };
+type CaveLite = { id: string; nom: string; origine: string | null };
 type Session = {
   id: string;
   nom: string;
@@ -28,7 +28,7 @@ export default function Journal() {
   const [open, setOpen] = useState(false);
 
   async function loadCave() {
-    const { data } = await supabase.from("cave").select("id,nom").order("nom");
+    const { data } = await supabase.from("cave").select("id,nom,origine").order("nom");
     setCave((data ?? []) as CaveLite[]);
   }
   async function loadSessions() {
@@ -96,6 +96,19 @@ export default function Journal() {
     return new Date(d).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
   }
 
+  const now = new Date();
+  const moisCount = sessions.filter((s) => {
+    if (!s.date_fume) return false;
+    const d = new Date(s.date_fume);
+    return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
+  }).length;
+  const rated = sessions.filter((s) => s.rating);
+  const moyenne = rated.length ? rated.reduce((a, s) => a + (s.rating || 0), 0) / rated.length : 0;
+  const origineCount: Record<string, number> = {};
+  cave.forEach((c) => { if (c.origine) origineCount[c.origine] = (origineCount[c.origine] || 0) + 1; });
+  const originePref = Object.entries(origineCount).sort((a, b) => b[1] - a[1])[0]?.[0] || "—";
+  const hasData = cave.length > 0 || sessions.length > 0;
+
   return (
     <main className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col items-center px-6 py-12">
       <div className="w-full max-w-md">
@@ -103,6 +116,19 @@ export default function Journal() {
         <h1 className="text-3xl font-semibold mt-1 mb-6">Journal de dégustation 📓</h1>
 
         <AuthBar />
+
+        {hasData && (
+          <div className="mb-6 grid grid-cols-2 gap-2">
+            <Stat label="En cave" value={String(cave.length)} />
+            <Stat label="Dégustations" value={String(sessions.length)} />
+            <Stat label="Ce mois-ci" value={String(moisCount)} />
+            <Stat label="Note moyenne" value={moyenne ? `${moyenne.toFixed(1)} ★` : "—"} />
+            <div className="col-span-2 rounded-xl border border-zinc-800 bg-zinc-900/50 px-4 py-3">
+              <p className="text-[11px] uppercase tracking-wider text-zinc-500">Origine préférée</p>
+              <p className="mt-0.5 text-amber-500">{originePref}</p>
+            </div>
+          </div>
+        )}
 
         <button onClick={() => setOpen((v) => !v)} className="mb-6 w-full rounded-lg bg-amber-600 px-4 py-2.5 font-medium text-zinc-950 transition hover:bg-amber-500">
           {open ? "Fermer" : "+ Nouvelle dégustation"}
@@ -178,5 +204,14 @@ export default function Journal() {
         )}
       </div>
     </main>
+  );
+}
+
+function Stat({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 px-4 py-3">
+      <p className="text-[11px] uppercase tracking-wider text-zinc-500">{label}</p>
+      <p className="mt-0.5 text-xl font-semibold">{value}</p>
+    </div>
   );
 }
