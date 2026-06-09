@@ -46,6 +46,7 @@ export default function Home() {
   const [selected, setSelected] = useState<CaveItem | null>(null);
   const [ratingDraft, setRatingDraft] = useState(0);
   const [noteDraft, setNoteDraft] = useState("");
+  const [photoBusy, setPhotoBusy] = useState(false);
 
   async function loadCave() {
     const { data } = await supabase
@@ -145,6 +146,21 @@ export default function Home() {
     loadCave();
   }
 
+  async function onDetailPhoto(e: React.ChangeEvent<HTMLInputElement>) {
+    const f = e.target.files?.[0];
+    if (!f || !selected) return;
+    setPhotoBusy(true);
+    const ext = f.name.split(".").pop() || "jpg";
+    const path = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+    const { error: upErr } = await supabase.storage.from("cigares").upload(path, f);
+    if (upErr) { setPhotoBusy(false); return; }
+    const url = supabase.storage.from("cigares").getPublicUrl(path).data.publicUrl;
+    await supabase.from("cave").update({ photo_url: url }).eq("id", selected.id);
+    setSelected({ ...selected, photo_url: url });
+    setPhotoBusy(false);
+    loadCave();
+  }
+
   const profil = Array.isArray(fiche?.profil) ? fiche?.profil.join(", ") : fiche?.profil;
 
   return (
@@ -155,9 +171,10 @@ export default function Home() {
 
         <AuthBar />
 
-        <Link href="/caviste" className="mb-6 inline-block rounded-lg border border-zinc-700 px-4 py-2 text-sm text-zinc-300 transition hover:border-amber-500 hover:text-amber-500">
-          Demander au caviste 🥃 →
-        </Link>
+        <div className="mb-6 flex flex-wrap gap-2">
+          <Link href="/caviste" className="inline-block rounded-lg border border-zinc-700 px-4 py-2 text-sm text-zinc-300 transition hover:border-amber-500 hover:text-amber-500">Demander au caviste 🥃</Link>
+          <Link href="/wishlist" className="inline-block rounded-lg border border-zinc-700 px-4 py-2 text-sm text-zinc-300 transition hover:border-amber-500 hover:text-amber-500">Mes envies ✨</Link>
+        </div>
 
         {!fiche && !loading && (
           <label className="block cursor-pointer rounded-xl border border-dashed border-zinc-700 bg-zinc-900/40 px-6 py-10 text-center transition hover:border-amber-500">
@@ -244,9 +261,16 @@ export default function Home() {
       {selected && (
         <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/70 p-4 sm:items-center" onClick={() => setSelected(null)}>
           <div className="w-full max-w-md rounded-2xl border border-zinc-800 bg-zinc-900 p-5" onClick={(e) => e.stopPropagation()}>
-            {selected.photo_url && (
-              <img src={selected.photo_url} alt={selected.nom} className="mb-4 max-h-60 w-full rounded-xl border border-zinc-800 object-cover" />
+            {selected.photo_url ? (
+              <img src={selected.photo_url} alt={selected.nom} className="mb-3 max-h-60 w-full rounded-xl border border-zinc-800 object-cover" />
+            ) : (
+              <div className="mb-3 flex h-40 w-full items-center justify-center rounded-xl border border-dashed border-zinc-700 bg-zinc-800 text-3xl">🚬</div>
             )}
+            <label className="mb-4 block cursor-pointer text-center text-sm text-zinc-400 transition hover:text-amber-500">
+              {photoBusy ? "Envoi…" : selected.photo_url ? "Changer la photo" : "Ajouter une photo"}
+              <input type="file" accept="image/*" onChange={onDetailPhoto} className="hidden" />
+            </label>
+
             <h2 className="text-xl font-semibold">{selected.nom}</h2>
             {selected.marque && <p className="text-sm uppercase tracking-wider text-amber-500">{selected.marque}</p>}
 
