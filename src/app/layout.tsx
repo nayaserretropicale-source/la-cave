@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import NavBar from "@/components/NavBar";
+import AvatarBadge from "@/components/AvatarBadge";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -15,20 +16,16 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "La Cave",
-  description: "Ma cave à cigares perso",
+  description: "Ma cave à cigares personnelle",
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
-      <body className="min-h-full flex flex-col bg-zinc-950 pb-20">
+    <html lang="fr">
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-full flex flex-col bg-zinc-950 pb-20`}>
+        <AvatarBadge />
         {children}
         <NavBar />
       </body>
