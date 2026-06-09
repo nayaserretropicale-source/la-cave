@@ -26,9 +26,14 @@ type Fiche = {
 type CaveItem = {
   id: string;
   nom: string;
+  marque?: string | null;
   origine?: string | null;
   force?: string | null;
+  format?: string | null;
+  cape?: string | null;
   photo_url?: string | null;
+  rating?: number | null;
+  note_perso?: string | null;
 };
 
 export default function Home() {
@@ -38,11 +43,14 @@ export default function Home() {
   const [file, setFile] = useState<File | null>(null);
   const [cave, setCave] = useState<CaveItem[]>([]);
   const [saveMsg, setSaveMsg] = useState("");
+  const [selected, setSelected] = useState<CaveItem | null>(null);
+  const [ratingDraft, setRatingDraft] = useState(0);
+  const [noteDraft, setNoteDraft] = useState("");
 
   async function loadCave() {
     const { data } = await supabase
       .from("cave")
-      .select("id,nom,origine,force,photo_url")
+      .select("id,nom,marque,origine,force,format,cape,photo_url,rating,note_perso")
       .order("created_at", { ascending: false });
     setCave((data ?? []) as CaveItem[]);
   }
@@ -124,6 +132,19 @@ export default function Home() {
     loadCave();
   }
 
+  function openDetail(item: CaveItem) {
+    setSelected(item);
+    setRatingDraft(item.rating ?? 0);
+    setNoteDraft(item.note_perso ?? "");
+  }
+
+  async function saveDetail() {
+    if (!selected) return;
+    await supabase.from("cave").update({ rating: ratingDraft, note_perso: noteDraft }).eq("id", selected.id);
+    setSelected(null);
+    loadCave();
+  }
+
   const profil = Array.isArray(fiche?.profil) ? fiche?.profil.join(", ") : fiche?.profil;
 
   return (
@@ -134,10 +155,7 @@ export default function Home() {
 
         <AuthBar />
 
-        <Link
-          href="/caviste"
-          className="mb-6 inline-block rounded-lg border border-zinc-700 px-4 py-2 text-sm text-zinc-300 transition hover:border-amber-500 hover:text-amber-500"
-        >
+        <Link href="/caviste" className="mb-6 inline-block rounded-lg border border-zinc-700 px-4 py-2 text-sm text-zinc-300 transition hover:border-amber-500 hover:text-amber-500">
           Demander au caviste 🥃 →
         </Link>
 
@@ -149,9 +167,7 @@ export default function Home() {
           </label>
         )}
 
-        {preview && (
-          <img src={preview} alt="cigare" className="mb-6 w-full rounded-xl border border-zinc-800" />
-        )}
+        {preview && <img src={preview} alt="cigare" className="mb-6 w-full rounded-xl border border-zinc-800" />}
 
         {loading && <p className="animate-pulse text-amber-500">Analyse en cours…</p>}
 
@@ -179,32 +195,23 @@ export default function Home() {
                 </div>
 
                 {fiche.degustation && (
-                  <p className="rounded-r-lg border-l-2 border-amber-500 bg-zinc-900/50 px-4 py-3 italic text-zinc-300">
-                    {fiche.degustation}
-                  </p>
+                  <p className="rounded-r-lg border-l-2 border-amber-500 bg-zinc-900/50 px-4 py-3 italic text-zinc-300">{fiche.degustation}</p>
                 )}
                 {fiche.conservation && (
                   <p className="rounded-r-lg border-l-2 border-zinc-600 bg-zinc-900/50 px-4 py-3 text-sm text-zinc-300">
-                    <span className="font-medium text-zinc-100">Conservation — </span>
-                    {fiche.conservation}
+                    <span className="font-medium text-zinc-100">Conservation — </span>{fiche.conservation}
                   </p>
                 )}
               </div>
             ) : (
-              <p className="italic text-orange-400">
-                {fiche.commentaire || "Cigare non identifié, réessaie avec la bague bien visible."}
-              </p>
+              <p className="italic text-orange-400">{fiche.commentaire || "Cigare non identifié, réessaie avec la bague bien visible."}</p>
             )}
 
             <div className="mt-6 flex gap-2">
               {fiche.identifie && (
-                <button onClick={saveToCave} className="rounded-lg bg-amber-600 px-5 py-2.5 font-medium text-zinc-950 transition hover:bg-amber-500">
-                  + Ajouter à ma cave
-                </button>
+                <button onClick={saveToCave} className="rounded-lg bg-amber-600 px-5 py-2.5 font-medium text-zinc-950 transition hover:bg-amber-500">+ Ajouter à ma cave</button>
               )}
-              <button onClick={reset} className="rounded-lg border border-zinc-700 px-5 py-2.5 transition hover:border-amber-500">
-                Scanner un autre
-              </button>
+              <button onClick={reset} className="rounded-lg border border-zinc-700 px-5 py-2.5 transition hover:border-amber-500">Scanner un autre</button>
             </div>
             {saveMsg && <p className="mt-2 text-sm text-amber-500">{saveMsg}</p>}
           </div>
@@ -215,7 +222,7 @@ export default function Home() {
             <p className="mb-3 text-xs tracking-[0.3em] uppercase text-amber-500">Ma cave</p>
             <div className="space-y-2">
               {cave.map((c) => (
-                <div key={c.id} className="flex items-center gap-3 rounded-lg border border-zinc-800 bg-zinc-900/50 p-3">
+                <div key={c.id} onClick={() => openDetail(c)} className="flex cursor-pointer items-center gap-3 rounded-lg border border-zinc-800 bg-zinc-900/50 p-3 transition hover:border-zinc-700">
                   {c.photo_url ? (
                     <img src={c.photo_url} alt={c.nom} className="h-14 w-14 flex-shrink-0 rounded-lg border border-zinc-800 object-cover" />
                   ) : (
@@ -224,20 +231,49 @@ export default function Home() {
                   <div className="min-w-0 flex-1">
                     <p className="truncate font-medium">{c.nom}</p>
                     <p className="text-sm text-zinc-500">{[c.origine, c.force].filter(Boolean).join(" · ")}</p>
+                    {c.rating ? <p className="text-sm text-amber-500">{"★".repeat(c.rating)}</p> : null}
                   </div>
-                  <button
-                    onClick={() => removeFromCave(c.id)}
-                    className="flex-shrink-0 rounded-md px-2 py-1 text-zinc-500 transition hover:bg-zinc-800 hover:text-orange-400"
-                    aria-label="Supprimer"
-                  >
-                    ✕
-                  </button>
+                  <button onClick={(e) => { e.stopPropagation(); removeFromCave(c.id); }} className="flex-shrink-0 rounded-md px-2 py-1 text-zinc-500 transition hover:bg-zinc-800 hover:text-orange-400" aria-label="Supprimer">✕</button>
                 </div>
               ))}
             </div>
           </div>
         )}
       </div>
+
+      {selected && (
+        <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/70 p-4 sm:items-center" onClick={() => setSelected(null)}>
+          <div className="w-full max-w-md rounded-2xl border border-zinc-800 bg-zinc-900 p-5" onClick={(e) => e.stopPropagation()}>
+            {selected.photo_url && (
+              <img src={selected.photo_url} alt={selected.nom} className="mb-4 max-h-60 w-full rounded-xl border border-zinc-800 object-cover" />
+            )}
+            <h2 className="text-xl font-semibold">{selected.nom}</h2>
+            {selected.marque && <p className="text-sm uppercase tracking-wider text-amber-500">{selected.marque}</p>}
+
+            <div className="mt-3 grid grid-cols-2 gap-px overflow-hidden rounded-xl bg-zinc-800">
+              <Field label="Origine" value={selected.origine ?? undefined} />
+              <Field label="Force" value={selected.force ?? undefined} />
+              <Field label="Format" value={selected.format ?? undefined} />
+              <Field label="Cape" value={selected.cape ?? undefined} />
+            </div>
+
+            <p className="mt-4 mb-1 text-xs uppercase tracking-wider text-zinc-500">Ma note</p>
+            <div className="flex gap-1">
+              {[1, 2, 3, 4, 5].map((n) => (
+                <button key={n} type="button" onClick={() => setRatingDraft(n)} className={`text-2xl ${n <= ratingDraft ? "text-amber-500" : "text-zinc-600"}`} aria-label={`${n} étoiles`}>★</button>
+              ))}
+            </div>
+
+            <p className="mt-4 mb-1 text-xs uppercase tracking-wider text-zinc-500">Mon commentaire</p>
+            <textarea value={noteDraft} onChange={(e) => setNoteDraft(e.target.value)} rows={3} placeholder="Ce que j'en ai pensé…" className="w-full rounded-lg bg-zinc-800 px-3 py-2 text-sm outline-none" />
+
+            <div className="mt-4 flex gap-2">
+              <button onClick={saveDetail} className="flex-1 rounded-lg bg-amber-600 px-4 py-2.5 font-medium text-zinc-950 transition hover:bg-amber-500">Enregistrer</button>
+              <button onClick={() => setSelected(null)} className="rounded-lg border border-zinc-700 px-4 py-2.5 transition hover:border-amber-500">Fermer</button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
