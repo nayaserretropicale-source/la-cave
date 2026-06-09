@@ -6,10 +6,10 @@ import { usePathname } from "next/navigation";
 const tabs = [
   { href: "/", label: "Cave", icon: "🔥" },
   { href: "/journal", label: "Journal", icon: "📓" },
+  { href: "/wishlist", label: "Envies", icon: "✨" },
   { href: "/caviste", label: "Caviste", icon: "🥃" },
   { href: "/actu", label: "Actu", icon: "📰" },
   { href: "/promos", label: "Promos", icon: "🏷️" },
-  { href: "/profil", label: "Profil", icon: "👤" },
 ];
 
 export default function NavBar() {
