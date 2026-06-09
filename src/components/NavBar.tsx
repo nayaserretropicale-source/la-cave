@@ -7,6 +7,7 @@ const TABS = [
   { href: "/", label: "Cave", icon: "🔥" },
   { href: "/caviste", label: "Caviste", icon: "🥃" },
   { href: "/actu", label: "Actu", icon: "📰" },
+  { href: "/promos", label: "Promos", icon: "🏷️" },
 ];
 
 export default function NavBar() {
