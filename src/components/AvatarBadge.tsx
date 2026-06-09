@@ -28,11 +28,11 @@ export default function AvatarBadge() {
   if (!signedIn || pathname === "/profil") return null;
 
   return (
-    <Link href="/profil" className="fixed top-3 right-3 z-50" aria-label="Mon profil">
+    <Link href="/profil" aria-label="Mon profil" className="fixed right-6 z-50" style={{ top: "calc(env(safe-area-inset-top, 0px) + 16px)" }}>
       {avatarUrl ? (
-        <img src={avatarUrl} alt="profil" className="h-9 w-9 rounded-full border border-amber-500 object-cover" />
+        <img src={avatarUrl} alt="profil" className="h-10 w-10 rounded-full border border-amber-500/70 object-cover shadow-lg shadow-black/40" />
       ) : (
-        <div className="flex h-9 w-9 items-center justify-center rounded-full border border-zinc-700 bg-zinc-800 text-sm">👤</div>
+        <div className="flex h-10 w-10 items-center justify-center rounded-full border border-zinc-700 bg-zinc-800 text-sm shadow-lg shadow-black/40">👤</div>
       )}
     </Link>
   );
