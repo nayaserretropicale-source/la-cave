@@ -113,8 +113,8 @@ export default function Home() {
         {!fiche && !loading && (
           <label className="block cursor-pointer rounded-xl border border-dashed border-zinc-700 bg-zinc-900/40 px-6 py-10 text-center transition hover:border-amber-500">
             <span className="text-zinc-300">Choisir / prendre une photo</span>
-            <span className="mt-1 block text-sm text-zinc-500">Cadre bien la bague.</span>
-            <input type="file" accept="image/*" capture="environment" onChange={onFile} className="hidden" />
+            <span className="mt-1 block text-sm text-zinc-500">Galerie ou appareil photo — cadre bien la bague.</span>
+            <input type="file" accept="image/*" onChange={onFile} className="hidden" />
           </label>
         )}
 
