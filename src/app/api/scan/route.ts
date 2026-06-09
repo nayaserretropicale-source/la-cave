@@ -7,8 +7,8 @@ const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
 const INSTRUCTION = `Tu es un caviste-tabac et torcedor avec 30 ans d'expérience. À partir de la photo (lis surtout la bague), identifie le cigare.
 Réponds UNIQUEMENT par un JSON valide, sans backticks ni texte autour, schéma exact :
-{"identifie":true,"nom":"","marque":"","origine":"","format":"","cape":"","force":"léger|moyen|corsé","profil":["",""],"prix_indicatif":"","degustation":"conseil court","confiance":"haute|moyenne|faible","commentaire":""}
-Si la bague est illisible ou le cigare non identifiable, mets identifie à false et explique dans commentaire ce qu'il faudrait (meilleur angle, lumière, bague visible). Prix indicatif à l'unité en euros approximatifs. Sois honnête sur la confiance.`;
+{"identifie":true,"nom":"","marque":"","origine":"","format":"","cape":"","force":"léger|moyen|corsé","profil":["",""],"prix_indicatif":"","duree_fume":"","accord":"","conservation":"","degustation":"conseil court","confiance":"haute|moyenne|faible","commentaire":""}
+"duree_fume" = durée de fume estimée (ex: "45-60 min"). "accord" = boisson qui s'accorde bien. "conservation" = conseil de conservation (hygrométrie idéale ~65-70 %, humidor, température). Si la bague est illisible ou le cigare non identifiable, mets identifie à false et explique dans commentaire. Prix indicatif à l'unité en euros. Sois honnête sur la confiance.`;
 
 export async function POST(req: Request) {
   try {

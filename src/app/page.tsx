@@ -15,6 +15,9 @@ type Fiche = {
   force?: string;
   profil?: string[] | string;
   prix_indicatif?: string;
+  duree_fume?: string;
+  accord?: string;
+  conservation?: string;
   degustation?: string;
   confiance?: string;
   commentaire?: string;
@@ -115,6 +118,12 @@ export default function Home() {
     loadCave();
   }
 
+  async function removeFromCave(id: string) {
+    if (!window.confirm("Supprimer ce cigare de ta cave ?")) return;
+    await supabase.from("cave").delete().eq("id", id);
+    loadCave();
+  }
+
   const profil = Array.isArray(fiche?.profil) ? fiche?.profil.join(", ") : fiche?.profil;
 
   return (
@@ -163,6 +172,8 @@ export default function Home() {
                   <Field label="Format" value={fiche.format} />
                   <Field label="Cape" value={fiche.cape} />
                   <Field label="Force" value={fiche.force} />
+                  <Field label="Durée de fume" value={fiche.duree_fume} />
+                  <Field label="Accord" value={fiche.accord} />
                   <Field label="Prix indicatif" value={fiche.prix_indicatif} />
                   <Field label="Profil" value={profil} />
                 </div>
@@ -170,6 +181,12 @@ export default function Home() {
                 {fiche.degustation && (
                   <p className="rounded-r-lg border-l-2 border-amber-500 bg-zinc-900/50 px-4 py-3 italic text-zinc-300">
                     {fiche.degustation}
+                  </p>
+                )}
+                {fiche.conservation && (
+                  <p className="rounded-r-lg border-l-2 border-zinc-600 bg-zinc-900/50 px-4 py-3 text-sm text-zinc-300">
+                    <span className="font-medium text-zinc-100">Conservation — </span>
+                    {fiche.conservation}
                   </p>
                 )}
               </div>
@@ -208,6 +225,13 @@ export default function Home() {
                     <p className="truncate font-medium">{c.nom}</p>
                     <p className="text-sm text-zinc-500">{[c.origine, c.force].filter(Boolean).join(" · ")}</p>
                   </div>
+                  <button
+                    onClick={() => removeFromCave(c.id)}
+                    className="flex-shrink-0 rounded-md px-2 py-1 text-zinc-500 transition hover:bg-zinc-800 hover:text-orange-400"
+                    aria-label="Supprimer"
+                  >
+                    ✕
+                  </button>
                 </div>
               ))}
             </div>
