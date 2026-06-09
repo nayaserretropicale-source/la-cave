@@ -9,6 +9,7 @@ const tabs = [
   { href: "/caviste", label: "Caviste", icon: "🥃" },
   { href: "/actu", label: "Actu", icon: "📰" },
   { href: "/promos", label: "Promos", icon: "🏷️" },
+  { href: "/profil", label: "Profil", icon: "👤" },
 ];
 
 export default function NavBar() {
@@ -19,7 +20,7 @@ export default function NavBar() {
         {tabs.map((t) => {
           const active = pathname === t.href;
           return (
-            <Link key={t.href} href={t.href} className={`flex flex-1 flex-col items-center gap-0.5 py-2.5 text-xs transition ${active ? "text-amber-500" : "text-zinc-500"}`}>
+            <Link key={t.href} href={t.href} className={`flex flex-1 flex-col items-center gap-0.5 py-2.5 text-[10px] transition ${active ? "text-amber-500" : "text-zinc-500"}`}>
               <span className="text-lg">{t.icon}</span>
               <span>{t.label}</span>
             </Link>
