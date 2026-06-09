@@ -20,19 +20,26 @@ type Fiche = {
   commentaire?: string;
 };
 
-type CaveItem = { id: string; nom: string; marque?: string | null; origine?: string | null; force?: string | null };
+type CaveItem = {
+  id: string;
+  nom: string;
+  origine?: string | null;
+  force?: string | null;
+  photo_url?: string | null;
+};
 
 export default function Home() {
   const [loading, setLoading] = useState(false);
   const [fiche, setFiche] = useState<Fiche | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
+  const [file, setFile] = useState<File | null>(null);
   const [cave, setCave] = useState<CaveItem[]>([]);
   const [saveMsg, setSaveMsg] = useState("");
 
   async function loadCave() {
     const { data } = await supabase
       .from("cave")
-      .select("id,nom,marque,origine,force")
+      .select("id,nom,origine,force,photo_url")
       .order("created_at", { ascending: false });
     setCave((data ?? []) as CaveItem[]);
   }
@@ -44,9 +51,10 @@ export default function Home() {
   }, []);
 
   async function onFile(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setPreview(URL.createObjectURL(file));
+    const f = e.target.files?.[0];
+    if (!f) return;
+    setFile(f);
+    setPreview(URL.createObjectURL(f));
     setLoading(true);
     setFiche(null);
     setSaveMsg("");
@@ -57,24 +65,36 @@ export default function Home() {
       const res = await fetch("/api/scan", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ imageBase64: base64, mediaType: file.type }),
+        body: JSON.stringify({ imageBase64: base64, mediaType: f.type }),
       });
       const data = (await res.json()) as Fiche;
       setFiche(data);
       setLoading(false);
     };
-    reader.readAsDataURL(file);
+    reader.readAsDataURL(f);
   }
 
   function reset() {
     setFiche(null);
     setPreview(null);
+    setFile(null);
     setSaveMsg("");
   }
 
   async function saveToCave() {
     if (!fiche || !fiche.identifie) return;
-    setSaveMsg("");
+    setSaveMsg("Enregistrement…");
+
+    let photo_url: string | null = null;
+    if (file) {
+      const ext = file.name.split(".").pop() || "jpg";
+      const path = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+      const { error: upErr } = await supabase.storage.from("cigares").upload(path, file);
+      if (!upErr) {
+        photo_url = supabase.storage.from("cigares").getPublicUrl(path).data.publicUrl;
+      }
+    }
+
     const { error } = await supabase.from("cave").insert({
       nom: fiche.nom || fiche.marque || "Cigare",
       marque: fiche.marque,
@@ -83,8 +103,10 @@ export default function Home() {
       cape: fiche.cape,
       force: fiche.force,
       profil: Array.isArray(fiche.profil) ? fiche.profil : fiche.profil ? [fiche.profil] : [],
+      photo_url,
       source: "scan",
     });
+
     if (error) {
       setSaveMsg("Connecte-toi d'abord pour sauvegarder.");
       return;
@@ -176,9 +198,16 @@ export default function Home() {
             <p className="mb-3 text-xs tracking-[0.3em] uppercase text-amber-500">Ma cave</p>
             <div className="space-y-2">
               {cave.map((c) => (
-                <div key={c.id} className="flex items-center justify-between rounded-lg border border-zinc-800 bg-zinc-900/50 px-4 py-3">
-                  <span className="font-medium">{c.nom}</span>
-                  <span className="text-sm text-zinc-500">{[c.origine, c.force].filter(Boolean).join(" · ")}</span>
+                <div key={c.id} className="flex items-center gap-3 rounded-lg border border-zinc-800 bg-zinc-900/50 p-3">
+                  {c.photo_url ? (
+                    <img src={c.photo_url} alt={c.nom} className="h-14 w-14 flex-shrink-0 rounded-lg border border-zinc-800 object-cover" />
+                  ) : (
+                    <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-lg bg-zinc-800 text-lg">🚬</div>
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate font-medium">{c.nom}</p>
+                    <p className="text-sm text-zinc-500">{[c.origine, c.force].filter(Boolean).join(" · ")}</p>
+                  </div>
                 </div>
               ))}
             </div>
