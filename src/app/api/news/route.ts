@@ -16,6 +16,36 @@ const parser = new Parser({ headers: { "User-Agent": "Mozilla/5.0" } });
 
 type Item = { title: string; link: string; source: string; date: string; snippet: string };
 
+async function traduire(items: Item[]): Promise<Item[]> {
+  if (items.length === 0) return items;
+  const payload = items.map((it, i) => ({ i, title: it.title, snippet: it.snippet }));
+  try {
+    const msg = await anthropic.messages.create({
+      model: "claude-sonnet-4-6",
+      max_tokens: 2000,
+      messages: [
+        {
+          role: "user",
+          content: `Traduis en français naturel les champs "title" et "snippet" de ces actualités cigares. Réponds UNIQUEMENT par un tableau JSON valide, sans backticks ni texte autour, au format [{"i":0,"title":"...","snippet":"..."}], en conservant le même "i". Données :\n${JSON.stringify(payload)}`,
+        },
+      ],
+    });
+    const text = msg.content
+      .filter((b): b is Anthropic.TextBlock => b.type === "text")
+      .map((b) => b.text)
+      .join("");
+    const clean = text.replace(/```json|```/g, "").trim();
+    const fr: { i: number; title: string; snippet: string }[] = JSON.parse(clean);
+    const map = new Map(fr.map((t) => [t.i, t]));
+    return items.map((it, i) => {
+      const t = map.get(i);
+      return t ? { ...it, title: t.title, snippet: t.snippet } : it;
+    });
+  } catch {
+    return items;
+  }
+}
+
 export async function GET() {
   const all: Item[] = [];
 
@@ -23,7 +53,7 @@ export async function GET() {
     FEEDS.map(async (f) => {
       try {
         const feed = await parser.parseURL(f.url);
-        for (const item of feed.items.slice(0, 8)) {
+        for (const item of feed.items.slice(0, 6)) {
           all.push({
             title: item.title ?? "Sans titre",
             link: item.link ?? "#",
@@ -33,42 +63,13 @@ export async function GET() {
           });
         }
       } catch {
-        // flux indisponible : on l'ignore
+        // flux indisponible : ignoré
       }
     })
   );
 
   all.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-  const items = all.slice(0, 25);
-
-  // Traduction en français (un seul appel, modèle rapide et économique)
-  try {
-    const payload = items.map((a, i) => ({ i, title: a.title, snippet: a.snippet }));
-    const tr = await anthropic.messages.create({
-      model: "claude-haiku-4-5-20251001",
-      max_tokens: 3000,
-      system:
-        'Tu traduis en français des titres et extraits d\'actualité sur les cigares. Réponds UNIQUEMENT par un tableau JSON valide (sans backticks) de la forme [{"i":0,"title":"...","snippet":"..."}], en gardant le même "i" pour chaque élément. Traduis fidèlement et naturellement. Garde tels quels les noms propres de marques et de cigares.',
-      messages: [{ role: "user", content: JSON.stringify(payload) }],
-    });
-    const text = tr.content
-      .filter((b): b is Anthropic.TextBlock => b.type === "text")
-      .map((b) => b.text)
-      .join("");
-    const translated = JSON.parse(text.replace(/```json|```/g, "").trim()) as {
-      i: number;
-      title: string;
-      snippet: string;
-    }[];
-    for (const t of translated) {
-      if (items[t.i]) {
-        items[t.i].title = t.title ?? items[t.i].title;
-        items[t.i].snippet = t.snippet ?? items[t.i].snippet;
-      }
-    }
-  } catch {
-    // si la traduction échoue, on garde l'anglais (l'app reste fonctionnelle)
-  }
-
-  return NextResponse.json({ items });
+  const top = all.slice(0, 15);
+  const traduits = await traduire(top);
+  return NextResponse.json({ items: traduits });
 }
