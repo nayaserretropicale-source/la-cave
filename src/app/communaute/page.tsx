@@ -270,12 +270,14 @@ export default function Communaute() {
               return (
               <div key={p.id} className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-4">
                 <div className="flex items-center gap-2">
-                  {p.author?.avatar_url ? (
-                    <img src={p.author.avatar_url} alt="" className="h-8 w-8 rounded-full border border-zinc-700 object-cover" />
-                  ) : (
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-zinc-800 text-sm">👤</div>
-                  )}
-                  <span className="text-sm font-medium">{p.author?.pseudo || "Anonyme"}</span>
+                  <Link href={`/u/${p.user_id}`} className="flex min-w-0 items-center gap-2">
+                    {p.author?.avatar_url ? (
+                      <img src={p.author.avatar_url} alt="" className="h-8 w-8 rounded-full border border-zinc-700 object-cover" />
+                    ) : (
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-zinc-800 text-sm">👤</div>
+                    )}
+                    <span className="truncate text-sm font-medium">{p.author?.pseudo || "Anonyme"}</span>
+                  </Link>
 
                   {rel && rel.state === "none" && (
                     <button onClick={() => addFriend(p.user_id)} className="ml-auto rounded-lg border border-zinc-700 px-2.5 py-1 text-xs text-zinc-300 transition hover:border-amber-500 hover:text-amber-500">+ Ami</button>
