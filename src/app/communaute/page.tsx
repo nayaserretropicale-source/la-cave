@@ -29,6 +29,7 @@ export default function Communaute() {
   const [majeur, setMajeur] = useState(false);
   const [posts, setPosts] = useState<Post[]>([]);
   const [links, setLinks] = useState<Friendship[]>([]);
+  const [onlyFriends, setOnlyFriends] = useState(false);
   const [cNom, setCNom] = useState("");
   const [cMarque, setCMarque] = useState("");
   const [cRating, setCRating] = useState(0);
@@ -229,6 +230,11 @@ export default function Communaute() {
     );
   }
 
+  const friendIds = new Set(
+    links.filter((f) => f.status === "accepted").map((f) => (f.requester_id === userId ? f.addressee_id : f.requester_id))
+  );
+  const visiblePosts = onlyFriends ? posts.filter((p) => p.user_id === userId || friendIds.has(p.user_id)) : posts;
+
   return (
     <main className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col items-center px-6 py-12">
       <div className="w-full max-w-md">
@@ -261,11 +267,16 @@ export default function Communaute() {
           </div>
         )}
 
-        {posts.length === 0 ? (
-          <p className="text-sm text-zinc-500">Aucune publication pour l'instant. Sois le premier à partager !</p>
+        <div className="mb-4 flex gap-2">
+          <button onClick={() => setOnlyFriends(false)} className={`rounded-full px-4 py-1.5 text-sm transition ${!onlyFriends ? "bg-amber-600 text-zinc-950" : "border border-zinc-700 text-zinc-400 hover:border-amber-500"}`}>Tous</button>
+          <button onClick={() => setOnlyFriends(true)} className={`rounded-full px-4 py-1.5 text-sm transition ${onlyFriends ? "bg-amber-600 text-zinc-950" : "border border-zinc-700 text-zinc-400 hover:border-amber-500"}`}>Amis</button>
+        </div>
+
+        {visiblePosts.length === 0 ? (
+          <p className="text-sm text-zinc-500">{onlyFriends ? "Aucune publication de tes amis pour l'instant." : "Aucune publication pour l'instant. Sois le premier à partager !"}</p>
         ) : (
           <div className="space-y-4">
-            {posts.map((p) => {
+            {visiblePosts.map((p) => {
               const rel = p.user_id !== userId ? relation(p.user_id) : null;
               return (
               <div key={p.id} className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-4">
