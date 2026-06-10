@@ -7,6 +7,7 @@ import { supabase } from "@/lib/supabase";
 
 type Author = { pseudo: string | null; avatar_url: string | null };
 type Comment = { id: string; user_id: string; texte: string; author?: Author };
+type Friendship = { id: string; requester_id: string; addressee_id: string; status: string };
 type Post = {
   id: string;
   user_id: string;
@@ -27,6 +28,7 @@ export default function Communaute() {
   const [pseudo, setPseudo] = useState<string | null>(null);
   const [majeur, setMajeur] = useState(false);
   const [posts, setPosts] = useState<Post[]>([]);
+  const [links, setLinks] = useState<Friendship[]>([]);
   const [cNom, setCNom] = useState("");
   const [cMarque, setCMarque] = useState("");
   const [cRating, setCRating] = useState(0);
@@ -45,6 +47,11 @@ export default function Communaute() {
     const { data } = await supabase.from("profiles").select("pseudo,majeur").eq("id", user.id).single();
     setPseudo(data?.pseudo ?? null);
     setMajeur(data?.majeur === true);
+  }
+
+  async function loadFriends() {
+    const { data } = await supabase.from("friendships").select("id,requester_id,addressee_id,status");
+    setLinks((data ?? []) as Friendship[]);
   }
 
   async function loadFeed() {
@@ -86,7 +93,8 @@ export default function Communaute() {
   useEffect(() => {
     loadMe();
     loadFeed();
-    const { data: sub } = supabase.auth.onAuthStateChange(() => { loadMe(); loadFeed(); });
+    loadFriends();
+    const { data: sub } = supabase.auth.onAuthStateChange(() => { loadMe(); loadFeed(); loadFriends(); });
     return () => sub.subscription.unsubscribe();
   }, []);
 
@@ -94,6 +102,28 @@ export default function Communaute() {
     if (!userId) return;
     await supabase.from("profiles").upsert({ id: userId, majeur: true });
     setMajeur(true);
+  }
+
+  function relation(otherId: string) {
+    const row = links.find(
+      (f) =>
+        (f.requester_id === userId && f.addressee_id === otherId) ||
+        (f.requester_id === otherId && f.addressee_id === userId)
+    );
+    if (!row) return { state: "none" as const, row: null };
+    if (row.status === "accepted") return { state: "friends" as const, row };
+    if (row.requester_id === userId) return { state: "sent" as const, row };
+    return { state: "incoming" as const, row };
+  }
+
+  async function addFriend(otherId: string) {
+    await supabase.from("friendships").insert({ addressee_id: otherId });
+    loadFriends();
+  }
+
+  async function acceptFriend(rowId: string) {
+    await supabase.from("friendships").update({ status: "accepted" }).eq("id", rowId);
+    loadFriends();
   }
 
   async function onComposePhoto(e: React.ChangeEvent<HTMLInputElement>) {
@@ -170,7 +200,6 @@ export default function Communaute() {
     loadFeed();
   }
 
-  // --- Rendu ---
   if (!userId) {
     return (
       <main className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col items-center px-6 py-12">
@@ -236,7 +265,9 @@ export default function Communaute() {
           <p className="text-sm text-zinc-500">Aucune publication pour l'instant. Sois le premier à partager !</p>
         ) : (
           <div className="space-y-4">
-            {posts.map((p) => (
+            {posts.map((p) => {
+              const rel = p.user_id !== userId ? relation(p.user_id) : null;
+              return (
               <div key={p.id} className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-4">
                 <div className="flex items-center gap-2">
                   {p.author?.avatar_url ? (
@@ -245,6 +276,16 @@ export default function Communaute() {
                     <div className="flex h-8 w-8 items-center justify-center rounded-full bg-zinc-800 text-sm">👤</div>
                   )}
                   <span className="text-sm font-medium">{p.author?.pseudo || "Anonyme"}</span>
+
+                  {rel && rel.state === "none" && (
+                    <button onClick={() => addFriend(p.user_id)} className="ml-auto rounded-lg border border-zinc-700 px-2.5 py-1 text-xs text-zinc-300 transition hover:border-amber-500 hover:text-amber-500">+ Ami</button>
+                  )}
+                  {rel && rel.state === "sent" && <span className="ml-auto text-xs text-zinc-500">En attente</span>}
+                  {rel && rel.state === "incoming" && rel.row && (
+                    <button onClick={() => acceptFriend(rel.row!.id)} className="ml-auto rounded-lg bg-amber-600 px-2.5 py-1 text-xs font-medium text-zinc-950 transition hover:bg-amber-500">Accepter</button>
+                  )}
+                  {rel && rel.state === "friends" && <span className="ml-auto text-xs text-amber-500">Ami ✓</span>}
+
                   {p.user_id === userId && (
                     <button onClick={() => deletePost(p.id)} className="ml-auto rounded-md px-2 py-1 text-zinc-500 transition hover:bg-zinc-800 hover:text-orange-400" aria-label="Supprimer">✕</button>
                   )}
@@ -283,7 +324,8 @@ export default function Communaute() {
                   </div>
                 )}
               </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
