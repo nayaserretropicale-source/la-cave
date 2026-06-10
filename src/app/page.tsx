@@ -4,7 +4,9 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import AuthBar from "@/components/AuthBar";
 import { supabase } from "@/lib/supabase";
+import { compressImage } from "@/lib/image";
 
+type Evolution = { premier_tiers?: string; deuxieme_tiers?: string; troisieme_tiers?: string };
 type Fiche = {
   identifie: boolean;
   nom?: string;
@@ -19,6 +21,7 @@ type Fiche = {
   accord?: string;
   conservation?: string;
   degustation?: string;
+  evolution?: Evolution;
   confiance?: string;
   commentaire?: string;
 };
@@ -34,6 +37,13 @@ type CaveItem = {
   photo_url?: string | null;
   rating?: number | null;
   note_perso?: string | null;
+  source?: string | null;
+  duree_fume?: string | null;
+  accord?: string | null;
+  conservation?: string | null;
+  premier_tiers?: string | null;
+  deuxieme_tiers?: string | null;
+  troisieme_tiers?: string | null;
 };
 
 export default function Home() {
@@ -49,11 +59,13 @@ export default function Home() {
   const [photoBusy, setPhotoBusy] = useState(false);
   const [q, setQ] = useState("");
   const [forceF, setForceF] = useState("");
+  const [histoire, setHistoire] = useState<string | null>(null);
+  const [histoireLoading, setHistoireLoading] = useState(false);
 
   async function loadCave() {
     const { data } = await supabase
       .from("cave")
-      .select("id,nom,marque,origine,force,format,cape,photo_url,rating,note_perso")
+      .select("id,nom,marque,origine,force,format,cape,photo_url,rating,note_perso,source,duree_fume,accord,conservation,premier_tiers,deuxieme_tiers,troisieme_tiers")
       .order("created_at", { ascending: false });
     setCave((data ?? []) as CaveItem[]);
   }
@@ -65,8 +77,9 @@ export default function Home() {
   }, []);
 
   async function onFile(e: React.ChangeEvent<HTMLInputElement>) {
-    const f = e.target.files?.[0];
-    if (!f) return;
+    const f0 = e.target.files?.[0];
+    if (!f0) return;
+    const f = await compressImage(f0);
     setFile(f);
     setPreview(URL.createObjectURL(f));
     setLoading(true);
@@ -104,9 +117,7 @@ export default function Home() {
       const ext = file.name.split(".").pop() || "jpg";
       const path = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
       const { error: upErr } = await supabase.storage.from("cigares").upload(path, file);
-      if (!upErr) {
-        photo_url = supabase.storage.from("cigares").getPublicUrl(path).data.publicUrl;
-      }
+      if (!upErr) photo_url = supabase.storage.from("cigares").getPublicUrl(path).data.publicUrl;
     }
 
     const { error } = await supabase.from("cave").insert({
@@ -117,14 +128,17 @@ export default function Home() {
       cape: fiche.cape,
       force: fiche.force,
       profil: Array.isArray(fiche.profil) ? fiche.profil : fiche.profil ? [fiche.profil] : [],
+      duree_fume: fiche.duree_fume,
+      accord: fiche.accord,
+      conservation: fiche.conservation,
+      premier_tiers: fiche.evolution?.premier_tiers,
+      deuxieme_tiers: fiche.evolution?.deuxieme_tiers,
+      troisieme_tiers: fiche.evolution?.troisieme_tiers,
       photo_url,
       source: "scan",
     });
 
-    if (error) {
-      setSaveMsg("Connecte-toi d'abord pour sauvegarder.");
-      return;
-    }
+    if (error) { setSaveMsg("Connecte-toi d'abord pour sauvegarder."); return; }
     setSaveMsg("Ajouté à ta cave ✓");
     loadCave();
   }
@@ -139,6 +153,8 @@ export default function Home() {
     setSelected(item);
     setRatingDraft(item.rating ?? 0);
     setNoteDraft(item.note_perso ?? "");
+    setHistoire(null);
+    setHistoireLoading(false);
   }
 
   async function saveDetail() {
@@ -149,9 +165,10 @@ export default function Home() {
   }
 
   async function onDetailPhoto(e: React.ChangeEvent<HTMLInputElement>) {
-    const f = e.target.files?.[0];
-    if (!f || !selected) return;
+    const f0 = e.target.files?.[0];
+    if (!f0 || !selected) return;
     setPhotoBusy(true);
+    const f = await compressImage(f0);
     const ext = f.name.split(".").pop() || "jpg";
     const path = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
     const { error: upErr } = await supabase.storage.from("cigares").upload(path, f);
@@ -163,8 +180,20 @@ export default function Home() {
     loadCave();
   }
 
-  const profil = Array.isArray(fiche?.profil) ? fiche?.profil.join(", ") : fiche?.profil;
+  async function fetchHistoire() {
+    if (!selected) return;
+    setHistoireLoading(true);
+    const res = await fetch("/api/histoire", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ marque: selected.marque, nom: selected.nom }),
+    });
+    const data = await res.json();
+    setHistoire(data.histoire || "Histoire indisponible pour le moment.");
+    setHistoireLoading(false);
+  }
 
+  const profil = Array.isArray(fiche?.profil) ? fiche?.profil.join(", ") : fiche?.profil;
   const forces = Array.from(new Set(cave.map((c) => c.force).filter(Boolean))) as string[];
   const filtered = cave.filter((c) => {
     const term = q.trim().toLowerCase();
@@ -172,6 +201,12 @@ export default function Home() {
     const matchesF = !forceF || c.force === forceF;
     return matchesQ && matchesF;
   });
+  const groups: Record<string, CaveItem[]> = {};
+  filtered.forEach((c) => {
+    const key = c.origine?.trim() || "Autres";
+    (groups[key] ||= []).push(c);
+  });
+  const groupNames = Object.keys(groups).sort();
 
   return (
     <main className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col items-center px-6 py-12">
@@ -190,7 +225,7 @@ export default function Home() {
           <label className="block cursor-pointer rounded-xl border border-dashed border-zinc-700 bg-zinc-900/40 px-6 py-10 text-center transition hover:border-amber-500">
             <span className="text-zinc-300">Choisir / prendre une photo</span>
             <span className="mt-1 block text-sm text-zinc-500">Galerie ou appareil photo — cadre bien la bague.</span>
-            <input type="file" accept="image/*" onChange={onFile} className="hidden" />
+            <input type="file" accept="image/jpeg,image/png,image/webp" onChange={onFile} className="hidden" />
           </label>
         )}
 
@@ -210,16 +245,25 @@ export default function Home() {
                   </p>
                 </div>
 
-                <div className="grid grid-cols-2 gap-px overflow-hidden rounded-xl bg-zinc-800">
-                  <Field label="Origine" value={fiche.origine} />
-                  <Field label="Format" value={fiche.format} />
-                  <Field label="Cape" value={fiche.cape} />
-                  <Field label="Force" value={fiche.force} />
-                  <Field label="Durée de fume" value={fiche.duree_fume} />
-                  <Field label="Accord" value={fiche.accord} />
-                  <Field label="Prix indicatif" value={fiche.prix_indicatif} />
-                  <Field label="Profil" value={profil} />
+                <div className="rounded-xl border border-zinc-800 bg-zinc-900/40 px-4">
+                  <Line label="Origine" value={fiche.origine} />
+                  <Line label="Format" value={fiche.format} />
+                  <Line label="Cape" value={fiche.cape} />
+                  <Line label="Force" value={fiche.force} />
+                  <Line label="Durée de fume" value={fiche.duree_fume} />
+                  <Line label="Accord" value={fiche.accord} />
+                  <Line label="Prix indicatif" value={fiche.prix_indicatif} />
+                  <Line label="Profil" value={profil} last />
                 </div>
+
+                {(fiche.evolution?.premier_tiers || fiche.evolution?.deuxieme_tiers || fiche.evolution?.troisieme_tiers) && (
+                  <div className="rounded-xl border border-zinc-800 bg-zinc-900/40 px-4">
+                    <p className="border-b border-zinc-800 py-2 text-xs uppercase tracking-wider text-amber-500">Évolution de la dégustation</p>
+                    <Line label="1er tiers" value={fiche.evolution?.premier_tiers} />
+                    <Line label="2e tiers" value={fiche.evolution?.deuxieme_tiers} />
+                    <Line label="3e tiers" value={fiche.evolution?.troisieme_tiers} last />
+                  </div>
+                )}
 
                 {fiche.degustation && (
                   <p className="rounded-r-lg border-l-2 border-amber-500 bg-zinc-900/50 px-4 py-3 italic text-zinc-300">{fiche.degustation}</p>
@@ -249,7 +293,7 @@ export default function Home() {
             <p className="mb-3 text-xs tracking-[0.3em] uppercase text-amber-500">Ma cave ({cave.length})</p>
 
             {cave.length >= 5 && (
-              <div className="mb-3 space-y-2">
+              <div className="mb-4 space-y-2">
                 <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Rechercher (nom, marque, origine)…" className="w-full rounded-lg bg-zinc-800 px-3 py-2 text-sm outline-none" />
                 {forces.length > 1 && (
                   <div className="flex flex-wrap gap-2">
@@ -265,20 +309,30 @@ export default function Home() {
             {filtered.length === 0 ? (
               <p className="text-sm text-zinc-500">Aucun cigare ne correspond.</p>
             ) : (
-              <div className="space-y-2">
-                {filtered.map((c) => (
-                  <div key={c.id} onClick={() => openDetail(c)} className="flex cursor-pointer items-center gap-3 rounded-lg border border-zinc-800 bg-zinc-900/50 p-3 transition hover:border-zinc-700">
-                    {c.photo_url ? (
-                      <img src={c.photo_url} alt={c.nom} className="h-14 w-14 flex-shrink-0 rounded-lg border border-zinc-800 object-cover" />
-                    ) : (
-                      <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-lg bg-zinc-800 text-lg">🚬</div>
-                    )}
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate font-medium">{c.nom}</p>
-                      <p className="text-sm text-zinc-500">{[c.origine, c.force].filter(Boolean).join(" · ")}</p>
-                      {c.rating ? <p className="text-sm text-amber-500">{"★".repeat(c.rating)}</p> : null}
+              <div className="space-y-6">
+                {groupNames.map((name) => (
+                  <div key={name}>
+                    <p className="mb-2 text-sm font-medium text-amber-500">📍 {name}</p>
+                    <div className="space-y-2">
+                      {groups[name].map((c) => (
+                        <div key={c.id} onClick={() => openDetail(c)} className="flex cursor-pointer items-center gap-3 rounded-lg border border-zinc-800 bg-zinc-900/50 p-3 transition hover:border-zinc-700">
+                          {c.photo_url ? (
+                            <img src={c.photo_url} alt={c.nom} className="h-14 w-14 flex-shrink-0 rounded-lg border border-zinc-800 object-cover" />
+                          ) : (
+                            <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-lg bg-zinc-800 text-lg">🚬</div>
+                          )}
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate font-medium">{c.nom}</p>
+                            <p className="text-sm text-zinc-500">{[c.marque, c.force].filter(Boolean).join(" · ")}</p>
+                            <div className="mt-0.5 flex items-center gap-2">
+                              {c.rating ? <span className="text-sm text-amber-500">{"★".repeat(c.rating)}</span> : null}
+                              {c.source === "wishlist" && <span className="rounded-full border border-amber-700/50 px-2 py-0.5 text-[10px] text-amber-500">✨ Envie</span>}
+                            </div>
+                          </div>
+                          <button onClick={(e) => { e.stopPropagation(); removeFromCave(c.id); }} className="flex-shrink-0 rounded-md px-2 py-1 text-zinc-500 transition hover:bg-zinc-800 hover:text-orange-400" aria-label="Supprimer">✕</button>
+                        </div>
+                      ))}
                     </div>
-                    <button onClick={(e) => { e.stopPropagation(); removeFromCave(c.id); }} className="flex-shrink-0 rounded-md px-2 py-1 text-zinc-500 transition hover:bg-zinc-800 hover:text-orange-400" aria-label="Supprimer">✕</button>
                   </div>
                 ))}
               </div>
@@ -288,8 +342,8 @@ export default function Home() {
       </div>
 
       {selected && (
-        <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/70 p-4 sm:items-center" onClick={() => setSelected(null)}>
-          <div className="w-full max-w-md rounded-2xl border border-zinc-800 bg-zinc-900 p-5" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 z-[60] flex items-end justify-center overflow-y-auto bg-black/70 p-4 sm:items-center" onClick={() => setSelected(null)}>
+          <div className="my-auto w-full max-w-md rounded-2xl border border-zinc-800 bg-zinc-900 p-5" onClick={(e) => e.stopPropagation()}>
             {selected.photo_url ? (
               <img src={selected.photo_url} alt={selected.nom} className="mb-3 max-h-60 w-full rounded-xl border border-zinc-800 object-cover" />
             ) : (
@@ -297,17 +351,47 @@ export default function Home() {
             )}
             <label className="mb-4 block cursor-pointer text-center text-sm text-zinc-400 transition hover:text-amber-500">
               {photoBusy ? "Envoi…" : selected.photo_url ? "Changer la photo" : "Ajouter une photo"}
-              <input type="file" accept="image/*" onChange={onDetailPhoto} className="hidden" />
+              <input type="file" accept="image/jpeg,image/png,image/webp" onChange={onDetailPhoto} className="hidden" />
             </label>
 
             <h2 className="text-xl font-semibold">{selected.nom}</h2>
-            {selected.marque && <p className="text-sm uppercase tracking-wider text-amber-500">{selected.marque}</p>}
+            <div className="flex items-center gap-2">
+              {selected.marque && <p className="text-sm uppercase tracking-wider text-amber-500">{selected.marque}</p>}
+              {selected.source === "wishlist" && <span className="rounded-full border border-amber-700/50 px-2 py-0.5 text-[10px] text-amber-500">✨ Envie</span>}
+            </div>
 
-            <div className="mt-3 grid grid-cols-2 gap-px overflow-hidden rounded-xl bg-zinc-800">
-              <Field label="Origine" value={selected.origine ?? undefined} />
-              <Field label="Force" value={selected.force ?? undefined} />
-              <Field label="Format" value={selected.format ?? undefined} />
-              <Field label="Cape" value={selected.cape ?? undefined} />
+            <div className="mt-3 rounded-xl border border-zinc-800 bg-zinc-900/40 px-4">
+              <Line label="Origine" value={selected.origine} />
+              <Line label="Format" value={selected.format} />
+              <Line label="Cape" value={selected.cape} />
+              <Line label="Force" value={selected.force} />
+              <Line label="Durée de fume" value={selected.duree_fume} />
+              <Line label="Accord" value={selected.accord} last />
+            </div>
+
+            {(selected.premier_tiers || selected.deuxieme_tiers || selected.troisieme_tiers) && (
+              <div className="mt-3 rounded-xl border border-zinc-800 bg-zinc-900/40 px-4">
+                <p className="border-b border-zinc-800 py-2 text-xs uppercase tracking-wider text-amber-500">Évolution</p>
+                <Line label="1er tiers" value={selected.premier_tiers} />
+                <Line label="2e tiers" value={selected.deuxieme_tiers} />
+                <Line label="3e tiers" value={selected.troisieme_tiers} last />
+              </div>
+            )}
+
+            {selected.conservation && (
+              <p className="mt-3 rounded-r-lg border-l-2 border-zinc-600 bg-zinc-900/50 px-4 py-3 text-sm text-zinc-300">
+                <span className="font-medium text-zinc-100">Conservation — </span>{selected.conservation}
+              </p>
+            )}
+
+            <div className="mt-4">
+              {histoire ? (
+                <p className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-3 text-sm text-zinc-300 whitespace-pre-wrap">{histoire}</p>
+              ) : (
+                <button onClick={fetchHistoire} disabled={histoireLoading} className="w-full rounded-lg border border-zinc-700 px-4 py-2 text-sm text-zinc-300 transition hover:border-amber-500 hover:text-amber-500 disabled:opacity-50">
+                  {histoireLoading ? "Recherche…" : "Histoire de la marque 📖"}
+                </button>
+              )}
             </div>
 
             <p className="mt-4 mb-1 text-xs uppercase tracking-wider text-zinc-500">Ma note</p>
@@ -331,11 +415,12 @@ export default function Home() {
   );
 }
 
-function Field({ label, value }: { label: string; value?: string }) {
+function Line({ label, value, last }: { label: string; value?: string | null; last?: boolean }) {
+  if (!value) return null;
   return (
-    <div className="bg-zinc-900 px-4 py-3">
-      <p className="text-[11px] uppercase tracking-wider text-zinc-500">{label}</p>
-      <p className="mt-0.5">{value || "—"}</p>
+    <div className={`flex gap-3 py-2 text-sm ${last ? "" : "border-b border-zinc-800"}`}>
+      <span className="w-28 flex-shrink-0 text-zinc-500">{label}</span>
+      <span className="flex-1">{value}</span>
     </div>
   );
 }
