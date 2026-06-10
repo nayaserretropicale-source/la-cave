@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 
 export default function Profil() {
@@ -87,7 +88,12 @@ export default function Profil() {
           </label>
         </div>
 
-        <div className="mt-8 space-y-4">
+        <Link href="/amis" className="mt-6 flex items-center justify-between rounded-xl border border-zinc-800 bg-zinc-900/50 px-4 py-3 transition hover:border-amber-500">
+          <span className="text-sm">Mes amis 👥</span>
+          <span className="text-amber-500">→</span>
+        </Link>
+
+        <div className="mt-6 space-y-4">
           <div>
             <label className="mb-1 block text-xs uppercase tracking-wider text-zinc-500">Pseudo</label>
             <input value={pseudo} onChange={(e) => setPseudo(e.target.value)} placeholder="Ton nom d'aficionado" className="w-full rounded-lg bg-zinc-800 px-3 py-2 text-sm outline-none" />
