@@ -47,6 +47,8 @@ export default function Home() {
   const [ratingDraft, setRatingDraft] = useState(0);
   const [noteDraft, setNoteDraft] = useState("");
   const [photoBusy, setPhotoBusy] = useState(false);
+  const [q, setQ] = useState("");
+  const [forceF, setForceF] = useState("");
 
   async function loadCave() {
     const { data } = await supabase
@@ -163,6 +165,14 @@ export default function Home() {
 
   const profil = Array.isArray(fiche?.profil) ? fiche?.profil.join(", ") : fiche?.profil;
 
+  const forces = Array.from(new Set(cave.map((c) => c.force).filter(Boolean))) as string[];
+  const filtered = cave.filter((c) => {
+    const term = q.trim().toLowerCase();
+    const matchesQ = !term || [c.nom, c.marque, c.origine].filter(Boolean).some((v) => (v as string).toLowerCase().includes(term));
+    const matchesF = !forceF || c.force === forceF;
+    return matchesQ && matchesF;
+  });
+
   return (
     <main className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col items-center px-6 py-12">
       <div className="w-full max-w-md">
@@ -236,24 +246,43 @@ export default function Home() {
 
         {cave.length > 0 && (
           <div className="mt-10">
-            <p className="mb-3 text-xs tracking-[0.3em] uppercase text-amber-500">Ma cave</p>
-            <div className="space-y-2">
-              {cave.map((c) => (
-                <div key={c.id} onClick={() => openDetail(c)} className="flex cursor-pointer items-center gap-3 rounded-lg border border-zinc-800 bg-zinc-900/50 p-3 transition hover:border-zinc-700">
-                  {c.photo_url ? (
-                    <img src={c.photo_url} alt={c.nom} className="h-14 w-14 flex-shrink-0 rounded-lg border border-zinc-800 object-cover" />
-                  ) : (
-                    <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-lg bg-zinc-800 text-lg">🚬</div>
-                  )}
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate font-medium">{c.nom}</p>
-                    <p className="text-sm text-zinc-500">{[c.origine, c.force].filter(Boolean).join(" · ")}</p>
-                    {c.rating ? <p className="text-sm text-amber-500">{"★".repeat(c.rating)}</p> : null}
+            <p className="mb-3 text-xs tracking-[0.3em] uppercase text-amber-500">Ma cave ({cave.length})</p>
+
+            {cave.length >= 5 && (
+              <div className="mb-3 space-y-2">
+                <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Rechercher (nom, marque, origine)…" className="w-full rounded-lg bg-zinc-800 px-3 py-2 text-sm outline-none" />
+                {forces.length > 1 && (
+                  <div className="flex flex-wrap gap-2">
+                    <button onClick={() => setForceF("")} className={`rounded-full px-3 py-1 text-xs transition ${forceF === "" ? "bg-amber-600 text-zinc-950" : "border border-zinc-700 text-zinc-400 hover:border-amber-500"}`}>Toutes forces</button>
+                    {forces.map((f) => (
+                      <button key={f} onClick={() => setForceF(f)} className={`rounded-full px-3 py-1 text-xs transition ${forceF === f ? "bg-amber-600 text-zinc-950" : "border border-zinc-700 text-zinc-400 hover:border-amber-500"}`}>{f}</button>
+                    ))}
                   </div>
-                  <button onClick={(e) => { e.stopPropagation(); removeFromCave(c.id); }} className="flex-shrink-0 rounded-md px-2 py-1 text-zinc-500 transition hover:bg-zinc-800 hover:text-orange-400" aria-label="Supprimer">✕</button>
-                </div>
-              ))}
-            </div>
+                )}
+              </div>
+            )}
+
+            {filtered.length === 0 ? (
+              <p className="text-sm text-zinc-500">Aucun cigare ne correspond.</p>
+            ) : (
+              <div className="space-y-2">
+                {filtered.map((c) => (
+                  <div key={c.id} onClick={() => openDetail(c)} className="flex cursor-pointer items-center gap-3 rounded-lg border border-zinc-800 bg-zinc-900/50 p-3 transition hover:border-zinc-700">
+                    {c.photo_url ? (
+                      <img src={c.photo_url} alt={c.nom} className="h-14 w-14 flex-shrink-0 rounded-lg border border-zinc-800 object-cover" />
+                    ) : (
+                      <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-lg bg-zinc-800 text-lg">🚬</div>
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate font-medium">{c.nom}</p>
+                      <p className="text-sm text-zinc-500">{[c.origine, c.force].filter(Boolean).join(" · ")}</p>
+                      {c.rating ? <p className="text-sm text-amber-500">{"★".repeat(c.rating)}</p> : null}
+                    </div>
+                    <button onClick={(e) => { e.stopPropagation(); removeFromCave(c.id); }} className="flex-shrink-0 rounded-md px-2 py-1 text-zinc-500 transition hover:bg-zinc-800 hover:text-orange-400" aria-label="Supprimer">✕</button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>
