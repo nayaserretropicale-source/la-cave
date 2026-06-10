@@ -4,9 +4,10 @@ import { useEffect, useState } from "react";
 import AuthBar from "@/components/AuthBar";
 import { supabase } from "@/lib/supabase";
 
-type CaveLite = { id: string; nom: string; origine: string | null };
+type CaveLite = { id: string; nom: string; origine: string | null; photo_url: string | null };
 type Session = {
   id: string;
+  cigare_id: string | null;
   nom: string;
   date_fume: string | null;
   duree_min: number | null;
@@ -18,6 +19,10 @@ type Session = {
 export default function Journal() {
   const [cave, setCave] = useState<CaveLite[]>([]);
   const [sessions, setSessions] = useState<Session[]>([]);
+  const [pseudo, setPseudo] = useState<string | null>(null);
+  const [majeur, setMajeur] = useState(false);
+  const [sharedIds, setSharedIds] = useState<Set<string>>(new Set());
+  const [shareMsg, setShareMsg] = useState("");
   const [cigareId, setCigareId] = useState("");
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
   const [duree, setDuree] = useState("");
@@ -27,26 +32,33 @@ export default function Journal() {
   const [msg, setMsg] = useState("");
   const [open, setOpen] = useState(false);
 
+  async function loadMe() {
+    const { data: { session } } = await supabase.auth.getSession();
+    const user = session?.user;
+    if (!user) { setPseudo(null); setMajeur(false); return; }
+    const { data } = await supabase.from("profiles").select("pseudo,majeur").eq("id", user.id).single();
+    setPseudo(data?.pseudo ?? null);
+    setMajeur(data?.majeur === true);
+  }
+
   async function loadCave() {
-    const { data } = await supabase.from("cave").select("id,nom,origine").order("nom");
+    const { data } = await supabase.from("cave").select("id,nom,origine,photo_url").order("nom");
     setCave((data ?? []) as CaveLite[]);
   }
   async function loadSessions() {
     const { data } = await supabase
       .from("degustation")
-      .select("id,nom,date_fume,duree_min,accord,rating,commentaire")
+      .select("id,cigare_id,nom,date_fume,duree_min,accord,rating,commentaire")
       .order("date_fume", { ascending: false })
       .order("created_at", { ascending: false });
     setSessions((data ?? []) as Session[]);
   }
 
   useEffect(() => {
+    loadMe();
     loadCave();
     loadSessions();
-    const { data: sub } = supabase.auth.onAuthStateChange(() => {
-      loadCave();
-      loadSessions();
-    });
+    const { data: sub } = supabase.auth.onAuthStateChange(() => { loadMe(); loadCave(); loadSessions(); });
     return () => sub.subscription.unsubscribe();
   }, []);
 
@@ -89,6 +101,22 @@ export default function Journal() {
     if (!window.confirm("Supprimer cette dégustation ?")) return;
     await supabase.from("degustation").delete().eq("id", id);
     loadSessions();
+  }
+
+  async function shareSession(s: Session) {
+    setShareMsg("");
+    if (!majeur) { setShareMsg("Confirme d'abord ton âge dans l'onglet Communauté."); return; }
+    if (!pseudo) { setShareMsg("Ajoute un pseudo dans ton profil pour publier."); return; }
+    const photo = cave.find((c) => c.id === s.cigare_id)?.photo_url ?? null;
+    const texte = [s.commentaire, s.accord ? `Accord : ${s.accord}` : null].filter(Boolean).join("\n");
+    const { error } = await supabase.from("posts").insert({
+      cigare_nom: s.nom,
+      rating: s.rating,
+      texte: texte || null,
+      photo_url: photo,
+    });
+    if (error) { setShareMsg("Partage impossible : " + error.message); return; }
+    setSharedIds((p) => new Set(p).add(s.id));
   }
 
   function frDate(d: string | null) {
@@ -180,6 +208,8 @@ export default function Journal() {
           </div>
         )}
 
+        {shareMsg && <p className="mb-3 text-sm text-amber-500">{shareMsg}</p>}
+
         {sessions.length === 0 ? (
           <p className="text-sm text-zinc-500">Aucune dégustation pour l'instant. Note ta première session !</p>
         ) : (
@@ -198,6 +228,12 @@ export default function Journal() {
                   <p className="mt-1 text-sm text-zinc-400">{[s.duree_min ? `${s.duree_min} min` : null, s.accord].filter(Boolean).join(" · ")}</p>
                 )}
                 {s.commentaire && <p className="mt-2 text-sm text-zinc-300">{s.commentaire}</p>}
+
+                {sharedIds.has(s.id) ? (
+                  <p className="mt-3 text-sm text-amber-500">Partagé au cercle ✓</p>
+                ) : (
+                  <button onClick={() => shareSession(s)} className="mt-3 rounded-lg border border-zinc-700 px-3 py-1.5 text-sm text-zinc-300 transition hover:border-amber-500 hover:text-amber-500">Partager au cercle 👥</button>
+                )}
               </div>
             ))}
           </div>
