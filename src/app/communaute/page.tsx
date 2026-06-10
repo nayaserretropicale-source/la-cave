@@ -27,6 +27,7 @@ export default function Communaute() {
   const [userId, setUserId] = useState<string | null>(null);
   const [pseudo, setPseudo] = useState<string | null>(null);
   const [majeur, setMajeur] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [posts, setPosts] = useState<Post[]>([]);
   const [links, setLinks] = useState<Friendship[]>([]);
   const [onlyFriends, setOnlyFriends] = useState(false);
@@ -45,9 +46,10 @@ export default function Communaute() {
     const user = session?.user;
     if (!user) { setUserId(null); return; }
     setUserId(user.id);
-    const { data } = await supabase.from("profiles").select("pseudo,majeur").eq("id", user.id).single();
+    const { data } = await supabase.from("profiles").select("pseudo,majeur,is_admin").eq("id", user.id).single();
     setPseudo(data?.pseudo ?? null);
     setMajeur(data?.majeur === true);
+    setIsAdmin(data?.is_admin === true);
   }
 
   async function loadFriends() {
@@ -163,9 +165,21 @@ export default function Communaute() {
   }
 
   async function deletePost(id: string) {
-    if (!window.confirm("Supprimer ta publication ?")) return;
+    if (!window.confirm("Supprimer cette publication ?")) return;
     await supabase.from("posts").delete().eq("id", id);
     loadFeed();
+  }
+
+  async function refreshComments(postId: string) {
+    const { data: coms } = await supabase.from("comments").select("id,user_id,texte").eq("post_id", postId).order("created_at");
+    const list = (coms ?? []) as Comment[];
+    const userIds = Array.from(new Set(list.map((c) => c.user_id)));
+    let profMap: Record<string, Author> = {};
+    if (userIds.length) {
+      const { data: profs } = await supabase.from("profiles").select("id,pseudo,avatar_url").in("id", userIds);
+      (profs ?? []).forEach((p: any) => { profMap[p.id] = { pseudo: p.pseudo, avatar_url: p.avatar_url }; });
+    }
+    setOpenComments((m) => ({ ...m, [postId]: list.map((c) => ({ ...c, author: profMap[c.user_id] })) }));
   }
 
   async function toggleComments(postId: string) {
@@ -173,15 +187,7 @@ export default function Communaute() {
       setOpenComments((m) => { const n = { ...m }; delete n[postId]; return n; });
       return;
     }
-    const { data: coms } = await supabase.from("comments").select("id,user_id,texte").eq("post_id", postId).order("created_at");
-    const list = (coms ?? []) as Comment[];
-    const userIds = Array.from(new Set(list.map((c) => c.user_id)));
-    let profMap: Record<string, Author> = {};
-    if (userIds.length) {
-      const { data: profs } = await supabase.from("profiles").select("id,pseudo,avatar_url").in("id", userIds);
-      (profs ?? []).forEach((p: any) => { profMap[p.id] = { pseudo: p.pseudo, avatar_url: p.avatar_url }; });
-    }
-    setOpenComments((m) => ({ ...m, [postId]: list.map((c) => ({ ...c, author: profMap[c.user_id] })) }));
+    await refreshComments(postId);
   }
 
   async function addComment(postId: string) {
@@ -189,15 +195,14 @@ export default function Communaute() {
     if (!txt) return;
     await supabase.from("comments").insert({ post_id: postId, texte: txt });
     setCommentInput((m) => ({ ...m, [postId]: "" }));
-    const { data: coms } = await supabase.from("comments").select("id,user_id,texte").eq("post_id", postId).order("created_at");
-    const list = (coms ?? []) as Comment[];
-    const userIds = Array.from(new Set(list.map((c) => c.user_id)));
-    let profMap: Record<string, Author> = {};
-    if (userIds.length) {
-      const { data: profs } = await supabase.from("profiles").select("id,pseudo,avatar_url").in("id", userIds);
-      (profs ?? []).forEach((p: any) => { profMap[p.id] = { pseudo: p.pseudo, avatar_url: p.avatar_url }; });
-    }
-    setOpenComments((m) => ({ ...m, [postId]: list.map((c) => ({ ...c, author: profMap[c.user_id] })) }));
+    await refreshComments(postId);
+    loadFeed();
+  }
+
+  async function deleteComment(postId: string, commentId: string) {
+    if (!window.confirm("Supprimer ce commentaire ?")) return;
+    await supabase.from("comments").delete().eq("id", commentId);
+    await refreshComments(postId);
     loadFeed();
   }
 
@@ -238,7 +243,7 @@ export default function Communaute() {
   return (
     <main className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col items-center px-6 py-12">
       <div className="w-full max-w-md">
-        <p className="text-xs tracking-[0.3em] uppercase text-amber-500">Cercle</p>
+        <p className="text-xs tracking-[0.3em] uppercase text-amber-500">Cercle{isAdmin ? " · admin" : ""}</p>
         <h1 className="text-3xl font-semibold mt-1 mb-6">Communauté 👥</h1>
 
         {!pseudo ? (
@@ -290,18 +295,20 @@ export default function Communaute() {
                     <span className="truncate text-sm font-medium">{p.author?.pseudo || "Anonyme"}</span>
                   </Link>
 
-                  {rel && rel.state === "none" && (
-                    <button onClick={() => addFriend(p.user_id)} className="ml-auto rounded-lg border border-zinc-700 px-2.5 py-1 text-xs text-zinc-300 transition hover:border-amber-500 hover:text-amber-500">+ Ami</button>
-                  )}
-                  {rel && rel.state === "sent" && <span className="ml-auto text-xs text-zinc-500">En attente</span>}
-                  {rel && rel.state === "incoming" && rel.row && (
-                    <button onClick={() => acceptFriend(rel.row!.id)} className="ml-auto rounded-lg bg-amber-600 px-2.5 py-1 text-xs font-medium text-zinc-950 transition hover:bg-amber-500">Accepter</button>
-                  )}
-                  {rel && rel.state === "friends" && <span className="ml-auto text-xs text-amber-500">Ami ✓</span>}
+                  <div className="ml-auto flex items-center gap-2">
+                    {rel && rel.state === "none" && (
+                      <button onClick={() => addFriend(p.user_id)} className="rounded-lg border border-zinc-700 px-2.5 py-1 text-xs text-zinc-300 transition hover:border-amber-500 hover:text-amber-500">+ Ami</button>
+                    )}
+                    {rel && rel.state === "sent" && <span className="text-xs text-zinc-500">En attente</span>}
+                    {rel && rel.state === "incoming" && rel.row && (
+                      <button onClick={() => acceptFriend(rel.row!.id)} className="rounded-lg bg-amber-600 px-2.5 py-1 text-xs font-medium text-zinc-950 transition hover:bg-amber-500">Accepter</button>
+                    )}
+                    {rel && rel.state === "friends" && <span className="text-xs text-amber-500">Ami ✓</span>}
 
-                  {p.user_id === userId && (
-                    <button onClick={() => deletePost(p.id)} className="ml-auto rounded-md px-2 py-1 text-zinc-500 transition hover:bg-zinc-800 hover:text-orange-400" aria-label="Supprimer">✕</button>
-                  )}
+                    {(p.user_id === userId || isAdmin) && (
+                      <button onClick={() => deletePost(p.id)} className="rounded-md px-2 py-1 text-zinc-500 transition hover:bg-zinc-800 hover:text-orange-400" aria-label="Supprimer">✕</button>
+                    )}
+                  </div>
                 </div>
 
                 <p className="mt-3 font-semibold">{p.cigare_nom}{p.marque ? <span className="font-normal text-zinc-500"> · {p.marque}</span> : null}</p>
@@ -327,7 +334,10 @@ export default function Communaute() {
                         ) : (
                           <div className="flex h-6 w-6 items-center justify-center rounded-full bg-zinc-800 text-xs">👤</div>
                         )}
-                        <p className="text-sm text-zinc-300"><span className="font-medium text-zinc-100">{c.author?.pseudo || "Anonyme"}</span> {c.texte}</p>
+                        <p className="flex-1 text-sm text-zinc-300"><span className="font-medium text-zinc-100">{c.author?.pseudo || "Anonyme"}</span> {c.texte}</p>
+                        {(c.user_id === userId || isAdmin) && (
+                          <button onClick={() => deleteComment(p.id, c.id)} className="flex-shrink-0 text-xs text-zinc-600 transition hover:text-orange-400" aria-label="Supprimer le commentaire">✕</button>
+                        )}
                       </div>
                     ))}
                     <div className="flex gap-2 pt-1">
