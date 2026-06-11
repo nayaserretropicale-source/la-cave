@@ -5,6 +5,9 @@ import Link from "next/link";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
+// Mets ici le chemin de ton écran de connexion ("/" si c'est la page d'accueil, "/login" si tu as une route dédiée)
+const LOGIN_PATH = "/";
+
 const SUGGESTIONS = [
   "Vitoles courantes et leurs tailles",
   "Quelle vitole pour ~30 min de fume ?",
@@ -16,6 +19,7 @@ export default function Caviste() {
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [thinking, setThinking] = useState(false);
+  const [needAuth, setNeedAuth] = useState(false);
 
   async function send(text?: string) {
     const q = (text ?? input).trim();
@@ -31,10 +35,7 @@ export default function Caviste() {
         body: JSON.stringify({ messages: next }),
       });
       if (res.status === 401) {
-        setMessages([
-          ...next,
-          { role: "assistant", content: "🔒 Connecte-toi pour parler au caviste." },
-        ]);
+        setNeedAuth(true);
         return;
       }
       const data = await res.json();
@@ -68,12 +69,22 @@ export default function Caviste() {
               {m.content}
             </div>
           ))}
+
+          {needAuth && (
+            <Link
+              href={LOGIN_PATH}
+              className="block w-full rounded-lg bg-amber-600 px-4 py-3 text-center font-medium text-zinc-950 transition hover:bg-amber-500"
+            >
+              Se connecter pour parler au caviste 🔒
+            </Link>
+          )}
+
           {thinking && <p className="animate-pulse text-sm text-amber-500">Le caviste cherche…</p>}
         </div>
 
         <div className="flex gap-2">
-          <input value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") send(); }} placeholder="Pose ta question…" className="flex-1 rounded-lg bg-zinc-800 px-3 py-2.5 text-sm outline-none" />
-          <button onClick={() => send()} disabled={thinking} className="rounded-lg bg-amber-600 px-4 py-2.5 font-medium text-zinc-950 transition hover:bg-amber-500 disabled:opacity-50">Envoyer</button>
+          <input value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") send(); }} placeholder="Pose ta question…" className="flex-1 rounded-lg bg-zinc-800 px-3 py-2.5 text-sm outline-none" disabled={needAuth} />
+          <button onClick={() => send()} disabled={thinking || needAuth} className="rounded-lg bg-amber-600 px-4 py-2.5 font-medium text-zinc-950 transition hover:bg-amber-500 disabled:opacity-50">Envoyer</button>
         </div>
       </div>
     </main>
