@@ -4,123 +4,164 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 
-type P = { pseudo: string | null; avatar_url: string | null };
-type Req = { id: string; requester_id: string; author?: P };
-type Activity = { key: string; type: "like" | "comment"; actor?: P; postName: string; texte?: string | null; created_at: string; isNew: boolean };
+type Author = { pseudo: string | null; avatar_url: string | null };
+type Notif = {
+  key: string;
+  type: "like" | "comment" | "friend";
+  userId: string;
+  author?: Author;
+  detail: string;
+  created_at: string;
+  isNew: boolean;
+  friendshipId?: string;
+};
 
 export default function Notifs() {
-  const [me, setMe] = useState<string | null>(null);
-  const [reqs, setReqs] = useState<Req[]>([]);
-  const [acts, setActs] = useState<Activity[]>([]);
+  const [signedIn, setSignedIn] = useState<boolean | null>(null);
+  const [notifs, setNotifs] = useState<Notif[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  async function loadAll() {
+  async function load() {
+    setLoading(true);
     const { data: { session } } = await supabase.auth.getSession();
-    const meId = session?.user?.id ?? null;
-    setMe(meId);
-    if (!meId) return;
+    const me = session?.user?.id;
+    if (!me) { setSignedIn(false); setLoading(false); return; }
+    setSignedIn(true);
 
-    const { data: prof } = await supabase.from("profiles").select("notifs_seen_at").eq("id", meId).single();
+    const { data: prof } = await supabase
+      .from("profiles").select("notifs_seen_at").eq("id", me).single();
     const seen = prof?.notifs_seen_at ?? "1970-01-01T00:00:00Z";
 
-    const { data: fr } = await supabase.from("friendships").select("id,requester_id").eq("addressee_id", meId).eq("status", "pending");
-    const reqList = (fr ?? []) as Req[];
+    const { data: myPosts } = await supabase
+      .from("posts").select("id,cigare_nom").eq("user_id", me);
+    const postIds = (myPosts ?? []).map((p) => p.id);
+    const postName: Record<string, string> = {};
+    (myPosts ?? []).forEach((p) => { postName[p.id] = p.cigare_nom; });
 
-    const { data: myPosts } = await supabase.from("posts").select("id,cigare_nom").eq("user_id", meId);
-    const postMap: Record<string, string> = {};
-    (myPosts ?? []).forEach((p: any) => { postMap[p.id] = p.cigare_nom; });
-    const ids = Object.keys(postMap);
-
-    let likes: any[] = [], coms: any[] = [];
-    if (ids.length) {
-      const lr = await supabase.from("likes").select("user_id,post_id,created_at").in("post_id", ids);
-      const cr = await supabase.from("comments").select("user_id,post_id,texte,created_at").in("post_id", ids);
-      likes = (lr.data ?? []).filter((x: any) => x.user_id !== meId);
-      coms = (cr.data ?? []).filter((x: any) => x.user_id !== meId);
+    let likes: any[] = [];
+    let coms: any[] = [];
+    if (postIds.length) {
+      const l = await supabase
+        .from("likes").select("user_id,post_id,created_at")
+        .in("post_id", postIds).neq("user_id", me)
+        .order("created_at", { ascending: false }).limit(30);
+      likes = l.data ?? [];
+      const c = await supabase
+        .from("comments").select("id,user_id,post_id,texte,created_at")
+        .in("post_id", postIds).neq("user_id", me)
+        .order("created_at", { ascending: false }).limit(30);
+      coms = c.data ?? [];
     }
 
-    const actorIds = Array.from(new Set([...reqList.map((r) => r.requester_id), ...likes.map((l) => l.user_id), ...coms.map((c) => c.user_id)]));
-    const profMap: Record<string, P> = {};
-    if (actorIds.length) {
-      const { data: profs } = await supabase.from("profiles").select("id,pseudo,avatar_url").in("id", actorIds);
+    const { data: reqs } = await supabase
+      .from("friendships").select("id,requester_id,created_at")
+      .eq("addressee_id", me).eq("status", "pending");
+    const pending = reqs ?? [];
+
+    const uids = Array.from(new Set([
+      ...likes.map((x) => x.user_id),
+      ...coms.map((x) => x.user_id),
+      ...pending.map((x) => x.requester_id),
+    ]));
+    const profMap: Record<string, Author> = {};
+    if (uids.length) {
+      const { data: profs } = await supabase
+        .from("profiles").select("id,pseudo,avatar_url").in("id", uids);
       (profs ?? []).forEach((p: any) => { profMap[p.id] = { pseudo: p.pseudo, avatar_url: p.avatar_url }; });
     }
-    setReqs(reqList.map((r) => ({ ...r, author: profMap[r.requester_id] })));
 
-    const activity: Activity[] = [
-      ...likes.map((l: any) => ({ key: `l-${l.post_id}-${l.user_id}-${l.created_at}`, type: "like" as const, actor: profMap[l.user_id], postName: postMap[l.post_id], created_at: l.created_at, isNew: l.created_at > seen })),
-      ...coms.map((c: any) => ({ key: `c-${c.post_id}-${c.user_id}-${c.created_at}`, type: "comment" as const, actor: profMap[c.user_id], postName: postMap[c.post_id], texte: c.texte, created_at: c.created_at, isNew: c.created_at > seen })),
-    ].sort((a, b) => (a.created_at < b.created_at ? 1 : -1)).slice(0, 40);
-    setActs(activity);
+    const list: Notif[] = [
+      ...likes.map((x) => ({
+        key: `l-${x.post_id}-${x.user_id}`,
+        type: "like" as const,
+        userId: x.user_id,
+        author: profMap[x.user_id],
+        detail: `a aimé « ${postName[x.post_id] || "ton post"} »`,
+        created_at: x.created_at,
+        isNew: x.created_at > seen,
+      })),
+      ...coms.map((x) => ({
+        key: `c-${x.id}`,
+        type: "comment" as const,
+        userId: x.user_id,
+        author: profMap[x.user_id],
+        detail: `a commenté : « ${(x.texte || "").slice(0, 70)} »`,
+        created_at: x.created_at,
+        isNew: x.created_at > seen,
+      })),
+      ...pending.map((x) => ({
+        key: `f-${x.id}`,
+        type: "friend" as const,
+        userId: x.requester_id,
+        author: profMap[x.requester_id],
+        detail: "t'a envoyé une demande d'ami",
+        created_at: x.created_at,
+        isNew: x.created_at > seen,
+        friendshipId: x.id,
+      })),
+    ].sort((a, b) => b.created_at.localeCompare(a.created_at)).slice(0, 40);
 
-    await supabase.from("profiles").update({ notifs_seen_at: new Date().toISOString() }).eq("id", meId);
+    setNotifs(list);
+    setLoading(false);
+
+    // Marque tout comme lu (le badge de l'AvatarBadge se mettra à jour au prochain changement de page)
+    await supabase.from("profiles")
+      .update({ notifs_seen_at: new Date().toISOString() })
+      .eq("id", me);
   }
 
-  useEffect(() => {
-    loadAll();
-    const { data: sub } = supabase.auth.onAuthStateChange(() => loadAll());
-    return () => sub.subscription.unsubscribe();
-  }, []);
+  useEffect(() => { load(); }, []);
 
-  async function accept(id: string) { await supabase.from("friendships").update({ status: "accepted" }).eq("id", id); loadAll(); }
-  async function refuse(id: string) { await supabase.from("friendships").delete().eq("id", id); loadAll(); }
-  function frTime(d: string) { return new Date(d).toLocaleDateString("fr-FR", { day: "numeric", month: "short" }); }
-
-  if (!me) {
-    return (
-      <main className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col items-center px-6 py-12">
-        <div className="w-full max-w-md">
-          <h1 className="text-3xl font-semibold mb-4">Notifications 🔔</h1>
-          <p className="text-sm text-zinc-400">Connecte-toi pour voir tes notifications.</p>
-        </div>
-      </main>
-    );
+  async function acceptFriend(rowId: string) {
+    await supabase.from("friendships").update({ status: "accepted" }).eq("id", rowId);
+    load();
   }
+
+  const ICON = { like: "❤️", comment: "💬", friend: "🤝" };
 
   return (
     <main className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col items-center px-6 py-12">
       <div className="w-full max-w-md">
-        <p className="text-xs tracking-[0.3em] uppercase text-amber-500">Activité</p>
-        <h1 className="text-3xl font-semibold mt-1 mb-6">Notifications 🔔</h1>
+        <Link href="/" className="text-sm text-zinc-500 hover:text-amber-500">← Ma cave</Link>
+        <h1 className="text-3xl font-semibold mt-2 mb-6">Notifications 🔔</h1>
 
-        {reqs.length > 0 && (
-          <div className="mb-8">
-            <p className="mb-2 text-xs uppercase tracking-wider text-amber-500">Demandes d'amis</p>
-            <div className="space-y-2">
-              {reqs.map((r) => (
-                <div key={r.id} className="flex items-center gap-3 rounded-lg border border-zinc-800 bg-zinc-900/50 p-3">
-                  <Link href={`/u/${r.requester_id}`}>
-                    {r.author?.avatar_url ? <img src={r.author.avatar_url} alt="" className="h-9 w-9 rounded-full border border-zinc-700 object-cover" /> : <div className="flex h-9 w-9 items-center justify-center rounded-full bg-zinc-800 text-sm">👤</div>}
-                  </Link>
-                  <span className="flex-1 truncate text-sm">{r.author?.pseudo || "Membre"}</span>
-                  <button onClick={() => accept(r.id)} className="rounded-lg bg-amber-600 px-3 py-1.5 text-sm font-medium text-zinc-950 transition hover:bg-amber-500">Accepter</button>
-                  <button onClick={() => refuse(r.id)} className="rounded-lg border border-zinc-700 px-3 py-1.5 text-sm text-zinc-400 transition hover:border-orange-400 hover:text-orange-400">Refuser</button>
-                </div>
-              ))}
+        {signedIn === false && (
+          <p className="text-sm text-zinc-400">Connecte-toi pour voir tes notifications.</p>
+        )}
+
+        {loading && signedIn !== false && (
+          <p className="animate-pulse text-amber-500">Chargement…</p>
+        )}
+
+        {!loading && signedIn && notifs.length === 0 && (
+          <p className="text-sm text-zinc-500">Rien de nouveau pour l&apos;instant. Partage une dégustation dans le <Link href="/communaute" className="text-amber-500 underline">Cercle</Link> !</p>
+        )}
+
+        <div className="space-y-2">
+          {notifs.map((n) => (
+            <div key={n.key} className={`flex items-center gap-3 rounded-xl border p-3 ${n.isNew ? "border-amber-600/50 bg-amber-950/10" : "border-zinc-800 bg-zinc-900/50"}`}>
+              <span className="text-lg">{ICON[n.type]}</span>
+              <Link href={`/u/${n.userId}`} className="flex-shrink-0">
+                {n.author?.avatar_url ? (
+                  <img src={n.author.avatar_url} alt="" className="h-8 w-8 rounded-full border border-zinc-700 object-cover" />
+                ) : (
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-zinc-800 text-sm">👤</div>
+                )}
+              </Link>
+              <p className="min-w-0 flex-1 text-sm text-zinc-300">
+                <span className="font-medium text-zinc-100">{n.author?.pseudo || "Anonyme"}</span> {n.detail}
+              </p>
+              {n.type === "friend" && n.friendshipId && (
+                <button onClick={() => acceptFriend(n.friendshipId!)} className="flex-shrink-0 rounded-lg bg-amber-600 px-2.5 py-1 text-xs font-medium text-zinc-950 transition hover:bg-amber-500">
+                  Accepter
+                </button>
+              )}
+              {n.type !== "friend" && (
+                <Link href="/communaute" className="flex-shrink-0 text-xs text-zinc-500 transition hover:text-amber-500">Voir →</Link>
+              )}
             </div>
-          </div>
-        )}
-
-        <p className="mb-2 text-xs uppercase tracking-wider text-zinc-500">Sur tes publications</p>
-        {acts.length === 0 ? (
-          <p className="text-sm text-zinc-500">Rien pour l'instant.</p>
-        ) : (
-          <div className="space-y-2">
-            {acts.map((a) => (
-              <div key={a.key} className={`flex items-center gap-3 rounded-lg border p-3 ${a.isNew ? "border-amber-700/40 bg-amber-950/10" : "border-zinc-800 bg-zinc-900/50"}`}>
-                {a.actor?.avatar_url ? <img src={a.actor.avatar_url} alt="" className="h-9 w-9 rounded-full border border-zinc-700 object-cover" /> : <div className="flex h-9 w-9 items-center justify-center rounded-full bg-zinc-800 text-sm">👤</div>}
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm">
-                    <span className="font-medium">{a.actor?.pseudo || "Quelqu'un"}</span>
-                    {a.type === "like" ? " a aimé " : " a commenté "}
-                    <span className="text-zinc-400">{a.postName}</span>
-                  </p>
-                  {a.type === "comment" && a.texte && <p className="truncate text-xs text-zinc-500">« {a.texte} »</p>}
-                </div>
-                <span className="flex-shrink-0 text-xs text-zinc-600">{frTime(a.created_at)}</span>
-              </div>
-            ))}
-          </div>
-        )}
+          ))}
+        </div>
       </div>
     </main>
   );
