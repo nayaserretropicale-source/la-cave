@@ -26,6 +26,7 @@ export default function Promos() {
   const [deals, setDeals] = useState<Deal[]>([]);
   const [loading, setLoading] = useState(true);
   const [matchCount, setMatchCount] = useState(0);
+  const [added, setAdded] = useState<Record<number, "ok" | "login" | "busy">>({});
 
   useEffect(() => {
     async function loadAll() {
@@ -59,6 +60,21 @@ export default function Promos() {
     loadAll();
   }, []);
 
+  async function addToEnvies(d: Deal, i: number) {
+    if (added[i] === "ok" || added[i] === "busy") return;
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      setAdded((m) => ({ ...m, [i]: "login" }));
+      return;
+    }
+    setAdded((m) => ({ ...m, [i]: "busy" }));
+    const { error } = await supabase.from("wishlist").insert({
+      nom: d.title.slice(0, 120),
+      note: `Bon plan vu chez ${d.retailer} — ${d.url}`,
+    });
+    setAdded((m) => ({ ...m, [i]: error ? "login" : "ok" }));
+  }
+
   return (
     <main className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col items-center px-6 py-12">
       <div className="w-full max-w-md">
@@ -75,11 +91,29 @@ export default function Promos() {
         )}
         <div className="space-y-3">
           {deals.map((d, i) => (
-            <a key={i} href={d.url} target="_blank" rel="noopener noreferrer" className={`block rounded-lg border px-4 py-3 transition hover:border-amber-500 ${d.match ? "border-amber-600/60 bg-amber-950/15" : "border-zinc-800 bg-zinc-900/50"}`}>
+            <div key={i} className={`rounded-lg border px-4 py-3 transition ${d.match ? "border-amber-600/60 bg-amber-950/15" : "border-zinc-800 bg-zinc-900/50"}`}>
               {d.match && <p className="mb-1 text-xs font-medium text-amber-400">⭐ Dans tes envies : {d.match}</p>}
-              <span className="text-xs uppercase tracking-wider text-amber-500">{d.retailer}</span>
-              <p className="mt-1 font-medium">{d.title}</p>
-            </a>
+              <div className="flex items-start gap-3">
+                <a href={d.url} target="_blank" rel="noopener noreferrer" className="min-w-0 flex-1 transition hover:text-amber-500">
+                  <span className="text-xs uppercase tracking-wider text-amber-500">{d.retailer}</span>
+                  <p className="mt-1 font-medium">{d.title}</p>
+                </a>
+                <button
+                  onClick={() => addToEnvies(d, i)}
+                  disabled={added[i] === "ok" || added[i] === "busy"}
+                  aria-label="Ajouter à mes envies"
+                  className={`flex-shrink-0 rounded-lg border px-2.5 py-1.5 text-sm transition ${added[i] === "ok" ? "border-amber-500 text-amber-500" : "border-zinc-700 text-zinc-300 hover:border-amber-500 hover:text-amber-500"}`}
+                >
+                  {added[i] === "ok" ? "✓" : added[i] === "busy" ? "…" : "＋✨"}
+                </button>
+              </div>
+              {added[i] === "login" && (
+                <p className="mt-2 text-xs text-amber-500">Connecte-toi pour ajouter à tes envies.</p>
+              )}
+              {added[i] === "ok" && (
+                <p className="mt-2 text-xs text-zinc-500">Ajouté à <Link href="/wishlist" className="text-amber-500 underline">Mes envies ✨</Link></p>
+              )}
+            </div>
           ))}
         </div>
 
