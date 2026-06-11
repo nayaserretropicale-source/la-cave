@@ -1,38 +1,30 @@
-import { createServerClient } from "@supabase/ssr";
-import { cookies } from "next/headers";
+import { createClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 
-export async function requireUser() {
-  const cookieStore = await cookies();
+export async function requireUser(req: Request) {
+  const auth = req.headers.get("authorization");
+  const token = auth?.startsWith("Bearer ") ? auth.slice(7) : null;
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return cookieStore.getAll();
-        },
-        setAll() {
-          // lecture seule dans les routes API
-        },
-      },
-    }
-  );
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
+  if (!token) {
     return {
       user: null,
-      error: NextResponse.json(
-        { error: "Connexion requise." },
-        { status: 401 }
-      ),
+      error: NextResponse.json({ error: "Connexion requise." }, { status: 401 }),
     };
   }
 
-  return { user, error: null };
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
+
+  const { data, error } = await supabase.auth.getUser(token);
+
+  if (error || !data.user) {
+    return {
+      user: null,
+      error: NextResponse.json({ error: "Session invalide." }, { status: 401 }),
+    };
+  }
+
+  return { user: data.user, error: null };
 }

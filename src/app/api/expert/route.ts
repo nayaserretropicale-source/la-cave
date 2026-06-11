@@ -32,7 +32,7 @@ function sanitize(messages: unknown): IncomingMsg[] | null {
 }
 
 export async function POST(req: Request) {
-  const { error } = await requireUser();
+  const { error } = await requireUser(req);
   if (error) return error;
 
   try {
