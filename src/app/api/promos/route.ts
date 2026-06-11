@@ -3,6 +3,8 @@ import Anthropic from "@anthropic-ai/sdk";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
+export const dynamic = "force-static";
+export const revalidate = 21600; // cache 6h : 4 exécutions/jour max
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 

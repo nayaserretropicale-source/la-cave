@@ -30,6 +30,13 @@ export default function Caviste() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ messages: next }),
       });
+      if (res.status === 401) {
+        setMessages([
+          ...next,
+          { role: "assistant", content: "🔒 Connecte-toi pour parler au caviste." },
+        ]);
+        return;
+      }
       const data = await res.json();
       setMessages([...next, { role: "assistant", content: data.reply ?? "…" }]);
     } catch {

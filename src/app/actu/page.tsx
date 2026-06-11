@@ -8,11 +8,16 @@ type News = { title: string; link: string; source: string; date: string; snippet
 export default function Actu() {
   const [items, setItems] = useState<News[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     fetch("/api/news")
-      .then((r) => r.json())
+      .then((r) => {
+        if (!r.ok) throw new Error("fetch failed");
+        return r.json();
+      })
       .then((d) => setItems(d.items ?? []))
+      .catch(() => setError(true))
       .finally(() => setLoading(false));
   }, []);
 
@@ -23,6 +28,14 @@ export default function Actu() {
         <h1 className="text-3xl font-semibold mt-2 mb-6">Actu cigares 📰</h1>
 
         {loading && <p className="animate-pulse text-amber-500">Chargement…</p>}
+
+        {!loading && error && (
+          <p className="text-sm text-zinc-500">Impossible de charger l&apos;actu pour le moment. Réessaie plus tard.</p>
+        )}
+
+        {!loading && !error && items.length === 0 && (
+          <p className="text-sm text-zinc-500">Pas d&apos;actualité disponible pour l&apos;instant.</p>
+        )}
 
         <div className="space-y-3">
           {items.map((n, i) => (

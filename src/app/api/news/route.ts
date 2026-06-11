@@ -3,6 +3,8 @@ import Parser from "rss-parser";
 import Anthropic from "@anthropic-ai/sdk";
 
 export const runtime = "nodejs";
+export const dynamic = "force-static";
+export const revalidate = 10800; // cache 3h : 8 traductions/jour max, quel que soit le trafic
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
