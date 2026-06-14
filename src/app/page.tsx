@@ -38,6 +38,8 @@ type CaveItem = {
   rating?: number | null;
   note_perso?: string | null;
   source?: string | null;
+  quantite?: number | null;
+  statut?: string | null;
   duree_fume?: string | null;
   accord?: string | null;
   conservation?: string | null;
@@ -56,16 +58,19 @@ export default function Home() {
   const [selected, setSelected] = useState<CaveItem | null>(null);
   const [ratingDraft, setRatingDraft] = useState(0);
   const [noteDraft, setNoteDraft] = useState("");
+  const [qteDraft, setQteDraft] = useState(1);
+  const [statutDraft, setStatutDraft] = useState("en_cave");
   const [photoBusy, setPhotoBusy] = useState(false);
   const [q, setQ] = useState("");
   const [forceF, setForceF] = useState("");
+  const [statutF, setStatutF] = useState("");
   const [histoire, setHistoire] = useState<string | null>(null);
   const [histoireLoading, setHistoireLoading] = useState(false);
 
   async function loadCave() {
     const { data } = await supabase
       .from("cave")
-      .select("id,nom,marque,origine,force,format,cape,photo_url,rating,note_perso,source,duree_fume,accord,conservation,premier_tiers,deuxieme_tiers,troisieme_tiers")
+      .select("id,nom,marque,origine,force,format,cape,photo_url,rating,note_perso,source,quantite,statut,duree_fume,accord,conservation,premier_tiers,deuxieme_tiers,troisieme_tiers")
       .order("created_at", { ascending: false });
     setCave((data ?? []) as CaveItem[]);
   }
@@ -153,13 +158,20 @@ export default function Home() {
     setSelected(item);
     setRatingDraft(item.rating ?? 0);
     setNoteDraft(item.note_perso ?? "");
+    setQteDraft(item.quantite ?? 1);
+    setStatutDraft(item.statut ?? "en_cave");
     setHistoire(null);
     setHistoireLoading(false);
   }
 
   async function saveDetail() {
     if (!selected) return;
-    await supabase.from("cave").update({ rating: ratingDraft, note_perso: noteDraft }).eq("id", selected.id);
+    await supabase.from("cave").update({
+      rating: ratingDraft,
+      note_perso: noteDraft,
+      quantite: qteDraft,
+      statut: statutDraft,
+    }).eq("id", selected.id);
     setSelected(null);
     loadCave();
   }
@@ -199,7 +211,8 @@ export default function Home() {
     const term = q.trim().toLowerCase();
     const matchesQ = !term || [c.nom, c.marque, c.origine].filter(Boolean).some((v) => (v as string).toLowerCase().includes(term));
     const matchesF = !forceF || c.force === forceF;
-    return matchesQ && matchesF;
+    const matchesS = !statutF || (statutF === "fume" ? c.statut === "fume" : c.statut !== "fume");
+    return matchesQ && matchesF && matchesS;
   });
   const groups: Record<string, CaveItem[]> = {};
   filtered.forEach((c) => {
@@ -207,6 +220,8 @@ export default function Home() {
     (groups[key] ||= []).push(c);
   });
   const groupNames = Object.keys(groups).sort();
+  const physical = cave.filter((c) => c.statut !== "fume").reduce((s, c) => s + (c.quantite ?? 1), 0);
+  const fumeCount = cave.filter((c) => c.statut === "fume").length;
 
   return (
     <main className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col items-center px-6 py-12">
@@ -290,11 +305,17 @@ export default function Home() {
 
         {cave.length > 0 && (
           <div className="mt-10">
-            <p className="mb-3 text-xs tracking-[0.3em] uppercase text-amber-500">Ma cave ({cave.length})</p>
+            <p className="text-xs tracking-[0.3em] uppercase text-amber-500">Ma cave ({cave.length})</p>
+            <p className="mb-3 mt-0.5 text-sm text-zinc-500">{physical} cigare(s) en cave{fumeCount ? ` · ${fumeCount} fumé(s)` : ""}</p>
 
             {cave.length >= 5 && (
               <div className="mb-4 space-y-2">
                 <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Rechercher (nom, marque, origine)…" className="w-full rounded-lg bg-zinc-800 px-3 py-2 text-sm outline-none" />
+                <div className="flex flex-wrap gap-2">
+                  <button onClick={() => setStatutF("")} className={`rounded-full px-3 py-1 text-xs transition ${statutF === "" ? "bg-amber-600 text-zinc-950" : "border border-zinc-700 text-zinc-400 hover:border-amber-500"}`}>Tout</button>
+                  <button onClick={() => setStatutF("en_cave")} className={`rounded-full px-3 py-1 text-xs transition ${statutF === "en_cave" ? "bg-amber-600 text-zinc-950" : "border border-zinc-700 text-zinc-400 hover:border-amber-500"}`}>En cave</button>
+                  <button onClick={() => setStatutF("fume")} className={`rounded-full px-3 py-1 text-xs transition ${statutF === "fume" ? "bg-amber-600 text-zinc-950" : "border border-zinc-700 text-zinc-400 hover:border-amber-500"}`}>Fumés</button>
+                </div>
                 {forces.length > 1 && (
                   <div className="flex flex-wrap gap-2">
                     <button onClick={() => setForceF("")} className={`rounded-full px-3 py-1 text-xs transition ${forceF === "" ? "bg-amber-600 text-zinc-950" : "border border-zinc-700 text-zinc-400 hover:border-amber-500"}`}>Toutes forces</button>
@@ -315,7 +336,7 @@ export default function Home() {
                     <p className="mb-2 text-sm font-medium text-amber-500">📍 {name}</p>
                     <div className="space-y-2">
                       {groups[name].map((c) => (
-                        <div key={c.id} onClick={() => openDetail(c)} className="flex cursor-pointer items-center gap-3 rounded-lg border border-zinc-800 bg-zinc-900/50 p-3 transition hover:border-zinc-700">
+                        <div key={c.id} onClick={() => openDetail(c)} className={`flex cursor-pointer items-center gap-3 rounded-lg border border-zinc-800 bg-zinc-900/50 p-3 transition hover:border-zinc-700 ${c.statut === "fume" ? "opacity-60" : ""}`}>
                           {c.photo_url ? (
                             <img src={c.photo_url} alt={c.nom} className="h-14 w-14 flex-shrink-0 rounded-lg border border-zinc-800 object-cover" />
                           ) : (
@@ -324,8 +345,10 @@ export default function Home() {
                           <div className="min-w-0 flex-1">
                             <p className="truncate font-medium">{c.nom}</p>
                             <p className="text-sm text-zinc-500">{[c.marque, c.force].filter(Boolean).join(" · ")}</p>
-                            <div className="mt-0.5 flex items-center gap-2">
+                            <div className="mt-0.5 flex flex-wrap items-center gap-2">
                               {c.rating ? <span className="text-sm text-amber-500">{"★".repeat(c.rating)}</span> : null}
+                              {(c.quantite ?? 1) > 1 && <span className="rounded-full bg-zinc-800 px-2 py-0.5 text-[10px] text-zinc-300">×{c.quantite}</span>}
+                              {c.statut === "fume" && <span className="rounded-full border border-zinc-600 px-2 py-0.5 text-[10px] text-zinc-400">Fumé</span>}
                               {c.source === "wishlist" && <span className="rounded-full border border-amber-700/50 px-2 py-0.5 text-[10px] text-amber-500">✨ Envie</span>}
                             </div>
                           </div>
@@ -383,6 +406,24 @@ export default function Home() {
                 <span className="font-medium text-zinc-100">Conservation — </span>{selected.conservation}
               </p>
             )}
+
+            <div className="mt-4 grid grid-cols-2 gap-4">
+              <div>
+                <p className="mb-1 text-xs uppercase tracking-wider text-zinc-500">Quantité</p>
+                <div className="flex items-center gap-3">
+                  <button type="button" onClick={() => setQteDraft((n) => Math.max(0, n - 1))} className="h-9 w-9 rounded-lg border border-zinc-700 text-lg transition hover:border-amber-500">−</button>
+                  <span className="w-6 text-center text-lg font-semibold">{qteDraft}</span>
+                  <button type="button" onClick={() => setQteDraft((n) => n + 1)} className="h-9 w-9 rounded-lg border border-zinc-700 text-lg transition hover:border-amber-500">+</button>
+                </div>
+              </div>
+              <div>
+                <p className="mb-1 text-xs uppercase tracking-wider text-zinc-500">Statut</p>
+                <div className="flex gap-2">
+                  <button type="button" onClick={() => setStatutDraft("en_cave")} className={`rounded-lg px-3 py-1.5 text-sm transition ${statutDraft !== "fume" ? "bg-amber-600 text-zinc-950" : "border border-zinc-700 text-zinc-400 hover:border-amber-500"}`}>En cave</button>
+                  <button type="button" onClick={() => setStatutDraft("fume")} className={`rounded-lg px-3 py-1.5 text-sm transition ${statutDraft === "fume" ? "bg-amber-600 text-zinc-950" : "border border-zinc-700 text-zinc-400 hover:border-amber-500"}`}>Fumé</button>
+                </div>
+              </div>
+            </div>
 
             <div className="mt-4">
               {histoire ? (
