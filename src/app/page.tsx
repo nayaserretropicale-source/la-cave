@@ -232,6 +232,7 @@ export default function Home() {
         <AuthBar />
 
         <div className="mb-6 flex flex-wrap gap-2">
+          <Link href="/ce-soir" className="inline-block rounded-lg border border-amber-600/60 bg-amber-950/20 px-4 py-2 text-sm text-amber-400 transition hover:border-amber-500">Que fumer ce soir ? 🌙</Link>
           <Link href="/caviste" className="inline-block rounded-lg border border-zinc-700 px-4 py-2 text-sm text-zinc-300 transition hover:border-amber-500 hover:text-amber-500">Demander au caviste 🥃</Link>
           <Link href="/wishlist" className="inline-block rounded-lg border border-zinc-700 px-4 py-2 text-sm text-zinc-300 transition hover:border-amber-500 hover:text-amber-500">Mes envies ✨</Link>
         </div>
