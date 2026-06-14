@@ -2,9 +2,16 @@ import Parser from "rss-parser";
 import Anthropic from "@anthropic-ai/sdk";
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-const parser = new Parser();
 
-export const revalidate = 10800; // 3h de cache
+const parser = new Parser({
+  timeout: 9000,
+  headers: {
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+    Accept: "application/rss+xml, application/xml;q=0.9, text/xml;q=0.8, */*;q=0.5",
+  },
+});
+
+export const revalidate = 1800; // 30 min de cache
 export const maxDuration = 60;
 
 const FEEDS = [
@@ -23,13 +30,15 @@ function clean(html: string): string {
 }
 
 export async function GET() {
+  const diag: any[] = [];
   try {
-    // 1) Récupère les flux — un flux mort ne casse pas les autres
     const all: any[] = [];
     for (const f of FEEDS) {
       try {
         const feed = await parser.parseURL(f.url);
-        (feed.items || []).forEach((it: any) => {
+        const items = feed.items || [];
+        diag.push({ source: f.source, items: items.length });
+        items.forEach((it: any) => {
           all.push({
             title: (it.title || "").trim(),
             snippet: clean(it.contentSnippet || it.content || ""),
@@ -38,14 +47,13 @@ export async function GET() {
             date: it.isoDate || it.pubDate || null,
           });
         });
-      } catch {
-        // flux indisponible : on ignore
+      } catch (err: any) {
+        diag.push({ source: f.source, error: err?.message || "echec" });
       }
     }
 
-    if (all.length === 0) return Response.json({ articles: [] });
+    if (all.length === 0) return Response.json({ articles: [], _diag: diag });
 
-    // 2) Tri par date décroissante, top 15
     all.sort((a, b) => {
       const da = a.date ? new Date(a.date).getTime() : 0;
       const db = b.date ? new Date(b.date).getTime() : 0;
@@ -53,7 +61,6 @@ export async function GET() {
     });
     const top = all.slice(0, 15);
 
-    // 3) Traduction FR en un seul appel, avec repli si échec
     let translated = top;
     try {
       const payload = top.map((a, i) => ({ i, title: a.title, snippet: a.snippet }));
@@ -76,13 +83,11 @@ export async function GET() {
         }
       }
     } catch {
-      // traduction indisponible : on garde l'original (jamais vide)
-      translated = top;
+      translated = top; // traduction indisponible : on garde l'original
     }
 
     return Response.json({ articles: translated });
-  } catch {
-    // Dernier filet : ne jamais planter le build ni la page
-    return Response.json({ articles: [] });
+  } catch (e: any) {
+    return Response.json({ articles: [], _diag: diag, _error: e?.message || "erreur" });
   }
 }
