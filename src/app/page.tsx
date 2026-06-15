@@ -48,6 +48,16 @@ type CaveItem = {
   troisieme_tiers?: string | null;
 };
 
+type Editable = {
+  nom: string; marque: string; origine: string; format: string; cape: string; force: string;
+  duree_fume: string; accord: string; conservation: string;
+  premier_tiers: string; deuxieme_tiers: string; troisieme_tiers: string;
+};
+const EMPTY: Editable = {
+  nom: "", marque: "", origine: "", format: "", cape: "", force: "",
+  duree_fume: "", accord: "", conservation: "", premier_tiers: "", deuxieme_tiers: "", troisieme_tiers: "",
+};
+
 export default function Home() {
   const [loading, setLoading] = useState(false);
   const [fiche, setFiche] = useState<Fiche | null>(null);
@@ -60,12 +70,17 @@ export default function Home() {
   const [noteDraft, setNoteDraft] = useState("");
   const [qteDraft, setQteDraft] = useState(1);
   const [statutDraft, setStatutDraft] = useState("en_cave");
+  const [editing, setEditing] = useState(false);
+  const [form, setForm] = useState<Editable>(EMPTY);
   const [photoBusy, setPhotoBusy] = useState(false);
   const [q, setQ] = useState("");
   const [forceF, setForceF] = useState("");
   const [statutF, setStatutF] = useState("");
   const [histoire, setHistoire] = useState<string | null>(null);
   const [histoireLoading, setHistoireLoading] = useState(false);
+  const [manual, setManual] = useState(false);
+  const [mForm, setMForm] = useState<Editable>(EMPTY);
+  const [manualMsg, setManualMsg] = useState("");
 
   async function loadCave() {
     const { data } = await supabase
@@ -148,6 +163,29 @@ export default function Home() {
     loadCave();
   }
 
+  async function saveManual() {
+    if (!mForm.nom.trim()) { setManualMsg("Le nom est obligatoire."); return; }
+    setManualMsg("Ajout…");
+    const { error } = await supabase.from("cave").insert({
+      nom: mForm.nom.trim(),
+      marque: mForm.marque.trim() || null,
+      origine: mForm.origine.trim() || null,
+      format: mForm.format.trim() || null,
+      cape: mForm.cape.trim() || null,
+      force: mForm.force.trim() || null,
+      duree_fume: mForm.duree_fume.trim() || null,
+      accord: mForm.accord.trim() || null,
+      conservation: mForm.conservation.trim() || null,
+      profil: [],
+      source: "manuel",
+    });
+    if (error) { setManualMsg("Connecte-toi d'abord pour ajouter."); return; }
+    setManual(false);
+    setMForm(EMPTY);
+    setManualMsg("");
+    loadCave();
+  }
+
   async function removeFromCave(id: string) {
     if (!window.confirm("Supprimer ce cigare de ta cave ?")) return;
     await supabase.from("cave").delete().eq("id", id);
@@ -160,6 +198,21 @@ export default function Home() {
     setNoteDraft(item.note_perso ?? "");
     setQteDraft(item.quantite ?? 1);
     setStatutDraft(item.statut ?? "en_cave");
+    setEditing(false);
+    setForm({
+      nom: item.nom ?? "",
+      marque: item.marque ?? "",
+      origine: item.origine ?? "",
+      format: item.format ?? "",
+      cape: item.cape ?? "",
+      force: item.force ?? "",
+      duree_fume: item.duree_fume ?? "",
+      accord: item.accord ?? "",
+      conservation: item.conservation ?? "",
+      premier_tiers: item.premier_tiers ?? "",
+      deuxieme_tiers: item.deuxieme_tiers ?? "",
+      troisieme_tiers: item.troisieme_tiers ?? "",
+    });
     setHistoire(null);
     setHistoireLoading(false);
   }
@@ -167,6 +220,18 @@ export default function Home() {
   async function saveDetail() {
     if (!selected) return;
     await supabase.from("cave").update({
+      nom: form.nom.trim() || selected.nom,
+      marque: form.marque.trim() || null,
+      origine: form.origine.trim() || null,
+      format: form.format.trim() || null,
+      cape: form.cape.trim() || null,
+      force: form.force.trim() || null,
+      duree_fume: form.duree_fume.trim() || null,
+      accord: form.accord.trim() || null,
+      conservation: form.conservation.trim() || null,
+      premier_tiers: form.premier_tiers.trim() || null,
+      deuxieme_tiers: form.deuxieme_tiers.trim() || null,
+      troisieme_tiers: form.troisieme_tiers.trim() || null,
       rating: ratingDraft,
       note_perso: noteDraft,
       quantite: qteDraft,
@@ -231,7 +296,7 @@ export default function Home() {
 
         <AuthBar />
 
-       <div className="mb-6 flex flex-wrap gap-2">
+        <div className="mb-6 flex flex-wrap gap-2">
           <Link href="/ce-soir" className="inline-block rounded-lg border border-amber-600/60 bg-amber-950/20 px-4 py-2 text-sm text-amber-400 transition hover:border-amber-500">Que fumer ce soir ? 🌙</Link>
           <Link href="/caviste" className="inline-block rounded-lg border border-zinc-700 px-4 py-2 text-sm text-zinc-300 transition hover:border-amber-500 hover:text-amber-500">Demander au caviste 🥃</Link>
           <Link href="/boutiques" className="inline-block rounded-lg border border-zinc-700 px-4 py-2 text-sm text-zinc-300 transition hover:border-amber-500 hover:text-amber-500">Boutiques 🗺️</Link>
@@ -239,11 +304,14 @@ export default function Home() {
         </div>
 
         {!fiche && !loading && (
-          <label className="block cursor-pointer rounded-xl border border-dashed border-zinc-700 bg-zinc-900/40 px-6 py-10 text-center transition hover:border-amber-500">
-            <span className="text-zinc-300">Choisir / prendre une photo</span>
-            <span className="mt-1 block text-sm text-zinc-500">Galerie ou appareil photo — cadre bien la bague.</span>
-            <input type="file" accept="image/jpeg,image/png,image/webp" onChange={onFile} className="hidden" />
-          </label>
+          <>
+            <label className="block cursor-pointer rounded-xl border border-dashed border-zinc-700 bg-zinc-900/40 px-6 py-10 text-center transition hover:border-amber-500">
+              <span className="text-zinc-300">Choisir / prendre une photo</span>
+              <span className="mt-1 block text-sm text-zinc-500">Galerie ou appareil photo — cadre bien la bague.</span>
+              <input type="file" accept="image/jpeg,image/png,image/webp" onChange={onFile} className="hidden" />
+            </label>
+            <button onClick={() => { setMForm(EMPTY); setManualMsg(""); setManual(true); }} className="mt-3 w-full rounded-lg border border-zinc-700 px-4 py-2 text-sm text-zinc-300 transition hover:border-amber-500 hover:text-amber-500">Ou ajouter un cigare à la main ✍️</button>
+          </>
         )}
 
         {preview && <img src={preview} alt="cigare" className="mb-6 w-full rounded-xl border border-zinc-800" />}
@@ -352,6 +420,7 @@ export default function Home() {
                               {(c.quantite ?? 1) > 1 && <span className="rounded-full bg-zinc-800 px-2 py-0.5 text-[10px] text-zinc-300">×{c.quantite}</span>}
                               {c.statut === "fume" && <span className="rounded-full border border-zinc-600 px-2 py-0.5 text-[10px] text-zinc-400">Fumé</span>}
                               {c.source === "wishlist" && <span className="rounded-full border border-amber-700/50 px-2 py-0.5 text-[10px] text-amber-500">✨ Envie</span>}
+                              {c.source === "manuel" && <span className="rounded-full border border-zinc-700 px-2 py-0.5 text-[10px] text-zinc-500">✍️ Manuel</span>}
                             </div>
                           </div>
                           <button onClick={(e) => { e.stopPropagation(); removeFromCave(c.id); }} className="flex-shrink-0 rounded-md px-2 py-1 text-zinc-500 transition hover:bg-zinc-800 hover:text-orange-400" aria-label="Supprimer">✕</button>
@@ -385,28 +454,52 @@ export default function Home() {
               {selected.source === "wishlist" && <span className="rounded-full border border-amber-700/50 px-2 py-0.5 text-[10px] text-amber-500">✨ Envie</span>}
             </div>
 
-            <div className="mt-3 rounded-xl border border-zinc-800 bg-zinc-900/40 px-4">
-              <Line label="Origine" value={selected.origine} />
-              <Line label="Format" value={selected.format} />
-              <Line label="Cape" value={selected.cape} />
-              <Line label="Force" value={selected.force} />
-              <Line label="Durée de fume" value={selected.duree_fume} />
-              <Line label="Accord" value={selected.accord} last />
-            </div>
-
-            {(selected.premier_tiers || selected.deuxieme_tiers || selected.troisieme_tiers) && (
-              <div className="mt-3 rounded-xl border border-zinc-800 bg-zinc-900/40 px-4">
-                <p className="border-b border-zinc-800 py-2 text-xs uppercase tracking-wider text-amber-500">Évolution</p>
-                <Line label="1er tiers" value={selected.premier_tiers} />
-                <Line label="2e tiers" value={selected.deuxieme_tiers} />
-                <Line label="3e tiers" value={selected.troisieme_tiers} last />
+            {editing ? (
+              <div className="mt-4 space-y-3">
+                <FieldEdit label="Nom" value={form.nom} onChange={(v) => setForm({ ...form, nom: v })} />
+                <FieldEdit label="Marque" value={form.marque} onChange={(v) => setForm({ ...form, marque: v })} />
+                <FieldEdit label="Origine" value={form.origine} onChange={(v) => setForm({ ...form, origine: v })} />
+                <div className="grid grid-cols-2 gap-3">
+                  <FieldEdit label="Force" value={form.force} onChange={(v) => setForm({ ...form, force: v })} placeholder="légère / moyenne / corsée" />
+                  <FieldEdit label="Format" value={form.format} onChange={(v) => setForm({ ...form, format: v })} />
+                  <FieldEdit label="Cape" value={form.cape} onChange={(v) => setForm({ ...form, cape: v })} />
+                  <FieldEdit label="Durée de fume" value={form.duree_fume} onChange={(v) => setForm({ ...form, duree_fume: v })} />
+                </div>
+                <FieldEdit label="Accord" value={form.accord} onChange={(v) => setForm({ ...form, accord: v })} />
+                <FieldEdit label="Conservation" value={form.conservation} onChange={(v) => setForm({ ...form, conservation: v })} />
+                <FieldEdit label="1er tiers" value={form.premier_tiers} onChange={(v) => setForm({ ...form, premier_tiers: v })} />
+                <FieldEdit label="2e tiers" value={form.deuxieme_tiers} onChange={(v) => setForm({ ...form, deuxieme_tiers: v })} />
+                <FieldEdit label="3e tiers" value={form.troisieme_tiers} onChange={(v) => setForm({ ...form, troisieme_tiers: v })} />
+                <button onClick={() => setEditing(false)} className="text-xs text-zinc-500 underline">Terminer l'édition</button>
               </div>
-            )}
+            ) : (
+              <>
+                <div className="mt-3 rounded-xl border border-zinc-800 bg-zinc-900/40 px-4">
+                  <Line label="Origine" value={selected.origine} />
+                  <Line label="Format" value={selected.format} />
+                  <Line label="Cape" value={selected.cape} />
+                  <Line label="Force" value={selected.force} />
+                  <Line label="Durée de fume" value={selected.duree_fume} />
+                  <Line label="Accord" value={selected.accord} last />
+                </div>
 
-            {selected.conservation && (
-              <p className="mt-3 rounded-r-lg border-l-2 border-zinc-600 bg-zinc-900/50 px-4 py-3 text-sm text-zinc-300">
-                <span className="font-medium text-zinc-100">Conservation — </span>{selected.conservation}
-              </p>
+                {(selected.premier_tiers || selected.deuxieme_tiers || selected.troisieme_tiers) && (
+                  <div className="mt-3 rounded-xl border border-zinc-800 bg-zinc-900/40 px-4">
+                    <p className="border-b border-zinc-800 py-2 text-xs uppercase tracking-wider text-amber-500">Évolution</p>
+                    <Line label="1er tiers" value={selected.premier_tiers} />
+                    <Line label="2e tiers" value={selected.deuxieme_tiers} />
+                    <Line label="3e tiers" value={selected.troisieme_tiers} last />
+                  </div>
+                )}
+
+                {selected.conservation && (
+                  <p className="mt-3 rounded-r-lg border-l-2 border-zinc-600 bg-zinc-900/50 px-4 py-3 text-sm text-zinc-300">
+                    <span className="font-medium text-zinc-100">Conservation — </span>{selected.conservation}
+                  </p>
+                )}
+
+                <button onClick={() => setEditing(true)} className="mt-3 w-full rounded-lg border border-zinc-700 px-4 py-2 text-sm text-zinc-300 transition hover:border-amber-500 hover:text-amber-500">Modifier les infos ✏️</button>
+              </>
             )}
 
             <div className="mt-4 grid grid-cols-2 gap-4">
@@ -454,6 +547,36 @@ export default function Home() {
           </div>
         </div>
       )}
+
+      {manual && (
+        <div className="fixed inset-0 z-[60] flex items-end justify-center overflow-y-auto bg-black/70 p-4 sm:items-center" onClick={() => setManual(false)}>
+          <div className="my-auto w-full max-w-md rounded-2xl border border-zinc-800 bg-zinc-900 p-5" onClick={(e) => e.stopPropagation()}>
+            <h2 className="text-xl font-semibold">Ajouter un cigare à la main</h2>
+            <p className="mt-1 text-sm text-zinc-500">Seul le nom est obligatoire.</p>
+
+            <div className="mt-4 space-y-3">
+              <FieldEdit label="Nom *" value={mForm.nom} onChange={(v) => setMForm({ ...mForm, nom: v })} />
+              <FieldEdit label="Marque" value={mForm.marque} onChange={(v) => setMForm({ ...mForm, marque: v })} />
+              <FieldEdit label="Origine" value={mForm.origine} onChange={(v) => setMForm({ ...mForm, origine: v })} />
+              <div className="grid grid-cols-2 gap-3">
+                <FieldEdit label="Force" value={mForm.force} onChange={(v) => setMForm({ ...mForm, force: v })} placeholder="légère / moyenne / corsée" />
+                <FieldEdit label="Format" value={mForm.format} onChange={(v) => setMForm({ ...mForm, format: v })} />
+                <FieldEdit label="Cape" value={mForm.cape} onChange={(v) => setMForm({ ...mForm, cape: v })} />
+                <FieldEdit label="Durée de fume" value={mForm.duree_fume} onChange={(v) => setMForm({ ...mForm, duree_fume: v })} />
+              </div>
+              <FieldEdit label="Accord" value={mForm.accord} onChange={(v) => setMForm({ ...mForm, accord: v })} />
+              <FieldEdit label="Conservation" value={mForm.conservation} onChange={(v) => setMForm({ ...mForm, conservation: v })} />
+            </div>
+
+            {manualMsg && <p className="mt-3 text-sm text-amber-500">{manualMsg}</p>}
+
+            <div className="mt-4 flex gap-2">
+              <button onClick={saveManual} className="flex-1 rounded-lg bg-amber-600 px-4 py-2.5 font-medium text-zinc-950 transition hover:bg-amber-500">Ajouter à ma cave</button>
+              <button onClick={() => setManual(false)} className="rounded-lg border border-zinc-700 px-4 py-2.5 transition hover:border-amber-500">Annuler</button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
@@ -464,6 +587,15 @@ function Line({ label, value, last }: { label: string; value?: string | null; la
     <div className={`flex gap-3 py-2 text-sm ${last ? "" : "border-b border-zinc-800"}`}>
       <span className="w-28 flex-shrink-0 text-zinc-500">{label}</span>
       <span className="flex-1">{value}</span>
+    </div>
+  );
+}
+
+function FieldEdit({ label, value, onChange, placeholder }: { label: string; value: string; onChange: (v: string) => void; placeholder?: string }) {
+  return (
+    <div>
+      <label className="mb-1 block text-xs uppercase tracking-wider text-zinc-500">{label}</label>
+      <input value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} className="w-full rounded-lg bg-zinc-800 px-3 py-2 text-sm outline-none" />
     </div>
   );
 }
