@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { supabase } from "@/lib/supabase";
 
 export default function Profil() {
@@ -27,6 +28,7 @@ export default function Profil() {
   }
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     load();
     const { data: sub } = supabase.auth.onAuthStateChange(() => load());
     return () => sub.subscription.unsubscribe();
@@ -64,7 +66,7 @@ export default function Profil() {
         <div className="w-full max-w-md">
           <p className="text-xs tracking-[0.3em] uppercase text-amber-500">Compte</p>
           <h1 className="text-3xl font-semibold mt-1 mb-6">Mon profil 👤</h1>
-          <p className="text-sm text-zinc-400">Connecte-toi depuis l'onglet Cave pour créer ton profil.</p>
+          <p className="text-sm text-zinc-400">Connecte-toi depuis l&apos;onglet Cave pour créer ton profil.</p>
         </div>
       </main>
     );
@@ -78,7 +80,7 @@ export default function Profil() {
 
         <div className="flex flex-col items-center gap-3">
           {avatarUrl ? (
-            <img src={avatarUrl} alt="avatar" className="h-28 w-28 rounded-full border-2 border-amber-500 object-cover" />
+            <Image src={avatarUrl} alt="avatar" width={112} height={112} className="h-28 w-28 rounded-full border-2 border-amber-500 object-cover" />
           ) : (
             <div className="flex h-28 w-28 items-center justify-center rounded-full border-2 border-zinc-700 bg-zinc-800 text-4xl">👤</div>
           )}

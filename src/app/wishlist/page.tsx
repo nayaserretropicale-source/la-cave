@@ -22,6 +22,7 @@ export default function Wishlist() {
   }
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     load();
     const { data: sub } = supabase.auth.onAuthStateChange(() => load());
     return () => sub.subscription.unsubscribe();
@@ -75,7 +76,7 @@ export default function Wishlist() {
         </div>
 
         {items.length === 0 ? (
-          <p className="text-sm text-zinc-500">Aucune envie pour l'instant. Note les cigares que tu veux goûter !</p>
+          <p className="text-sm text-zinc-500">Aucune envie pour l&apos;instant. Note les cigares que tu veux goûter !</p>
         ) : (
           <div className="space-y-2">
             {items.map((it) => (

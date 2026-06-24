@@ -20,6 +20,10 @@ const FEEDS = [
   { url: "https://www.cigar-coop.com/feed/", source: "Cigar Coop" },
 ];
 
+type DiagEntry = { source: string; items?: number; error?: string };
+type Article = { title: string; snippet: string; url: string; source: string; date: string | null };
+type TranslatedEntry = { i: number; title?: string; snippet?: string };
+
 function clean(html: string): string {
   return (html || "")
     .replace(/<[^>]*>/g, " ")
@@ -30,15 +34,15 @@ function clean(html: string): string {
 }
 
 export async function GET() {
-  const diag: any[] = [];
+  const diag: DiagEntry[] = [];
   try {
-    const all: any[] = [];
+    const all: Article[] = [];
     for (const f of FEEDS) {
       try {
         const feed = await parser.parseURL(f.url);
         const items = feed.items || [];
         diag.push({ source: f.source, items: items.length });
-        items.forEach((it: any) => {
+        items.forEach((it) => {
           all.push({
             title: (it.title || "").trim(),
             snippet: clean(it.contentSnippet || it.content || ""),
@@ -47,8 +51,9 @@ export async function GET() {
             date: it.isoDate || it.pubDate || null,
           });
         });
-      } catch (err: any) {
-        diag.push({ source: f.source, error: err?.message || "echec" });
+      } catch (err) {
+        const message = err instanceof Error ? err.message : "echec";
+        diag.push({ source: f.source, error: message });
       }
     }
 
@@ -70,14 +75,17 @@ export async function GET() {
         max_tokens: 2000,
         messages: [{ role: "user", content: prompt }],
       });
-      const raw = msg.content.filter((b: any) => b.type === "text").map((b: any) => b.text).join("");
+      const raw = msg.content
+        .filter((b): b is Anthropic.TextBlock => b.type === "text")
+        .map((b) => b.text)
+        .join("");
       const start = raw.indexOf("[");
       const end = raw.lastIndexOf("]");
       if (start !== -1 && end !== -1) {
-        const arr = JSON.parse(raw.slice(start, end + 1));
+        const arr: TranslatedEntry[] = JSON.parse(raw.slice(start, end + 1));
         if (Array.isArray(arr) && arr.length === top.length) {
           translated = top.map((a, idx) => {
-            const t = arr.find((x: any) => x.i === idx) || arr[idx] || {};
+            const t = arr.find((x) => x.i === idx) || arr[idx] || {};
             return { ...a, title: t.title || a.title, snippet: t.snippet || a.snippet };
           });
         }
@@ -87,7 +95,8 @@ export async function GET() {
     }
 
     return Response.json({ articles: translated });
-  } catch (e: any) {
-    return Response.json({ articles: [], _diag: diag, _error: e?.message || "erreur" });
+  } catch (e) {
+    const message = e instanceof Error ? e.message : "erreur";
+    return Response.json({ articles: [], _diag: diag, _error: message });
   }
 }

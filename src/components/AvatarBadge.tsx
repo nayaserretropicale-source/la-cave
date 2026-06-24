@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
@@ -26,17 +27,18 @@ export default function AvatarBadge() {
     let c = (fr ?? []).length;
 
     const { data: myPosts } = await supabase.from("posts").select("id").eq("user_id", me);
-    const ids = (myPosts ?? []).map((p: any) => p.id);
+    const ids = (myPosts ?? []).map((p: { id: string }) => p.id);
     if (ids.length) {
       const { data: lk } = await supabase.from("likes").select("user_id,created_at").in("post_id", ids).gt("created_at", seen);
       const { data: cm } = await supabase.from("comments").select("user_id,created_at").in("post_id", ids).gt("created_at", seen);
-      c += (lk ?? []).filter((x: any) => x.user_id !== me).length;
-      c += (cm ?? []).filter((x: any) => x.user_id !== me).length;
+      c += (lk ?? []).filter((x: { user_id: string }) => x.user_id !== me).length;
+      c += (cm ?? []).filter((x: { user_id: string }) => x.user_id !== me).length;
     }
     setCount(c);
   }
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     load();
     const { data: sub } = supabase.auth.onAuthStateChange(() => load());
     return () => sub.subscription.unsubscribe();
@@ -55,7 +57,7 @@ export default function AvatarBadge() {
       {pathname !== "/profil" && (
         <Link href="/profil" aria-label="Mon profil">
           {avatarUrl ? (
-            <img src={avatarUrl} alt="profil" className="h-10 w-10 rounded-full border border-amber-500/70 object-cover shadow-lg shadow-black/40" />
+            <Image src={avatarUrl} alt="profil" width={40} height={40} className="h-10 w-10 rounded-full border border-amber-500/70 object-cover shadow-lg shadow-black/40" />
           ) : (
             <div className="flex h-10 w-10 items-center justify-center rounded-full border border-zinc-700 bg-zinc-800 text-sm shadow-lg shadow-black/40">👤</div>
           )}

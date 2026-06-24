@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import AuthBar from "@/components/AuthBar";
 import { supabase } from "@/lib/supabase";
 
@@ -66,6 +67,7 @@ export default function CeSoir() {
   }
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     load();
     const { data: sub } = supabase.auth.onAuthStateChange(() => load());
     return () => sub.subscription.unsubscribe();
@@ -98,7 +100,7 @@ export default function CeSoir() {
         {!userId ? (
           <p className="text-sm text-zinc-400">Connecte-toi pour que je pioche dans ta cave.</p>
         ) : cave.length === 0 ? (
-          <p className="text-sm text-zinc-400">Ta cave est vide (ou tout est marqué « fumé »). Ajoute des cigares depuis l'onglet <Link href="/" className="text-amber-500 underline">Cave</Link>.</p>
+          <p className="text-sm text-zinc-400">Ta cave est vide (ou tout est marqué « fumé »). Ajoute des cigares depuis l&apos;onglet <Link href="/" className="text-amber-500 underline">Cave</Link>.</p>
         ) : (
           <>
             <div className="space-y-4 rounded-xl border border-zinc-800 bg-zinc-900/50 p-4">
@@ -130,14 +132,14 @@ export default function CeSoir() {
             {result && !loading && (
               <div className="mt-6">
                 {result.error || !choix ? (
-                  <p className="text-sm text-orange-400">Je n'ai pas réussi à choisir. Réessaie, ou précise un critère.</p>
+                  <p className="text-sm text-orange-400">Je n&apos;ai pas réussi à choisir. Réessaie, ou précise un critère.</p>
                 ) : (
                   <div className="space-y-4">
                     <div className="rounded-2xl border border-amber-700/40 bg-amber-950/15 p-4">
                       <p className="text-xs uppercase tracking-wider text-amber-500">Ce soir, fume…</p>
                       <div className="mt-2 flex items-center gap-3">
                         {choix.photo_url ? (
-                          <img src={choix.photo_url} alt={choix.nom} className="h-16 w-16 flex-shrink-0 rounded-lg border border-zinc-800 object-cover" />
+                          <Image src={choix.photo_url} alt={choix.nom} width={64} height={64} className="h-16 w-16 flex-shrink-0 rounded-lg border border-zinc-800 object-cover" />
                         ) : (
                           <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-lg bg-zinc-800 text-xl">🚬</div>
                         )}

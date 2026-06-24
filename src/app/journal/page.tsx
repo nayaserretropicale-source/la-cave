@@ -55,6 +55,7 @@ export default function Journal() {
   }
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadMe();
     loadCave();
     loadSessions();
@@ -170,7 +171,7 @@ export default function Journal() {
                 <option value="">— Choisir dans ma cave —</option>
                 {cave.map((c) => (<option key={c.id} value={c.id}>{c.nom}</option>))}
               </select>
-              {cave.length === 0 && <p className="mt-1 text-xs text-zinc-500">Ta cave est vide : ajoute d'abord un cigare depuis l'onglet Cave.</p>}
+              {cave.length === 0 && <p className="mt-1 text-xs text-zinc-500">Ta cave est vide : ajoute d&apos;abord un cigare depuis l&apos;onglet Cave.</p>}
             </div>
 
             <div className="grid grid-cols-2 gap-3">
@@ -211,7 +212,7 @@ export default function Journal() {
         {shareMsg && <p className="mb-3 text-sm text-amber-500">{shareMsg}</p>}
 
         {sessions.length === 0 ? (
-          <p className="text-sm text-zinc-500">Aucune dégustation pour l'instant. Note ta première session !</p>
+          <p className="text-sm text-zinc-500">Aucune dégustation pour l&apos;instant. Note ta première session !</p>
         ) : (
           <div className="space-y-3">
             {sessions.map((s) => (

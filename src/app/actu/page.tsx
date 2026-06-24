@@ -34,9 +34,9 @@ export default function Actu() {
         <h1 className="text-3xl font-semibold mt-2 mb-6">Actu cigares 📰</h1>
 
         {loading ? (
-          <p className="animate-pulse text-amber-500">Chargement de l'actu…</p>
+          <p className="animate-pulse text-amber-500">Chargement de l&apos;actu…</p>
         ) : articles.length === 0 ? (
-          <p className="text-sm text-zinc-500">Pas d'actualité disponible pour l'instant.</p>
+          <p className="text-sm text-zinc-500">Pas d&apos;actualité disponible pour l&apos;instant.</p>
         ) : (
           <div className="space-y-3">
             {articles.map((a, i) => (
@@ -56,7 +56,7 @@ export default function Actu() {
             <p className="text-[11px] uppercase tracking-wider text-amber-500">{sel.source}{sel.date ? ` · ${frDate(sel.date)}` : ""}</p>
             <h2 className="mt-1 text-xl font-semibold">{sel.title}</h2>
             <p className="mt-3 text-sm leading-relaxed text-zinc-300">{sel.snippet}</p>
-            <p className="mt-2 text-xs italic text-zinc-600">Extrait — la suite sur le site d'origine.</p>
+            <p className="mt-2 text-xs italic text-zinc-600">Extrait — la suite sur le site d&apos;origine.</p>
             <div className="mt-4 flex gap-2">
               {sel.url && (
                 <a href={sel.url} target="_blank" rel="noopener noreferrer" className="flex-1 rounded-lg bg-amber-600 px-4 py-2.5 text-center font-medium text-zinc-950 transition hover:bg-amber-500">Lire sur {sel.source} →</a>

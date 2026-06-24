@@ -1,17 +1,43 @@
 import Anthropic from "@anthropic-ai/sdk";
+import { requireUser } from "@/lib/api-guard";
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
 export const maxDuration = 30;
 
+type CigareInput = {
+  id: string;
+  nom: string;
+  marque: string | null;
+  origine: string | null;
+  force: string | null;
+  format: string | null;
+  profil: string[] | null;
+  duree_fume: string | null;
+  accord: string | null;
+  note_perso: string | null;
+  rating: number | null;
+};
+
+type Recommandation = {
+  choix_id: string;
+  pourquoi: string;
+  alternative_id: string | null;
+  alternative_pourquoi: string | null;
+  conseil: string | null;
+};
+
 export async function POST(req: Request) {
+  const { error } = await requireUser(req);
+  if (error) return error;
+
   try {
     const { criteres, cigares } = await req.json();
     if (!Array.isArray(cigares) || cigares.length === 0) {
       return Response.json({ error: "cave_vide" });
     }
 
-    const liste = cigares.map((c: any) => ({
+    const liste: CigareInput[] = cigares.map((c: CigareInput) => ({
       id: c.id,
       nom: c.nom,
       marque: c.marque,
@@ -51,15 +77,19 @@ Réponds UNIQUEMENT par un objet JSON valide, sans texte autour ni backticks, sc
       max_tokens: 600,
       messages: [{ role: "user", content: prompt }],
     });
-    const raw = msg.content.filter((b: any) => b.type === "text").map((b: any) => b.text).join("");
+    const raw = msg.content
+      .filter((b): b is Anthropic.TextBlock => b.type === "text")
+      .map((b) => b.text)
+      .join("");
     const start = raw.indexOf("{");
     const end = raw.lastIndexOf("}");
-    let out: any = { error: "parse" };
+    let out: Recommandation | { error: string } = { error: "parse" };
     if (start !== -1 && end !== -1) {
       try { out = JSON.parse(raw.slice(start, end + 1)); } catch {}
     }
     return Response.json(out);
-  } catch (e: any) {
-    return Response.json({ error: e?.message || "erreur" });
+  } catch (e) {
+    const message = e instanceof Error ? e.message : "erreur";
+    return Response.json({ error: message });
   }
 }

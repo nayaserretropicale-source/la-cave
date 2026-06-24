@@ -6,6 +6,7 @@ export default function AgeGate() {
   const [status, setStatus] = useState<"loading" | "ask" | "ok" | "denied">("loading");
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setStatus(localStorage.getItem("lacave_age_ok") === "1" ? "ok" : "ask");
   }, []);
 

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import AuthBar from "@/components/AuthBar";
 import { supabase } from "@/lib/supabase";
 
@@ -74,19 +75,19 @@ export default function Communaute() {
 
     const { data: profs } = await supabase.from("profiles").select("id,pseudo,avatar_url").in("id", userIds);
     const profMap: Record<string, Author> = {};
-    (profs ?? []).forEach((p: any) => { profMap[p.id] = { pseudo: p.pseudo, avatar_url: p.avatar_url }; });
+    (profs ?? []).forEach((p: Author & { id: string }) => { profMap[p.id] = { pseudo: p.pseudo, avatar_url: p.avatar_url }; });
 
     const { data: likes } = await supabase.from("likes").select("post_id,user_id").in("post_id", ids);
     const { data: coms } = await supabase.from("comments").select("post_id").in("post_id", ids);
 
     const enriched = list.map((p) => {
-      const pl = (likes ?? []).filter((l: any) => l.post_id === p.id);
-      const cc = (coms ?? []).filter((c: any) => c.post_id === p.id).length;
+      const pl = (likes ?? []).filter((l) => l.post_id === p.id);
+      const cc = (coms ?? []).filter((c) => c.post_id === p.id).length;
       return {
         ...p,
         author: profMap[p.user_id],
         likeCount: pl.length,
-        likedByMe: me ? pl.some((l: any) => l.user_id === me) : false,
+        likedByMe: me ? pl.some((l) => l.user_id === me) : false,
         commentCount: cc,
       };
     });
@@ -94,6 +95,7 @@ export default function Communaute() {
   }
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadMe();
     loadFeed();
     loadFriends();
@@ -174,10 +176,10 @@ export default function Communaute() {
     const { data: coms } = await supabase.from("comments").select("id,user_id,texte").eq("post_id", postId).order("created_at");
     const list = (coms ?? []) as Comment[];
     const userIds = Array.from(new Set(list.map((c) => c.user_id)));
-    let profMap: Record<string, Author> = {};
+    const profMap: Record<string, Author> = {};
     if (userIds.length) {
       const { data: profs } = await supabase.from("profiles").select("id,pseudo,avatar_url").in("id", userIds);
-      (profs ?? []).forEach((p: any) => { profMap[p.id] = { pseudo: p.pseudo, avatar_url: p.avatar_url }; });
+      (profs ?? []).forEach((p: Author & { id: string }) => { profMap[p.id] = { pseudo: p.pseudo, avatar_url: p.avatar_url }; });
     }
     setOpenComments((m) => ({ ...m, [postId]: list.map((c) => ({ ...c, author: profMap[c.user_id] })) }));
   }
@@ -226,8 +228,8 @@ export default function Communaute() {
           <p className="text-xs tracking-[0.3em] uppercase text-amber-500">Cercle</p>
           <h1 className="text-3xl font-semibold mt-1 mb-6">Communauté 👥</h1>
           <div className="rounded-xl border border-amber-700/40 bg-amber-950/20 p-5">
-            <p className="text-zinc-200">Espace réservé aux personnes ayant l'âge légal pour le tabac (18 ans ou plus).</p>
-            <p className="mt-2 text-sm text-zinc-400">Le cigare se savoure avec modération. En continuant, tu confirmes avoir l'âge légal.</p>
+            <p className="text-zinc-200">Espace réservé aux personnes ayant l&apos;âge légal pour le tabac (18 ans ou plus).</p>
+            <p className="mt-2 text-sm text-zinc-400">Le cigare se savoure avec modération. En continuant, tu confirmes avoir l&apos;âge légal.</p>
             <button onClick={confirmMajeur} className="mt-4 w-full rounded-lg bg-amber-600 px-4 py-2.5 font-medium text-zinc-950 transition hover:bg-amber-500">Je confirme avoir 18 ans ou plus</button>
           </div>
         </div>
@@ -260,7 +262,11 @@ export default function Communaute() {
               ))}
             </div>
             <textarea value={cTexte} onChange={(e) => setCTexte(e.target.value)} rows={3} placeholder="Ton ressenti à partager…" className="w-full rounded-lg bg-zinc-800 px-3 py-2 text-sm outline-none" />
-            {cPhoto && <img src={cPhoto} alt="aperçu" className="max-h-48 w-full rounded-lg border border-zinc-800 object-cover" />}
+            {cPhoto && (
+              <div className="relative h-48 w-full overflow-hidden rounded-lg border border-zinc-800">
+                <Image src={cPhoto} alt="aperçu" fill sizes="448px" className="object-cover" />
+              </div>
+            )}
             <div className="flex gap-2">
               <label className="cursor-pointer rounded-lg border border-zinc-700 px-3 py-2 text-sm text-zinc-300 transition hover:border-amber-500 hover:text-amber-500">
                 {busy ? "Envoi…" : cPhoto ? "Changer photo" : "Photo"}
@@ -278,7 +284,7 @@ export default function Communaute() {
         </div>
 
         {visiblePosts.length === 0 ? (
-          <p className="text-sm text-zinc-500">{onlyFriends ? "Aucune publication de tes amis pour l'instant." : "Aucune publication pour l'instant. Sois le premier à partager !"}</p>
+          <p className="text-sm text-zinc-500">{onlyFriends ? "Aucune publication de tes amis pour l&apos;instant." : "Aucune publication pour l&apos;instant. Sois le premier à partager !"}</p>
         ) : (
           <div className="space-y-4">
             {visiblePosts.map((p) => {
@@ -288,7 +294,7 @@ export default function Communaute() {
                 <div className="flex items-center gap-2">
                   <Link href={`/u/${p.user_id}`} className="flex min-w-0 items-center gap-2">
                     {p.author?.avatar_url ? (
-                      <img src={p.author.avatar_url} alt="" className="h-8 w-8 rounded-full border border-zinc-700 object-cover" />
+                      <Image src={p.author.avatar_url} alt="" width={32} height={32} className="h-8 w-8 rounded-full border border-zinc-700 object-cover" />
                     ) : (
                       <div className="flex h-8 w-8 items-center justify-center rounded-full bg-zinc-800 text-sm">👤</div>
                     )}
@@ -313,7 +319,11 @@ export default function Communaute() {
 
                 <p className="mt-3 font-semibold">{p.cigare_nom}{p.marque ? <span className="font-normal text-zinc-500"> · {p.marque}</span> : null}</p>
                 {p.rating ? <p className="text-sm text-amber-500">{"★".repeat(p.rating)}</p> : null}
-                {p.photo_url && <img src={p.photo_url} alt={p.cigare_nom} className="mt-2 max-h-72 w-full rounded-lg border border-zinc-800 object-cover" />}
+                {p.photo_url && (
+                  <div className="relative mt-2 h-72 w-full overflow-hidden rounded-lg border border-zinc-800">
+                    <Image src={p.photo_url} alt={p.cigare_nom} fill sizes="448px" className="object-cover" />
+                  </div>
+                )}
                 {p.texte && <p className="mt-2 text-sm text-zinc-300">{p.texte}</p>}
 
                 <div className="mt-3 flex items-center gap-4 text-sm">
@@ -330,7 +340,7 @@ export default function Communaute() {
                     {openComments[p.id].map((c) => (
                       <div key={c.id} className="flex items-start gap-2">
                         {c.author?.avatar_url ? (
-                          <img src={c.author.avatar_url} alt="" className="h-6 w-6 rounded-full border border-zinc-700 object-cover" />
+                          <Image src={c.author.avatar_url} alt="" width={24} height={24} className="h-6 w-6 rounded-full border border-zinc-700 object-cover" />
                         ) : (
                           <div className="flex h-6 w-6 items-center justify-center rounded-full bg-zinc-800 text-xs">👤</div>
                         )}

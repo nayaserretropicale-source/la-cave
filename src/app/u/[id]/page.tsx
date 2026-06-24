@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
@@ -38,7 +39,9 @@ export default function PublicProfile() {
       .limit(50);
     const list = (rawPosts ?? []) as Post[];
     const ids = list.map((x) => x.id);
-    let likes: any[] = [], coms: any[] = [];
+    type LikeRow = { post_id: string; user_id: string };
+    type CommentRow = { post_id: string };
+    let likes: LikeRow[] = [], coms: CommentRow[] = [];
     if (ids.length) {
       const lr = await supabase.from("likes").select("post_id,user_id").in("post_id", ids);
       const cr = await supabase.from("comments").select("post_id").in("post_id", ids);
@@ -51,9 +54,11 @@ export default function PublicProfile() {
   }
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (profileId) loadAll();
     const { data: sub } = supabase.auth.onAuthStateChange(() => { if (profileId) loadAll(); });
     return () => sub.subscription.unsubscribe();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profileId]);
 
   function relation() {
@@ -89,7 +94,7 @@ export default function PublicProfile() {
         <Link href="/communaute" className="text-sm text-amber-500">← Communauté</Link>
 
         <div className="mt-6 flex items-center gap-4">
-          {prof.avatar_url ? <img src={prof.avatar_url} alt="" className="h-20 w-20 rounded-full border-2 border-amber-500 object-cover" /> : <div className="flex h-20 w-20 items-center justify-center rounded-full border-2 border-zinc-700 bg-zinc-800 text-3xl">👤</div>}
+          {prof.avatar_url ? <Image src={prof.avatar_url} alt="" width={80} height={80} className="h-20 w-20 rounded-full border-2 border-amber-500 object-cover" /> : <div className="flex h-20 w-20 items-center justify-center rounded-full border-2 border-zinc-700 bg-zinc-800 text-3xl">👤</div>}
           <div className="min-w-0 flex-1">
             <h1 className="truncate text-2xl font-semibold">{prof.pseudo || "Membre"}</h1>
             {!isMe && rel.state === "none" && <button onClick={addFriend} className="mt-1 rounded-lg border border-zinc-700 px-3 py-1.5 text-sm text-zinc-300 transition hover:border-amber-500 hover:text-amber-500">+ Ajouter en ami</button>}
@@ -110,7 +115,11 @@ export default function PublicProfile() {
               <div key={p.id} className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-4">
                 <p className="font-semibold">{p.cigare_nom}{p.marque ? <span className="font-normal text-zinc-500"> · {p.marque}</span> : null}</p>
                 {p.rating ? <p className="text-sm text-amber-500">{"★".repeat(p.rating)}</p> : null}
-                {p.photo_url && <img src={p.photo_url} alt={p.cigare_nom} className="mt-2 max-h-72 w-full rounded-lg border border-zinc-800 object-cover" />}
+                {p.photo_url && (
+                  <div className="relative mt-2 h-72 w-full overflow-hidden rounded-lg border border-zinc-800">
+                    <Image src={p.photo_url} alt={p.cigare_nom} fill sizes="448px" className="object-cover" />
+                  </div>
+                )}
                 {p.texte && <p className="mt-2 text-sm text-zinc-300">{p.texte}</p>}
                 <div className="mt-3 flex items-center gap-4 text-sm">
                   <button onClick={() => toggleLike(p)} className={`flex items-center gap-1 transition ${p.likedByMe ? "text-amber-500" : "text-zinc-400 hover:text-amber-500"}`}>{p.likedByMe ? "♥" : "♡"} {p.likeCount}</button>

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import AuthBar from "@/components/AuthBar";
 import { supabase } from "@/lib/supabase";
 import { compressImage } from "@/lib/image";
@@ -91,6 +92,7 @@ export default function Home() {
   }
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadCave();
     const { data: sub } = supabase.auth.onAuthStateChange(() => loadCave());
     return () => sub.subscription.unsubscribe();
@@ -314,7 +316,11 @@ export default function Home() {
           </>
         )}
 
-        {preview && <img src={preview} alt="cigare" className="mb-6 w-full rounded-xl border border-zinc-800" />}
+        {preview && (
+          <div className="relative mb-6 aspect-[4/3] w-full overflow-hidden rounded-xl border border-zinc-800">
+            <Image src={preview} alt="cigare" fill sizes="448px" className="object-cover" />
+          </div>
+        )}
 
         {loading && <p className="animate-pulse text-amber-500">Analyse en cours…</p>}
 
@@ -408,7 +414,7 @@ export default function Home() {
                       {groups[name].map((c) => (
                         <div key={c.id} onClick={() => openDetail(c)} className={`flex cursor-pointer items-center gap-3 rounded-lg border border-zinc-800 bg-zinc-900/50 p-3 transition hover:border-zinc-700 ${c.statut === "fume" ? "opacity-60" : ""}`}>
                           {c.photo_url ? (
-                            <img src={c.photo_url} alt={c.nom} className="h-14 w-14 flex-shrink-0 rounded-lg border border-zinc-800 object-cover" />
+                            <Image src={c.photo_url} alt={c.nom} width={56} height={56} className="h-14 w-14 flex-shrink-0 rounded-lg border border-zinc-800 object-cover" />
                           ) : (
                             <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-lg bg-zinc-800 text-lg">🚬</div>
                           )}
@@ -439,7 +445,9 @@ export default function Home() {
         <div className="fixed inset-0 z-[60] flex items-end justify-center overflow-y-auto bg-black/70 p-4 sm:items-center" onClick={() => setSelected(null)}>
           <div className="my-auto w-full max-w-md rounded-2xl border border-zinc-800 bg-zinc-900 p-5" onClick={(e) => e.stopPropagation()}>
             {selected.photo_url ? (
-              <img src={selected.photo_url} alt={selected.nom} className="mb-3 max-h-60 w-full rounded-xl border border-zinc-800 object-cover" />
+              <div className="relative mb-3 h-60 w-full overflow-hidden rounded-xl border border-zinc-800">
+                <Image src={selected.photo_url} alt={selected.nom} fill sizes="448px" className="object-cover" />
+              </div>
             ) : (
               <div className="mb-3 flex h-40 w-full items-center justify-center rounded-xl border border-dashed border-zinc-700 bg-zinc-800 text-3xl">🚬</div>
             )}
@@ -470,7 +478,7 @@ export default function Home() {
                 <FieldEdit label="1er tiers" value={form.premier_tiers} onChange={(v) => setForm({ ...form, premier_tiers: v })} />
                 <FieldEdit label="2e tiers" value={form.deuxieme_tiers} onChange={(v) => setForm({ ...form, deuxieme_tiers: v })} />
                 <FieldEdit label="3e tiers" value={form.troisieme_tiers} onChange={(v) => setForm({ ...form, troisieme_tiers: v })} />
-                <button onClick={() => setEditing(false)} className="text-xs text-zinc-500 underline">Terminer l'édition</button>
+                <button onClick={() => setEditing(false)} className="text-xs text-zinc-500 underline">Terminer l&apos;édition</button>
               </div>
             ) : (
               <>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { supabase } from "@/lib/supabase";
 
 type Profile = { id: string; pseudo: string | null; avatar_url: string | null };
@@ -28,7 +29,7 @@ export default function Amis() {
     if (otherIds.length) {
       const { data: profs } = await supabase.from("profiles").select("id,pseudo,avatar_url").in("id", otherIds);
       const map: Record<string, Profile> = {};
-      (profs ?? []).forEach((p: any) => { map[p.id] = p; });
+      (profs ?? []).forEach((p: Profile) => { map[p.id] = p; });
       setProfiles(map);
     } else {
       setProfiles({});
@@ -36,6 +37,7 @@ export default function Amis() {
   }
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     load();
     const { data: sub } = supabase.auth.onAuthStateChange(() => load());
     return () => sub.subscription.unsubscribe();
@@ -115,7 +117,7 @@ export default function Amis() {
             const rel = relation(r.id);
             return (
               <div key={r.id} className="flex items-center gap-3 border-t border-zinc-800 pt-3">
-                {r.avatar_url ? <img src={r.avatar_url} alt="" className="h-9 w-9 rounded-full border border-zinc-700 object-cover" /> : <div className="flex h-9 w-9 items-center justify-center rounded-full bg-zinc-800 text-sm">👤</div>}
+                {r.avatar_url ? <Image src={r.avatar_url} alt="" width={36} height={36} className="h-9 w-9 rounded-full border border-zinc-700 object-cover" /> : <div className="flex h-9 w-9 items-center justify-center rounded-full bg-zinc-800 text-sm">👤</div>}
                 <span className="flex-1 truncate text-sm">{r.pseudo || "Sans pseudo"}</span>
                 {rel.state === "none" && <button onClick={() => addFriend(r.id)} className="rounded-lg border border-zinc-700 px-3 py-1.5 text-sm text-zinc-300 transition hover:border-amber-500 hover:text-amber-500">Ajouter</button>}
                 {rel.state === "sent" && <span className="text-xs text-zinc-500">En attente</span>}
@@ -134,7 +136,7 @@ export default function Amis() {
                 const p = profiles[otherOf(f)];
                 return (
                   <div key={f.id} className="flex items-center gap-3 rounded-lg border border-zinc-800 bg-zinc-900/50 p-3">
-                    {p?.avatar_url ? <img src={p.avatar_url} alt="" className="h-9 w-9 rounded-full border border-zinc-700 object-cover" /> : <div className="flex h-9 w-9 items-center justify-center rounded-full bg-zinc-800 text-sm">👤</div>}
+                    {p?.avatar_url ? <Image src={p.avatar_url} alt="" width={36} height={36} className="h-9 w-9 rounded-full border border-zinc-700 object-cover" /> : <div className="flex h-9 w-9 items-center justify-center rounded-full bg-zinc-800 text-sm">👤</div>}
                     <span className="flex-1 truncate text-sm">{p?.pseudo || "Membre"}</span>
                     <button onClick={() => accept(f.id)} className="rounded-lg bg-amber-600 px-3 py-1.5 text-sm font-medium text-zinc-950 transition hover:bg-amber-500">Accepter</button>
                     <button onClick={() => removeLink(f.id)} className="rounded-lg border border-zinc-700 px-3 py-1.5 text-sm text-zinc-400 transition hover:border-orange-400 hover:text-orange-400">Refuser</button>
@@ -147,14 +149,14 @@ export default function Amis() {
 
         <p className="mb-2 text-xs uppercase tracking-wider text-zinc-500">Amis ({friends.length})</p>
         {friends.length === 0 ? (
-          <p className="text-sm text-zinc-500">Pas encore d'amis. Cherche un pseudo ci-dessus pour commencer.</p>
+          <p className="text-sm text-zinc-500">Pas encore d&apos;amis. Cherche un pseudo ci-dessus pour commencer.</p>
         ) : (
           <div className="space-y-2">
             {friends.map((f) => {
               const p = profiles[otherOf(f)];
               return (
                 <div key={f.id} className="flex items-center gap-3 rounded-lg border border-zinc-800 bg-zinc-900/50 p-3">
-                  {p?.avatar_url ? <img src={p.avatar_url} alt="" className="h-9 w-9 rounded-full border border-zinc-700 object-cover" /> : <div className="flex h-9 w-9 items-center justify-center rounded-full bg-zinc-800 text-sm">👤</div>}
+                  {p?.avatar_url ? <Image src={p.avatar_url} alt="" width={36} height={36} className="h-9 w-9 rounded-full border border-zinc-700 object-cover" /> : <div className="flex h-9 w-9 items-center justify-center rounded-full bg-zinc-800 text-sm">👤</div>}
                   <span className="flex-1 truncate text-sm">{p?.pseudo || "Membre"}</span>
                   <button onClick={() => removeLink(f.id)} className="rounded-md px-2 py-1 text-zinc-500 transition hover:bg-zinc-800 hover:text-orange-400" aria-label="Retirer">✕</button>
                 </div>
@@ -171,7 +173,7 @@ export default function Amis() {
                 const p = profiles[otherOf(f)];
                 return (
                   <div key={f.id} className="flex items-center gap-3 rounded-lg border border-zinc-800 bg-zinc-900/50 p-3">
-                    {p?.avatar_url ? <img src={p.avatar_url} alt="" className="h-9 w-9 rounded-full border border-zinc-700 object-cover" /> : <div className="flex h-9 w-9 items-center justify-center rounded-full bg-zinc-800 text-sm">👤</div>}
+                    {p?.avatar_url ? <Image src={p.avatar_url} alt="" width={36} height={36} className="h-9 w-9 rounded-full border border-zinc-700 object-cover" /> : <div className="flex h-9 w-9 items-center justify-center rounded-full bg-zinc-800 text-sm">👤</div>}
                     <span className="flex-1 truncate text-sm">{p?.pseudo || "Membre"}</span>
                     <span className="text-xs text-zinc-500">En attente</span>
                     <button onClick={() => removeLink(f.id)} className="rounded-md px-2 py-1 text-zinc-500 transition hover:bg-zinc-800 hover:text-orange-400" aria-label="Annuler">✕</button>

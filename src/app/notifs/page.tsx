@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { supabase } from "@/lib/supabase";
 
 type Author = { pseudo: string | null; avatar_url: string | null };
@@ -38,8 +39,10 @@ export default function Notifs() {
     const postName: Record<string, string> = {};
     (myPosts ?? []).forEach((p) => { postName[p.id] = p.cigare_nom; });
 
-    let likes: any[] = [];
-    let coms: any[] = [];
+    type LikeRow = { user_id: string; post_id: string; created_at: string };
+    type CommentRow = { id: string; user_id: string; post_id: string; texte: string; created_at: string };
+    let likes: LikeRow[] = [];
+    let coms: CommentRow[] = [];
     if (postIds.length) {
       const l = await supabase
         .from("likes").select("user_id,post_id,created_at")
@@ -67,7 +70,7 @@ export default function Notifs() {
     if (uids.length) {
       const { data: profs } = await supabase
         .from("profiles").select("id,pseudo,avatar_url").in("id", uids);
-      (profs ?? []).forEach((p: any) => { profMap[p.id] = { pseudo: p.pseudo, avatar_url: p.avatar_url }; });
+      (profs ?? []).forEach((p: Author & { id: string }) => { profMap[p.id] = { pseudo: p.pseudo, avatar_url: p.avatar_url }; });
     }
 
     const list: Notif[] = [
@@ -110,7 +113,10 @@ export default function Notifs() {
       .eq("id", me);
   }
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    load();
+  }, []);
 
   async function acceptFriend(rowId: string) {
     await supabase.from("friendships").update({ status: "accepted" }).eq("id", rowId);
@@ -143,7 +149,7 @@ export default function Notifs() {
               <span className="text-lg">{ICON[n.type]}</span>
               <Link href={`/u/${n.userId}`} className="flex-shrink-0">
                 {n.author?.avatar_url ? (
-                  <img src={n.author.avatar_url} alt="" className="h-8 w-8 rounded-full border border-zinc-700 object-cover" />
+                  <Image src={n.author.avatar_url} alt="" width={32} height={32} className="h-8 w-8 rounded-full border border-zinc-700 object-cover" />
                 ) : (
                   <div className="flex h-8 w-8 items-center justify-center rounded-full bg-zinc-800 text-sm">👤</div>
                 )}

@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import AuthBar from "@/components/AuthBar";
 import { supabase } from "@/lib/supabase";
 
@@ -53,6 +52,7 @@ export default function Boutiques() {
   }
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     load();
     const { data: sub } = supabase.auth.onAuthStateChange(() => load());
     return () => sub.subscription.unsubscribe();
@@ -125,7 +125,7 @@ export default function Boutiques() {
         <AuthBar />
 
         {!userId ? (
-          <p className="text-sm text-zinc-400">Connecte-toi pour voir et enrichir l'annuaire des boutiques.</p>
+          <p className="text-sm text-zinc-400">Connecte-toi pour voir et enrichir l&apos;annuaire des boutiques.</p>
         ) : (
           <>
             <button onClick={() => setShowAdd((v) => !v)} className="mb-6 w-full rounded-lg bg-amber-600 px-4 py-2.5 font-medium text-zinc-950 transition hover:bg-amber-500">
@@ -141,7 +141,7 @@ export default function Boutiques() {
                 <input value={adresse} onChange={(e) => setAdresse(e.target.value)} placeholder="Adresse / repère (optionnel)" className="w-full rounded-lg bg-zinc-800 px-3 py-2 text-sm outline-none" />
                 <textarea value={note} onChange={(e) => setNote(e.target.value)} rows={2} placeholder="Note (horaires, spécialité…)" className="w-full rounded-lg bg-zinc-800 px-3 py-2 text-sm outline-none" />
                 <p className="text-xs text-zinc-600">Ton ajout est visible par toute la communauté.</p>
-                <button onClick={add} className="w-full rounded-lg bg-amber-600 px-4 py-2.5 font-medium text-zinc-950 transition hover:bg-amber-500">Ajouter à l'annuaire</button>
+                <button onClick={add} className="w-full rounded-lg bg-amber-600 px-4 py-2.5 font-medium text-zinc-950 transition hover:bg-amber-500">Ajouter à l&apos;annuaire</button>
                 {msg && <p className="text-sm text-amber-500">{msg}</p>}
               </div>
             )}
@@ -161,7 +161,7 @@ export default function Boutiques() {
             )}
 
             {filtered.length === 0 ? (
-              <p className="text-sm text-zinc-500">Aucune boutique dans l'annuaire pour l'instant. Ajoute-en une, ou utilise les suggestions ci-dessous.</p>
+              <p className="text-sm text-zinc-500">Aucune boutique dans l&apos;annuaire pour l&apos;instant. Ajoute-en une, ou utilise les suggestions ci-dessous.</p>
             ) : (
               <div className="space-y-6">
                 {groupNames.map((name) => (
@@ -191,7 +191,7 @@ export default function Boutiques() {
 
             <div className="mt-10 rounded-xl border border-zinc-800 bg-zinc-900/40 p-4">
               <p className="text-sm font-medium text-amber-500">Trouver des boutiques (IA)</p>
-              <p className="mt-1 text-xs text-zinc-500">Suggestions issues du web — <span className="text-zinc-400">à vérifier</span> avant de t'y rendre.</p>
+              <p className="mt-1 text-xs text-zinc-500">Suggestions issues du web — <span className="text-zinc-400">à vérifier</span> avant de t&apos;y rendre.</p>
               <div className="mt-3 space-y-2">
                 <input list="pays-list" value={aiPays} onChange={(e) => setAiPays(e.target.value)} placeholder="Pays" className="w-full rounded-lg bg-zinc-800 px-3 py-2 text-sm outline-none" />
                 <input value={aiVille} onChange={(e) => setAiVille(e.target.value)} placeholder="Ville (optionnel)" className="w-full rounded-lg bg-zinc-800 px-3 py-2 text-sm outline-none" />
@@ -209,7 +209,7 @@ export default function Boutiques() {
                       <div key={i} className="rounded-lg border border-zinc-800 bg-zinc-900/60 p-3">
                         <p className="font-medium">{r.nom}{r.ville ? <span className="font-normal text-zinc-500"> · {r.ville}</span> : null}</p>
                         {r.note && <p className="mt-1 text-sm text-zinc-400">{r.note}</p>}
-                        <button onClick={() => addFromAI(r)} className="mt-2 rounded-lg border border-zinc-700 px-3 py-1.5 text-sm text-zinc-300 transition hover:border-amber-500 hover:text-amber-500">+ Ajouter à l'annuaire</button>
+                        <button onClick={() => addFromAI(r)} className="mt-2 rounded-lg border border-zinc-700 px-3 py-1.5 text-sm text-zinc-300 transition hover:border-amber-500 hover:text-amber-500">+ Ajouter à l&apos;annuaire</button>
                       </div>
                     ))
                   )}

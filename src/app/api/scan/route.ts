@@ -1,8 +1,11 @@
 import Anthropic from "@anthropic-ai/sdk";
+import { requireUser } from "@/lib/api-guard";
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
 export const maxDuration = 60;
+
+type Fiche = { identifie: boolean; commentaire?: string } & Record<string, unknown>;
 
 const INSTRUCTION = `Tu es un expert du cigare. Identifie le cigare sur la photo (sers-toi surtout de la bague). Réponds UNIQUEMENT par un objet JSON valide, sans texte autour, sans backticks, avec ce schéma exact :
 {
@@ -29,6 +32,9 @@ const INSTRUCTION = `Tu es un expert du cigare. Identifie le cigare sur la photo
 Si tu ne parviens pas à identifier le cigare, renvoie {"identifie": false, "commentaire": "explication courte en français"}. Tout le texte en français. N'invente pas de certitudes : si un champ est incertain, reste général.`;
 
 export async function POST(req: Request) {
+  const { error } = await requireUser(req);
+  if (error) return error;
+
   try {
     const { imageBase64, mediaType } = await req.json();
     const msg = await anthropic.messages.create({
@@ -44,15 +50,19 @@ export async function POST(req: Request) {
         },
       ],
     });
-    const raw = msg.content.filter((b: any) => b.type === "text").map((b: any) => b.text).join("");
+    const raw = msg.content
+      .filter((b): b is Anthropic.TextBlock => b.type === "text")
+      .map((b) => b.text)
+      .join("");
     const start = raw.indexOf("{");
     const end = raw.lastIndexOf("}");
-    let fiche: any = { identifie: false, commentaire: "Lecture impossible, réessaie." };
+    let fiche: Fiche = { identifie: false, commentaire: "Lecture impossible, réessaie." };
     if (start !== -1 && end !== -1) {
       try { fiche = JSON.parse(raw.slice(start, end + 1)); } catch {}
     }
     return Response.json(fiche);
-  } catch (e: any) {
-    return Response.json({ identifie: false, commentaire: "Erreur d'analyse : " + (e?.message || "") }, { status: 200 });
+  } catch (e) {
+    const message = e instanceof Error ? e.message : "";
+    return Response.json({ identifie: false, commentaire: "Erreur d'analyse : " + message }, { status: 200 });
   }
 }
