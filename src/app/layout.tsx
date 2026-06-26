@@ -4,6 +4,7 @@ import "./globals.css";
 import NavBar from "@/components/NavBar";
 import AvatarBadge from "@/components/AvatarBadge";
 import AgeGate from "@/components/AgeGate";
+import PushSetup from "@/components/PushSetup";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,6 +35,7 @@ export default function RootLayout({
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-full flex flex-col bg-zinc-950 pb-20`}>
         <AgeGate />
         <AvatarBadge />
+        <PushSetup />
         {children}
         <NavBar />
       </body>

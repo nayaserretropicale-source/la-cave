@@ -123,6 +123,7 @@ export default function Communaute() {
 
   async function addFriend(otherId: string) {
     await supabase.from("friendships").insert({ addressee_id: otherId });
+    sendPush(otherId, "🤝 Demande d'ami", `${pseudo || "Quelqu'un"} t'a envoyé une demande d'ami`);
     loadFriends();
   }
 
@@ -157,11 +158,21 @@ export default function Communaute() {
     loadFeed();
   }
 
+  async function sendPush(toUserId: string, title: string, body: string) {
+    if (toUserId === userId) return;
+    fetch("/api/push/send", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId: toUserId, title, body }),
+    }).catch(() => {});
+  }
+
   async function toggleLike(p: Post) {
     if (p.likedByMe) {
       await supabase.from("likes").delete().eq("post_id", p.id).eq("user_id", userId);
     } else {
       await supabase.from("likes").insert({ post_id: p.id });
+      sendPush(p.user_id, "❤️ Nouveau like", `${pseudo || "Quelqu'un"} a aimé ton cigare « ${p.cigare_nom} »`);
     }
     loadFeed();
   }
@@ -197,6 +208,8 @@ export default function Communaute() {
     if (!txt) return;
     await supabase.from("comments").insert({ post_id: postId, texte: txt });
     setCommentInput((m) => ({ ...m, [postId]: "" }));
+    const post = posts.find((p) => p.id === postId);
+    if (post) sendPush(post.user_id, "💬 Nouveau commentaire", `${pseudo || "Quelqu'un"} a commenté « ${post.cigare_nom} » : ${txt.slice(0, 60)}`);
     await refreshComments(postId);
     loadFeed();
   }
