@@ -83,9 +83,10 @@ export default function Boutiques() {
     if (!aiPays.trim()) { return; }
     setAiLoading(true);
     setAiResults(null);
+    const { data: { session } } = await supabase.auth.getSession();
     const res = await fetch("/api/boutiques", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${session?.access_token ?? ""}` },
       body: JSON.stringify({ pays: aiPays.trim(), ville: aiVille.trim() || null }),
     });
     const data = await res.json();

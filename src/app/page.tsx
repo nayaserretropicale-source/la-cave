@@ -111,9 +111,10 @@ export default function Home() {
     const reader = new FileReader();
     reader.onload = async () => {
       const base64 = (reader.result as string).split(",")[1];
+      const { data: { session } } = await supabase.auth.getSession();
       const res = await fetch("/api/scan", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${session?.access_token ?? ""}` },
         body: JSON.stringify({ imageBase64: base64, mediaType: f.type }),
       });
       const data = (await res.json()) as Fiche;
@@ -262,9 +263,10 @@ export default function Home() {
   async function fetchHistoire() {
     if (!selected) return;
     setHistoireLoading(true);
+    const { data: { session } } = await supabase.auth.getSession();
     const res = await fetch("/api/histoire", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${session?.access_token ?? ""}` },
       body: JSON.stringify({ marque: selected.marque, nom: selected.nom }),
     });
     const data = await res.json();
