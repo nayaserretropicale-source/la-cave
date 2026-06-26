@@ -359,10 +359,10 @@ export default function Home() {
                 )}
 
                 {fiche.degustation && (
-                  <p className="rounded-r-lg border-l-2 border-amber-500 bg-zinc-900/50 px-4 py-3 italic text-zinc-300">{fiche.degustation}</p>
+                  <p className="rounded-lg border border-amber-500/30 bg-amber-950/20 px-4 py-3 italic text-zinc-300">{fiche.degustation}</p>
                 )}
                 {fiche.conservation && (
-                  <p className="rounded-r-lg border-l-2 border-zinc-600 bg-zinc-900/50 px-4 py-3 text-sm text-zinc-300">
+                  <p className="rounded-lg border border-zinc-700/60 bg-zinc-900/50 px-4 py-3 text-sm text-zinc-300">
                     <span className="font-medium text-zinc-100">Conservation — </span>{fiche.conservation}
                   </p>
                 )}
@@ -503,7 +503,7 @@ export default function Home() {
                 )}
 
                 {selected.conservation && (
-                  <p className="mt-3 rounded-r-lg border-l-2 border-zinc-600 bg-zinc-900/50 px-4 py-3 text-sm text-zinc-300">
+                  <p className="mt-3 rounded-lg border border-zinc-700/60 bg-zinc-900/50 px-4 py-3 text-sm text-zinc-300">
                     <span className="font-medium text-zinc-100">Conservation — </span>{selected.conservation}
                   </p>
                 )}
