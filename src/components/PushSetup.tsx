@@ -12,7 +12,7 @@ function urlBase64ToUint8Array(base64String: string) {
   return Uint8Array.from([...raw].map((c) => c.charCodeAt(0)));
 }
 
-async function subscribePush() {
+async function subscribePush(accessToken: string) {
   if (!("serviceWorker" in navigator) || !("PushManager" in window)) return;
   if (Notification.permission === "denied") return;
 
@@ -32,17 +32,19 @@ async function subscribePush() {
 
   await fetch("/api/push/subscribe", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${accessToken}`,
+    },
     body: JSON.stringify(sub.toJSON()),
   });
 }
 
 export default function PushSetup() {
   useEffect(() => {
-    // Trigger on auth state change so it fires reliably after session restore
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (session && (event === "SIGNED_IN" || event === "INITIAL_SESSION")) {
-        subscribePush().catch(() => {});
+        subscribePush(session.access_token).catch(() => {});
       }
     });
     return () => subscription.unsubscribe();
