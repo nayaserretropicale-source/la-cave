@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { supabase } from "@/lib/supabase";
+import { IconUser } from "@/components/Icons";
 
 type Author = { pseudo: string | null; avatar_url: string | null };
 type Notif = {
@@ -16,6 +17,8 @@ type Notif = {
   isNew: boolean;
   friendshipId?: string;
 };
+
+const TYPE_LABEL = { like: "J'aime", comment: "Commentaire", friend: "Demande d'ami" };
 
 export default function Notifs() {
   const [signedIn, setSignedIn] = useState<boolean | null>(null);
@@ -107,7 +110,6 @@ export default function Notifs() {
     setNotifs(list);
     setLoading(false);
 
-    // Marque tout comme lu (le badge de l'AvatarBadge se mettra à jour au prochain changement de page)
     await supabase.from("profiles")
       .update({ notifs_seen_at: new Date().toISOString() })
       .eq("id", me);
@@ -123,51 +125,75 @@ export default function Notifs() {
     load();
   }
 
-  const ICON = { like: "❤️", comment: "💬", friend: "🤝" };
-
   return (
-    <main className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col items-center px-6 py-12">
+    <main className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col items-center px-4 py-10">
       <div className="w-full max-w-md">
-        <Link href="/" className="text-sm text-zinc-500 hover:text-amber-500">← Ma cave</Link>
-        <h1 className="text-3xl font-semibold mt-2 mb-6">Notifications 🔔</h1>
+        <header className="mb-8">
+          <p className="text-[11px] font-medium tracking-widest text-amber-500/80 uppercase mb-1">Activité</p>
+          <h1 className="text-3xl font-semibold tracking-tight text-zinc-50">Notifications</h1>
+        </header>
 
         {signedIn === false && (
           <p className="text-sm text-zinc-400">Connecte-toi pour voir tes notifications.</p>
         )}
 
         {loading && signedIn !== false && (
-          <p className="animate-pulse text-amber-500">Chargement…</p>
+          <div className="flex items-center gap-3 py-8">
+            <div className="h-4 w-4 animate-spin rounded-full border-2 border-zinc-700 border-t-amber-500" />
+            <p className="text-sm text-zinc-400">Chargement…</p>
+          </div>
         )}
 
         {!loading && signedIn && notifs.length === 0 && (
-          <p className="text-sm text-zinc-500">Rien de nouveau pour l&apos;instant. Partage une dégustation dans le <Link href="/communaute" className="text-amber-500 underline">Cercle</Link> !</p>
+          <p className="py-8 text-center text-sm text-zinc-600">
+            Rien de nouveau. Partage une dégustation dans le{" "}
+            <Link href="/communaute" className="text-amber-400 underline underline-offset-2">Cercle</Link>.
+          </p>
         )}
 
-        <div className="space-y-2">
-          {notifs.map((n) => (
-            <div key={n.key} className={`flex items-center gap-3 rounded-xl border p-3 ${n.isNew ? "border-amber-600/50 bg-amber-950/10" : "border-zinc-800 bg-zinc-900/50"}`}>
-              <span className="text-lg">{ICON[n.type]}</span>
-              <Link href={`/u/${n.userId}`} className="flex-shrink-0">
-                {n.author?.avatar_url ? (
-                  <Image src={n.author.avatar_url} alt="" width={32} height={32} className="h-8 w-8 rounded-full border border-zinc-700 object-cover" />
-                ) : (
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-zinc-800 text-sm">👤</div>
+        {notifs.length > 0 && (
+          <div className="overflow-hidden rounded-2xl border border-zinc-800">
+            {notifs.map((n, i) => (
+              <div
+                key={n.key}
+                className={`flex items-center gap-3 p-3.5 transition-colors ${
+                  n.isNew ? "bg-amber-950/15" : "bg-zinc-900/40"
+                } ${i < notifs.length - 1 ? "border-b border-zinc-800/60" : ""}`}
+              >
+                {n.isNew && <div className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-amber-500" />}
+                <Link href={`/u/${n.userId}`} className="flex-shrink-0">
+                  {n.author?.avatar_url ? (
+                    <Image src={n.author.avatar_url} alt="" width={32} height={32} className="h-8 w-8 rounded-full border border-zinc-700 object-cover" />
+                  ) : (
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-zinc-800 text-zinc-500">
+                      <IconUser size={14} />
+                    </div>
+                  )}
+                </Link>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm text-zinc-300">
+                    <span className="font-medium text-zinc-100">{n.author?.pseudo || "Anonyme"}</span>{" "}
+                    {n.detail}
+                  </p>
+                  <p className="mt-0.5 text-[10px] font-medium uppercase tracking-wider text-zinc-600">{TYPE_LABEL[n.type]}</p>
+                </div>
+                {n.type === "friend" && n.friendshipId && (
+                  <button
+                    onClick={() => acceptFriend(n.friendshipId!)}
+                    className="flex-shrink-0 rounded-lg bg-amber-600 px-2.5 py-1 text-xs font-semibold text-zinc-950 transition-colors hover:bg-amber-500"
+                  >
+                    Accepter
+                  </button>
                 )}
-              </Link>
-              <p className="min-w-0 flex-1 text-sm text-zinc-300">
-                <span className="font-medium text-zinc-100">{n.author?.pseudo || "Anonyme"}</span> {n.detail}
-              </p>
-              {n.type === "friend" && n.friendshipId && (
-                <button onClick={() => acceptFriend(n.friendshipId!)} className="flex-shrink-0 rounded-lg bg-amber-600 px-2.5 py-1 text-xs font-medium text-zinc-950 transition hover:bg-amber-500">
-                  Accepter
-                </button>
-              )}
-              {n.type !== "friend" && (
-                <Link href="/communaute" className="flex-shrink-0 text-xs text-zinc-500 transition hover:text-amber-500">Voir →</Link>
-              )}
-            </div>
-          ))}
-        </div>
+                {n.type !== "friend" && (
+                  <Link href="/communaute" className="flex-shrink-0 text-xs text-zinc-600 transition-colors hover:text-amber-400">
+                    Voir
+                  </Link>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </main>
   );

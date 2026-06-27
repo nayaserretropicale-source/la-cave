@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import AuthBar from "@/components/AuthBar";
 import { supabase } from "@/lib/supabase";
+import { IconBook } from "@/components/Icons";
 
 type Cig = {
   id: string;
@@ -40,7 +41,15 @@ const FORCE = ["Peu importe", "Légère", "Moyenne", "Corsée"];
 function Chip({ value, current, set }: { value: string; current: string; set: (v: string) => void }) {
   const active = current === value;
   return (
-    <button type="button" onClick={() => set(active ? "" : value)} className={`rounded-full px-3 py-1.5 text-sm transition ${active ? "bg-amber-600 text-zinc-950" : "border border-zinc-700 text-zinc-300 hover:border-amber-500"}`}>{value}</button>
+    <button
+      type="button"
+      onClick={() => set(active ? "" : value)}
+      className={`rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${
+        active ? "bg-amber-600 text-zinc-950" : "border border-zinc-800 text-zinc-300 hover:border-zinc-600"
+      }`}
+    >
+      {value}
+    </button>
   );
 }
 
@@ -91,77 +100,92 @@ export default function CeSoir() {
   const alt = result?.alternative_id ? cave.find((c) => c.id === result.alternative_id) : null;
 
   return (
-    <main className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col items-center px-6 py-12">
+    <main className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col items-center px-4 py-10">
       <div className="w-full max-w-md">
-        <p className="text-xs tracking-[0.3em] uppercase text-amber-500">Suggestion</p>
-        <h1 className="text-3xl font-semibold mt-1 mb-6">Que fumer ce soir ? 🌙</h1>
+        <header className="mb-8">
+          <p className="text-[11px] font-medium tracking-widest text-amber-500/80 uppercase mb-1">Suggestion</p>
+          <h1 className="text-3xl font-semibold tracking-tight text-zinc-50">Ce soir</h1>
+        </header>
 
         <AuthBar />
 
         {!userId ? (
           <p className="text-sm text-zinc-400">Connecte-toi pour que je pioche dans ta cave.</p>
         ) : cave.length === 0 ? (
-          <p className="text-sm text-zinc-400">Ta cave est vide (ou tout est marqué « fumé »). Ajoute des cigares depuis l&apos;onglet <Link href="/" className="text-amber-500 underline">Cave</Link>.</p>
+          <p className="text-sm text-zinc-400">
+            Ta cave est vide (ou tout est marqué fumé). Ajoute des cigares depuis{" "}
+            <Link href="/" className="text-amber-400 underline underline-offset-2">La Cave</Link>.
+          </p>
         ) : (
           <>
-            <div className="space-y-4 rounded-xl border border-zinc-800 bg-zinc-900/50 p-4">
+            <div className="space-y-5 rounded-2xl border border-zinc-800 bg-zinc-900/40 p-5">
+              <FilterRow label="Temps disponible" values={TEMPS} current={temps} set={setTemps} />
+              <FilterRow label="Occasion" values={OCCASION} current={occasion} set={setOccasion} />
+              <FilterRow label="Accord" values={ACCORD} current={accord} set={setAccord} />
+              <FilterRow label="Force" values={FORCE} current={force} set={setForce} />
               <div>
-                <p className="mb-1.5 text-xs uppercase tracking-wider text-zinc-500">Temps dispo</p>
-                <div className="flex flex-wrap gap-2">{TEMPS.map((v) => <Chip key={v} value={v} current={temps} set={setTemps} />)}</div>
+                <p className="mb-2 text-xs font-medium uppercase tracking-wider text-zinc-500">Envie particulière</p>
+                <input
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  placeholder="ex. quelque chose de doux, boisé…"
+                  className="w-full rounded-xl border border-zinc-800 bg-zinc-900/60 px-3 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 outline-none focus:border-zinc-700 transition-colors"
+                />
               </div>
-              <div>
-                <p className="mb-1.5 text-xs uppercase tracking-wider text-zinc-500">Occasion</p>
-                <div className="flex flex-wrap gap-2">{OCCASION.map((v) => <Chip key={v} value={v} current={occasion} set={setOccasion} />)}</div>
-              </div>
-              <div>
-                <p className="mb-1.5 text-xs uppercase tracking-wider text-zinc-500">Accord</p>
-                <div className="flex flex-wrap gap-2">{ACCORD.map((v) => <Chip key={v} value={v} current={accord} set={setAccord} />)}</div>
-              </div>
-              <div>
-                <p className="mb-1.5 text-xs uppercase tracking-wider text-zinc-500">Force souhaitée</p>
-                <div className="flex flex-wrap gap-2">{FORCE.map((v) => <Chip key={v} value={v} current={force} set={setForce} />)}</div>
-              </div>
-              <div>
-                <p className="mb-1.5 text-xs uppercase tracking-wider text-zinc-500">Envie particulière (optionnel)</p>
-                <input value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="ex. quelque chose de doux, boisé…" className="w-full rounded-lg bg-zinc-800 px-3 py-2 text-sm outline-none" />
-              </div>
-              <button onClick={suggest} disabled={loading} className="w-full rounded-lg bg-amber-600 px-4 py-2.5 font-medium text-zinc-950 transition hover:bg-amber-500 disabled:opacity-50">
-                {loading ? "Je réfléchis…" : "Trouve-moi ça 🔥"}
+              <button
+                onClick={suggest}
+                disabled={loading}
+                className="w-full rounded-xl bg-amber-600 px-4 py-3 text-sm font-semibold text-zinc-950 transition-colors hover:bg-amber-500 disabled:opacity-50"
+              >
+                {loading ? "Analyse en cours…" : "Trouver un cigare"}
               </button>
             </div>
 
             {result && !loading && (
               <div className="mt-6">
                 {result.error || !choix ? (
-                  <p className="text-sm text-orange-400">Je n&apos;ai pas réussi à choisir. Réessaie, ou précise un critère.</p>
+                  <p className="rounded-xl border border-orange-500/20 bg-orange-950/20 px-4 py-3 text-sm text-orange-300">
+                    Je n&apos;ai pas réussi à choisir. Réessaie ou précise un critère.
+                  </p>
                 ) : (
-                  <div className="space-y-4">
-                    <div className="rounded-2xl border border-amber-700/40 bg-amber-950/15 p-4">
-                      <p className="text-xs uppercase tracking-wider text-amber-500">Ce soir, fume…</p>
-                      <div className="mt-2 flex items-center gap-3">
+                  <div className="space-y-3">
+                    <div className="rounded-2xl border border-amber-700/30 bg-amber-950/15 p-5">
+                      <p className="mb-3 text-xs font-medium uppercase tracking-widest text-amber-500/80">Ce soir</p>
+                      <div className="flex items-center gap-4">
                         {choix.photo_url ? (
-                          <Image src={choix.photo_url} alt={choix.nom} width={64} height={64} className="h-16 w-16 flex-shrink-0 rounded-lg border border-zinc-800 object-cover" />
+                          <Image src={choix.photo_url} alt={choix.nom} width={64} height={64} className="h-16 w-16 flex-shrink-0 rounded-xl object-cover" />
                         ) : (
-                          <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-lg bg-zinc-800 text-xl">🚬</div>
+                          <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-xl bg-zinc-800 text-zinc-600">
+                            <IconBook size={20} />
+                          </div>
                         )}
                         <div className="min-w-0">
-                          <p className="text-lg font-semibold leading-tight">{choix.nom}</p>
-                          <p className="text-sm text-zinc-400">{[choix.marque, choix.force].filter(Boolean).join(" · ")}</p>
+                          <p className="text-lg font-semibold leading-tight text-zinc-50">{choix.nom}</p>
+                          <p className="mt-0.5 text-sm text-zinc-400">{[choix.marque, choix.force].filter(Boolean).join(" · ")}</p>
                         </div>
                       </div>
-                      {result.pourquoi && <p className="mt-3 text-sm text-zinc-200">{result.pourquoi}</p>}
-                      {result.conseil && <p className="mt-2 text-sm italic text-zinc-400">💡 {result.conseil}</p>}
+                      {result.pourquoi && <p className="mt-4 text-sm text-zinc-200 leading-relaxed">{result.pourquoi}</p>}
+                      {result.conseil && <p className="mt-2 text-sm italic text-zinc-400 leading-relaxed">{result.conseil}</p>}
                     </div>
 
                     {alt && (
-                      <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-4">
-                        <p className="text-xs uppercase tracking-wider text-zinc-500">Sinon</p>
-                        <p className="mt-1 font-medium">{alt.nom}<span className="font-normal text-zinc-500">{alt.marque ? ` · ${alt.marque}` : ""}</span></p>
+                      <div className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-4">
+                        <p className="mb-1 text-xs font-medium uppercase tracking-widest text-zinc-500">Sinon</p>
+                        <p className="font-medium text-zinc-100">
+                          {alt.nom}
+                          {alt.marque && <span className="font-normal text-zinc-500"> · {alt.marque}</span>}
+                        </p>
                         {result.alternative_pourquoi && <p className="mt-1 text-sm text-zinc-400">{result.alternative_pourquoi}</p>}
                       </div>
                     )}
 
-                    <button onClick={suggest} disabled={loading} className="w-full rounded-lg border border-zinc-700 px-4 py-2.5 text-sm transition hover:border-amber-500">Une autre idée</button>
+                    <button
+                      onClick={suggest}
+                      disabled={loading}
+                      className="w-full rounded-xl border border-zinc-800 px-4 py-2.5 text-sm text-zinc-300 transition-colors hover:border-zinc-700 hover:text-zinc-100"
+                    >
+                      Une autre idée
+                    </button>
                   </div>
                 )}
               </div>
@@ -170,5 +194,16 @@ export default function CeSoir() {
         )}
       </div>
     </main>
+  );
+}
+
+function FilterRow({ label, values, current, set }: { label: string; values: string[]; current: string; set: (v: string) => void }) {
+  return (
+    <div>
+      <p className="mb-2 text-xs font-medium uppercase tracking-wider text-zinc-500">{label}</p>
+      <div className="flex flex-wrap gap-1.5">
+        {values.map((v) => <Chip key={v} value={v} current={current} set={set} />)}
+      </div>
+    </div>
   );
 }

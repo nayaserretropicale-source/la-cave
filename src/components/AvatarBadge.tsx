@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { IconBell, IconUser } from "./Icons";
 
 export default function AvatarBadge() {
   const pathname = usePathname();
@@ -47,19 +48,21 @@ export default function AvatarBadge() {
   if (!signedIn) return null;
 
   return (
-    <div className="fixed right-6 z-50 flex items-center gap-3" style={{ top: "calc(env(safe-area-inset-top, 0px) + 16px)" }}>
-      <Link href="/notifs" aria-label="Notifications" className="relative">
-        <span className="text-2xl">🔔</span>
+    <div className="fixed right-4 z-50 flex items-center gap-2" style={{ top: "calc(env(safe-area-inset-top, 0px) + 14px)" }}>
+      <Link href="/notifs" aria-label="Notifications" className="relative flex h-9 w-9 items-center justify-center rounded-full text-zinc-400 transition-colors hover:text-zinc-100">
+        <IconBell size={20} />
         {count > 0 && (
-          <span className="absolute -right-1 -top-1 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-amber-500 px-1 text-[10px] font-bold text-zinc-950">{count}</span>
+          <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-amber-500 px-1 text-[10px] font-bold leading-none text-zinc-950">
+            {count}
+          </span>
         )}
       </Link>
       {pathname !== "/profil" && (
-        <Link href="/profil" aria-label="Mon profil">
+        <Link href="/profil" aria-label="Mon profil" className="flex h-9 w-9 items-center justify-center rounded-full border border-zinc-700 bg-zinc-900 transition-colors hover:border-zinc-500">
           {avatarUrl ? (
-            <Image src={avatarUrl} alt="profil" width={40} height={40} className="h-10 w-10 rounded-full border border-amber-500/70 object-cover shadow-lg shadow-black/40" />
+            <Image src={avatarUrl} alt="profil" width={36} height={36} className="h-9 w-9 rounded-full object-cover" />
           ) : (
-            <div className="flex h-10 w-10 items-center justify-center rounded-full border border-zinc-700 bg-zinc-800 text-sm shadow-lg shadow-black/40">👤</div>
+            <IconUser size={18} className="text-zinc-400" />
           )}
         </Link>
       )}

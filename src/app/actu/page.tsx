@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 
 type Article = { title: string; snippet: string; url: string; source: string; date: string };
 
@@ -28,22 +27,35 @@ export default function Actu() {
   }
 
   return (
-    <main className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col items-center px-6 py-12">
+    <main className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col items-center px-4 py-10">
       <div className="w-full max-w-md">
-        <Link href="/" className="text-sm text-zinc-500 transition hover:text-amber-500">← Ma cave</Link>
-        <h1 className="text-3xl font-semibold mt-2 mb-6">Actu cigares 📰</h1>
+        <header className="mb-8">
+          <p className="text-[11px] font-medium tracking-widest text-amber-500/80 uppercase mb-1">Presse</p>
+          <h1 className="text-3xl font-semibold tracking-tight text-zinc-50">Actu cigares</h1>
+        </header>
 
         {loading ? (
-          <p className="animate-pulse text-amber-500">Chargement de l&apos;actu…</p>
+          <div className="flex items-center gap-3 py-8">
+            <div className="h-4 w-4 animate-spin rounded-full border-2 border-zinc-700 border-t-amber-500" />
+            <p className="text-sm text-zinc-400">Chargement…</p>
+          </div>
         ) : articles.length === 0 ? (
-          <p className="text-sm text-zinc-500">Pas d&apos;actualité disponible pour l&apos;instant.</p>
+          <p className="py-8 text-center text-sm text-zinc-600">Pas d&apos;actualité disponible pour l&apos;instant.</p>
         ) : (
-          <div className="space-y-3">
+          <div className="overflow-hidden rounded-2xl border border-zinc-800">
             {articles.map((a, i) => (
-              <button key={i} onClick={() => setSel(a)} className="block w-full rounded-xl border border-zinc-800 bg-zinc-900/50 p-4 text-left transition hover:border-amber-500">
-                <p className="text-[11px] uppercase tracking-wider text-amber-500">{a.source}{a.date ? ` · ${frDate(a.date)}` : ""}</p>
-                <p className="mt-1 font-medium">{a.title}</p>
-                <p className="mt-1 line-clamp-2 text-sm text-zinc-400">{a.snippet}</p>
+              <button
+                key={i}
+                onClick={() => setSel(a)}
+                className={`block w-full bg-zinc-900/40 p-4 text-left transition-colors hover:bg-zinc-900/80 ${
+                  i < articles.length - 1 ? "border-b border-zinc-800/60" : ""
+                }`}
+              >
+                <p className="text-[10px] font-medium uppercase tracking-widest text-zinc-500">
+                  {a.source}{a.date ? ` · ${frDate(a.date)}` : ""}
+                </p>
+                <p className="mt-1 font-medium text-zinc-100 leading-snug">{a.title}</p>
+                <p className="mt-1 line-clamp-2 text-sm text-zinc-500 leading-relaxed">{a.snippet}</p>
               </button>
             ))}
           </div>
@@ -51,17 +63,37 @@ export default function Actu() {
       </div>
 
       {sel && (
-        <div className="fixed inset-0 z-[60] flex items-end justify-center overflow-y-auto bg-black/70 p-4 sm:items-center" onClick={() => setSel(null)}>
-          <div className="my-auto w-full max-w-md rounded-2xl border border-zinc-800 bg-zinc-900 p-5" onClick={(e) => e.stopPropagation()}>
-            <p className="text-[11px] uppercase tracking-wider text-amber-500">{sel.source}{sel.date ? ` · ${frDate(sel.date)}` : ""}</p>
-            <h2 className="mt-1 text-xl font-semibold">{sel.title}</h2>
+        <div
+          className="fixed inset-0 z-[60] flex items-end justify-center overflow-y-auto bg-black/80 backdrop-blur-sm p-4 sm:items-center"
+          onClick={() => setSel(null)}
+        >
+          <div
+            className="my-auto w-full max-w-md rounded-2xl border border-zinc-800 bg-zinc-950 p-5 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <p className="text-[10px] font-medium uppercase tracking-widest text-zinc-500">
+              {sel.source}{sel.date ? ` · ${frDate(sel.date)}` : ""}
+            </p>
+            <h2 className="mt-2 text-xl font-semibold tracking-tight text-zinc-50 leading-snug">{sel.title}</h2>
             <p className="mt-3 text-sm leading-relaxed text-zinc-300">{sel.snippet}</p>
             <p className="mt-2 text-xs italic text-zinc-600">Extrait — la suite sur le site d&apos;origine.</p>
-            <div className="mt-4 flex gap-2">
+            <div className="mt-5 flex gap-2">
               {sel.url && (
-                <a href={sel.url} target="_blank" rel="noopener noreferrer" className="flex-1 rounded-lg bg-amber-600 px-4 py-2.5 text-center font-medium text-zinc-950 transition hover:bg-amber-500">Lire sur {sel.source} →</a>
+                <a
+                  href={sel.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 rounded-xl bg-amber-600 px-4 py-2.5 text-center text-sm font-semibold text-zinc-950 transition-colors hover:bg-amber-500"
+                >
+                  Lire sur {sel.source}
+                </a>
               )}
-              <button onClick={() => setSel(null)} className="rounded-lg border border-zinc-700 px-4 py-2.5 transition hover:border-amber-500">Fermer</button>
+              <button
+                onClick={() => setSel(null)}
+                className="rounded-xl border border-zinc-800 px-4 py-2.5 text-sm text-zinc-400 transition-colors hover:border-zinc-700"
+              >
+                Fermer
+              </button>
             </div>
           </div>
         </div>

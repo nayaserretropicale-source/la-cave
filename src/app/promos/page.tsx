@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
+import { IconChevronRight, IconPlus } from "@/components/Icons";
 
 type Deal = { retailer: string; title: string; url: string; match?: string };
 
@@ -15,7 +16,7 @@ const SHORTCUTS = [
 const STOPWORDS = new Set(["cigare", "cigares", "cigar", "cigars", "edition", "serie", "series", "pack", "boite"]);
 
 function norm(s: string) {
-  return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  return s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
 }
 
 function motsCles(s: string) {
@@ -63,10 +64,7 @@ export default function Promos() {
   async function addToEnvies(d: Deal, i: number) {
     if (added[i] === "ok" || added[i] === "busy") return;
     const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
-      setAdded((m) => ({ ...m, [i]: "login" }));
-      return;
-    }
+    if (!session) { setAdded((m) => ({ ...m, [i]: "login" })); return; }
     setAdded((m) => ({ ...m, [i]: "busy" }));
     const { error } = await supabase.from("wishlist").insert({
       nom: d.title.slice(0, 120),
@@ -76,55 +74,101 @@ export default function Promos() {
   }
 
   return (
-    <main className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col items-center px-6 py-12">
+    <main className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col items-center px-4 py-10">
       <div className="w-full max-w-md">
-        <Link href="/" className="text-sm text-zinc-500 hover:text-amber-500">← Ma cave</Link>
-        <h1 className="text-3xl font-semibold mt-2 mb-6">Bons plans 🏷️</h1>
+        <header className="mb-8">
+          <p className="text-[11px] font-medium tracking-widest text-amber-500/80 uppercase mb-1">Deals</p>
+          <h1 className="text-3xl font-semibold tracking-tight text-zinc-50">Bons plans</h1>
+        </header>
 
-        <p className="mb-3 text-xs tracking-[0.3em] uppercase text-amber-500">Trouvés en ligne</p>
-        {loading && <p className="animate-pulse text-amber-500">Recherche des bons plans…</p>}
-        {!loading && matchCount > 0 && (
-          <p className="mb-3 text-sm text-amber-400">🔔 {matchCount === 1 ? "Un cigare de tes envies est en promo !" : `${matchCount} cigares de tes envies sont en promo !`}</p>
-        )}
-        {!loading && deals.length === 0 && (
-          <p className="text-sm text-zinc-500">Rien trouvé à l&apos;instant — vois les sites de référence ci-dessous.</p>
-        )}
-        <div className="space-y-3">
-          {deals.map((d, i) => (
-            <div key={i} className={`rounded-lg border px-4 py-3 transition ${d.match ? "border-amber-600/60 bg-amber-950/15" : "border-zinc-800 bg-zinc-900/50"}`}>
-              {d.match && <p className="mb-1 text-xs font-medium text-amber-400">⭐ Dans tes envies : {d.match}</p>}
-              <div className="flex items-start gap-3">
-                <a href={d.url} target="_blank" rel="noopener noreferrer" className="min-w-0 flex-1 transition hover:text-amber-500">
-                  <span className="text-xs uppercase tracking-wider text-amber-500">{d.retailer}</span>
-                  <p className="mt-1 font-medium">{d.title}</p>
-                </a>
-                <button
-                  onClick={() => addToEnvies(d, i)}
-                  disabled={added[i] === "ok" || added[i] === "busy"}
-                  aria-label="Ajouter à mes envies"
-                  className={`flex-shrink-0 rounded-lg border px-2.5 py-1.5 text-sm transition ${added[i] === "ok" ? "border-amber-500 text-amber-500" : "border-zinc-700 text-zinc-300 hover:border-amber-500 hover:text-amber-500"}`}
-                >
-                  {added[i] === "ok" ? "✓" : added[i] === "busy" ? "…" : "＋✨"}
-                </button>
+        {loading ? (
+          <div className="flex items-center gap-3 py-8">
+            <div className="h-4 w-4 animate-spin rounded-full border-2 border-zinc-700 border-t-amber-500" />
+            <p className="text-sm text-zinc-400">Recherche des bons plans…</p>
+          </div>
+        ) : (
+          <>
+            {matchCount > 0 && (
+              <div className="mb-5 rounded-xl border border-amber-600/30 bg-amber-950/15 px-4 py-3">
+                <p className="text-sm text-amber-300">
+                  {matchCount === 1
+                    ? "Un cigare de tes envies est en promo"
+                    : `${matchCount} cigares de tes envies sont en promo`}
+                </p>
               </div>
-              {added[i] === "login" && (
-                <p className="mt-2 text-xs text-amber-500">Connecte-toi pour ajouter à tes envies.</p>
-              )}
-              {added[i] === "ok" && (
-                <p className="mt-2 text-xs text-zinc-500">Ajouté à <Link href="/wishlist" className="text-amber-500 underline">Mes envies ✨</Link></p>
-              )}
-            </div>
-          ))}
-        </div>
+            )}
 
-        <p className="mt-8 mb-3 text-xs tracking-[0.3em] uppercase text-amber-500">Sites de référence</p>
-        <div className="space-y-2">
-          {SHORTCUTS.map((s) => (
-            <a key={s.url} href={s.url} target="_blank" rel="noopener noreferrer" className="block rounded-lg border border-zinc-800 bg-zinc-900/50 px-4 py-3 transition hover:border-amber-500">
-              {s.name} →
-            </a>
-          ))}
-        </div>
+            {deals.length === 0 ? (
+              <p className="py-4 text-sm text-zinc-500">Rien trouvé à l&apos;instant — vois les sites de référence ci-dessous.</p>
+            ) : (
+              <div className="mb-8 overflow-hidden rounded-2xl border border-zinc-800">
+                {deals.map((d, i) => (
+                  <div
+                    key={i}
+                    className={`p-4 ${d.match ? "bg-amber-950/10" : "bg-zinc-900/40"} ${
+                      i < deals.length - 1 ? "border-b border-zinc-800/60" : ""
+                    }`}
+                  >
+                    {d.match && (
+                      <p className="mb-1.5 text-[10px] font-medium uppercase tracking-widest text-amber-400">
+                        Dans tes envies · {d.match}
+                      </p>
+                    )}
+                    <div className="flex items-start gap-3">
+                      <a
+                        href={d.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="min-w-0 flex-1 transition-colors hover:text-amber-400"
+                      >
+                        <span className="text-[10px] font-medium uppercase tracking-widest text-zinc-500">{d.retailer}</span>
+                        <p className="mt-0.5 text-sm font-medium text-zinc-100 leading-snug">{d.title}</p>
+                      </a>
+                      <button
+                        onClick={() => addToEnvies(d, i)}
+                        disabled={added[i] === "ok" || added[i] === "busy"}
+                        aria-label="Ajouter à mes envies"
+                        className={`flex-shrink-0 flex items-center gap-1 rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-colors ${
+                          added[i] === "ok"
+                            ? "border-amber-600/40 text-amber-400"
+                            : "border-zinc-700 text-zinc-400 hover:border-zinc-600 hover:text-zinc-200"
+                        }`}
+                      >
+                        {added[i] === "ok" ? "Ajouté" : added[i] === "busy" ? "…" : <><IconPlus size={12} /> Envies</>}
+                      </button>
+                    </div>
+                    {added[i] === "login" && (
+                      <p className="mt-2 text-xs text-zinc-500">Connecte-toi pour ajouter à tes envies.</p>
+                    )}
+                    {added[i] === "ok" && (
+                      <p className="mt-2 text-xs text-zinc-500">
+                        Ajouté à <Link href="/wishlist" className="text-amber-400 underline underline-offset-2">Mes envies</Link>
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <p className="mb-3 text-xs font-medium uppercase tracking-widest text-zinc-500">Sites de référence</p>
+            <div className="overflow-hidden rounded-2xl border border-zinc-800">
+              {SHORTCUTS.map((s, i) => (
+                <a
+                  key={s.url}
+                  href={s.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`flex items-center justify-between bg-zinc-900/40 px-4 py-3.5 transition-colors hover:bg-zinc-900/80 ${
+                    i < SHORTCUTS.length - 1 ? "border-b border-zinc-800/60" : ""
+                  }`}
+                >
+                  <span className="text-sm text-zinc-200">{s.name}</span>
+                  <IconChevronRight size={14} className="text-zinc-600" />
+                </a>
+              ))}
+            </div>
+          </>
+        )}
       </div>
     </main>
   );

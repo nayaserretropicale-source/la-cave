@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import AuthBar from "@/components/AuthBar";
 import { supabase } from "@/lib/supabase";
+import { IconUser, IconX, IconStar, IconCamera, IconPlus } from "@/components/Icons";
 
 type Author = { pseudo: string | null; avatar_url: string | null };
 type Comment = { id: string; user_id: string; texte: string; author?: Author };
@@ -23,6 +24,15 @@ type Post = {
   likedByMe: boolean;
   commentCount: number;
 };
+
+function Avatar({ url, size = 32 }: { url?: string | null; size?: number }) {
+  if (url) return <Image src={url} alt="" width={size} height={size} className="rounded-full border border-zinc-700 object-cover" style={{ width: size, height: size }} />;
+  return (
+    <div className="flex flex-shrink-0 items-center justify-center rounded-full bg-zinc-800 text-zinc-500" style={{ width: size, height: size }}>
+      <IconUser size={size * 0.45} />
+    </div>
+  );
+}
 
 export default function Communaute() {
   const [userId, setUserId] = useState<string | null>(null);
@@ -61,7 +71,6 @@ export default function Communaute() {
   async function loadFeed() {
     const { data: { session } } = await supabase.auth.getSession();
     const me = session?.user?.id ?? null;
-
     const { data: rawPosts } = await supabase
       .from("posts")
       .select("id,user_id,cigare_nom,marque,texte,rating,photo_url,created_at")
@@ -69,36 +78,24 @@ export default function Communaute() {
       .limit(50);
     const list = (rawPosts ?? []) as Post[];
     if (list.length === 0) { setPosts([]); return; }
-
     const ids = list.map((p) => p.id);
     const userIds = Array.from(new Set(list.map((p) => p.user_id)));
-
     const { data: profs } = await supabase.from("profiles").select("id,pseudo,avatar_url").in("id", userIds);
     const profMap: Record<string, Author> = {};
     (profs ?? []).forEach((p: Author & { id: string }) => { profMap[p.id] = { pseudo: p.pseudo, avatar_url: p.avatar_url }; });
-
     const { data: likes } = await supabase.from("likes").select("post_id,user_id").in("post_id", ids);
     const { data: coms } = await supabase.from("comments").select("post_id").in("post_id", ids);
-
     const enriched = list.map((p) => {
       const pl = (likes ?? []).filter((l) => l.post_id === p.id);
       const cc = (coms ?? []).filter((c) => c.post_id === p.id).length;
-      return {
-        ...p,
-        author: profMap[p.user_id],
-        likeCount: pl.length,
-        likedByMe: me ? pl.some((l) => l.user_id === me) : false,
-        commentCount: cc,
-      };
+      return { ...p, author: profMap[p.user_id], likeCount: pl.length, likedByMe: me ? pl.some((l) => l.user_id === me) : false, commentCount: cc };
     });
     setPosts(enriched);
   }
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    loadMe();
-    loadFeed();
-    loadFriends();
+    loadMe(); loadFeed(); loadFriends();
     const { data: sub } = supabase.auth.onAuthStateChange(() => { loadMe(); loadFeed(); loadFriends(); });
     return () => sub.subscription.unsubscribe();
   }, []);
@@ -110,10 +107,9 @@ export default function Communaute() {
   }
 
   function relation(otherId: string) {
-    const row = links.find(
-      (f) =>
-        (f.requester_id === userId && f.addressee_id === otherId) ||
-        (f.requester_id === otherId && f.addressee_id === userId)
+    const row = links.find((f) =>
+      (f.requester_id === userId && f.addressee_id === otherId) ||
+      (f.requester_id === otherId && f.addressee_id === userId)
     );
     if (!row) return { state: "none" as const, row: null };
     if (row.status === "accepted") return { state: "friends" as const, row };
@@ -123,7 +119,7 @@ export default function Communaute() {
 
   async function addFriend(otherId: string) {
     await supabase.from("friendships").insert({ addressee_id: otherId });
-    sendPush(otherId, "🤝 Demande d'ami", `${pseudo || "Quelqu'un"} t'a envoyé une demande d'ami`);
+    sendPush(otherId, "Demande d'ami", `${pseudo || "Quelqu'un"} t'a envoyé une demande d'ami`);
     loadFriends();
   }
 
@@ -147,11 +143,8 @@ export default function Communaute() {
     if (!cNom.trim()) { setMsg("Indique au moins le nom du cigare."); return; }
     setMsg("Publication…");
     const { error } = await supabase.from("posts").insert({
-      cigare_nom: cNom.trim(),
-      marque: cMarque.trim() || null,
-      texte: cTexte.trim() || null,
-      rating: cRating || null,
-      photo_url: cPhoto,
+      cigare_nom: cNom.trim(), marque: cMarque.trim() || null,
+      texte: cTexte.trim() || null, rating: cRating || null, photo_url: cPhoto,
     });
     if (error) { setMsg("Erreur : " + error.message); return; }
     setCNom(""); setCMarque(""); setCRating(0); setCTexte(""); setCPhoto(null); setMsg("");
@@ -160,11 +153,7 @@ export default function Communaute() {
 
   async function sendPush(toUserId: string, title: string, body: string) {
     if (toUserId === userId) return;
-    fetch("/api/push/send", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId: toUserId, title, body }),
-    }).catch(() => {});
+    fetch("/api/push/send", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ userId: toUserId, title, body }) }).catch(() => {});
   }
 
   async function toggleLike(p: Post) {
@@ -172,7 +161,7 @@ export default function Communaute() {
       await supabase.from("likes").delete().eq("post_id", p.id).eq("user_id", userId);
     } else {
       await supabase.from("likes").insert({ post_id: p.id });
-      sendPush(p.user_id, "❤️ Nouveau like", `${pseudo || "Quelqu'un"} a aimé ton cigare « ${p.cigare_nom} »`);
+      sendPush(p.user_id, "Nouveau like", `${pseudo || "Quelqu'un"} a aimé ton cigare « ${p.cigare_nom} »`);
     }
     loadFeed();
   }
@@ -196,10 +185,7 @@ export default function Communaute() {
   }
 
   async function toggleComments(postId: string) {
-    if (openComments[postId]) {
-      setOpenComments((m) => { const n = { ...m }; delete n[postId]; return n; });
-      return;
-    }
+    if (openComments[postId]) { setOpenComments((m) => { const n = { ...m }; delete n[postId]; return n; }); return; }
     await refreshComments(postId);
   }
 
@@ -209,7 +195,7 @@ export default function Communaute() {
     await supabase.from("comments").insert({ post_id: postId, texte: txt });
     setCommentInput((m) => ({ ...m, [postId]: "" }));
     const post = posts.find((p) => p.id === postId);
-    if (post) sendPush(post.user_id, "💬 Nouveau commentaire", `${pseudo || "Quelqu'un"} a commenté « ${post.cigare_nom} » : ${txt.slice(0, 60)}`);
+    if (post) sendPush(post.user_id, "Nouveau commentaire", `${pseudo || "Quelqu'un"} a commenté « ${post.cigare_nom} » : ${txt.slice(0, 60)}`);
     await refreshComments(postId);
     loadFeed();
   }
@@ -221,12 +207,20 @@ export default function Communaute() {
     loadFeed();
   }
 
+  const pageHeader = (
+    <header className="mb-8">
+      <p className="text-[11px] font-medium tracking-widest text-amber-500/80 uppercase mb-1">
+        Cercle{isAdmin ? " · admin" : ""}
+      </p>
+      <h1 className="text-3xl font-semibold tracking-tight text-zinc-50">Communauté</h1>
+    </header>
+  );
+
   if (!userId) {
     return (
-      <main className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col items-center px-6 py-12">
+      <main className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col items-center px-4 py-10">
         <div className="w-full max-w-md">
-          <p className="text-xs tracking-[0.3em] uppercase text-amber-500">Cercle</p>
-          <h1 className="text-3xl font-semibold mt-1 mb-6">Communauté 👥</h1>
+          {pageHeader}
           <AuthBar />
           <p className="text-sm text-zinc-400">Connecte-toi pour rejoindre la communauté.</p>
         </div>
@@ -236,14 +230,15 @@ export default function Communaute() {
 
   if (!majeur) {
     return (
-      <main className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col items-center px-6 py-12">
+      <main className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col items-center px-4 py-10">
         <div className="w-full max-w-md">
-          <p className="text-xs tracking-[0.3em] uppercase text-amber-500">Cercle</p>
-          <h1 className="text-3xl font-semibold mt-1 mb-6">Communauté 👥</h1>
-          <div className="rounded-xl border border-amber-700/40 bg-amber-950/20 p-5">
-            <p className="text-zinc-200">Espace réservé aux personnes ayant l&apos;âge légal pour le tabac (18 ans ou plus).</p>
+          {pageHeader}
+          <div className="rounded-2xl border border-amber-700/30 bg-amber-950/15 p-5">
+            <p className="text-zinc-200 leading-relaxed">Espace réservé aux personnes ayant l&apos;âge légal pour le tabac (18 ans ou plus).</p>
             <p className="mt-2 text-sm text-zinc-400">Le cigare se savoure avec modération. En continuant, tu confirmes avoir l&apos;âge légal.</p>
-            <button onClick={confirmMajeur} className="mt-4 w-full rounded-lg bg-amber-600 px-4 py-2.5 font-medium text-zinc-950 transition hover:bg-amber-500">Je confirme avoir 18 ans ou plus</button>
+            <button onClick={confirmMajeur} className="mt-5 w-full rounded-xl bg-amber-600 px-4 py-2.5 text-sm font-semibold text-zinc-950 transition-colors hover:bg-amber-500">
+              Je confirme avoir 18 ans ou plus
+            </button>
           </div>
         </div>
       </main>
@@ -256,120 +251,196 @@ export default function Communaute() {
   const visiblePosts = onlyFriends ? posts.filter((p) => p.user_id === userId || friendIds.has(p.user_id)) : posts;
 
   return (
-    <main className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col items-center px-6 py-12">
+    <main className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col items-center px-4 py-10">
       <div className="w-full max-w-md">
-        <p className="text-xs tracking-[0.3em] uppercase text-amber-500">Cercle{isAdmin ? " · admin" : ""}</p>
-        <h1 className="text-3xl font-semibold mt-1 mb-6">Communauté 👥</h1>
+        {pageHeader}
 
+        {/* Compose */}
         {!pseudo ? (
-          <div className="mb-8 rounded-xl border border-zinc-800 bg-zinc-900/50 p-4 text-sm text-zinc-300">
-            Choisis un pseudo dans ton <Link href="/profil" className="text-amber-500 underline">profil</Link> pour pouvoir publier.
+          <div className="mb-8 rounded-xl border border-zinc-800 bg-zinc-900/40 px-4 py-3.5 text-sm text-zinc-400">
+            Choisis un pseudo dans ton <Link href="/profil" className="text-amber-400 underline underline-offset-2">profil</Link> pour publier.
           </div>
         ) : (
-          <div className="mb-8 space-y-3 rounded-xl border border-zinc-800 bg-zinc-900/50 p-4">
-            <input value={cNom} onChange={(e) => setCNom(e.target.value)} placeholder="Cigare dégusté *" className="w-full rounded-lg bg-zinc-800 px-3 py-2 text-sm outline-none" />
-            <input value={cMarque} onChange={(e) => setCMarque(e.target.value)} placeholder="Marque (optionnel)" className="w-full rounded-lg bg-zinc-800 px-3 py-2 text-sm outline-none" />
-            <div className="flex gap-1">
+          <div className="mb-8 space-y-3 rounded-2xl border border-zinc-800 bg-zinc-900/40 p-5">
+            <input
+              value={cNom}
+              onChange={(e) => setCNom(e.target.value)}
+              placeholder="Cigare dégusté *"
+              className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 outline-none focus:border-zinc-700 transition-colors"
+            />
+            <input
+              value={cMarque}
+              onChange={(e) => setCMarque(e.target.value)}
+              placeholder="Marque (optionnel)"
+              className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 outline-none focus:border-zinc-700 transition-colors"
+            />
+            <div className="flex gap-1.5">
               {[1, 2, 3, 4, 5].map((n) => (
-                <button key={n} type="button" onClick={() => setCRating(n)} className={`text-2xl ${n <= cRating ? "text-amber-500" : "text-zinc-600"}`} aria-label={`${n} étoiles`}>★</button>
+                <button key={n} type="button" onClick={() => setCRating(n)} aria-label={`${n} étoiles`}>
+                  <IconStar size={22} filled={n <= cRating} className={n <= cRating ? "text-amber-400" : "text-zinc-700"} />
+                </button>
               ))}
             </div>
-            <textarea value={cTexte} onChange={(e) => setCTexte(e.target.value)} rows={3} placeholder="Ton ressenti à partager…" className="w-full rounded-lg bg-zinc-800 px-3 py-2 text-sm outline-none" />
+            <textarea
+              value={cTexte}
+              onChange={(e) => setCTexte(e.target.value)}
+              rows={3}
+              placeholder="Ton ressenti à partager…"
+              className="w-full resize-none rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 outline-none focus:border-zinc-700 transition-colors"
+            />
             {cPhoto && (
-              <div className="relative h-48 w-full overflow-hidden rounded-lg border border-zinc-800">
+              <div className="relative h-48 w-full overflow-hidden rounded-xl border border-zinc-800">
                 <Image src={cPhoto} alt="aperçu" fill sizes="448px" className="object-cover" />
               </div>
             )}
             <div className="flex gap-2">
-              <label className="cursor-pointer rounded-lg border border-zinc-700 px-3 py-2 text-sm text-zinc-300 transition hover:border-amber-500 hover:text-amber-500">
-                {busy ? "Envoi…" : cPhoto ? "Changer photo" : "Photo"}
+              <label className="flex cursor-pointer items-center gap-2 rounded-xl border border-zinc-800 px-3 py-2 text-sm text-zinc-400 transition-colors hover:border-zinc-700 hover:text-zinc-200">
+                <IconCamera size={14} />
+                {busy ? "Envoi…" : cPhoto ? "Changer" : "Photo"}
                 <input type="file" accept="image/*" onChange={onComposePhoto} className="hidden" />
               </label>
-              <button onClick={publish} className="flex-1 rounded-lg bg-amber-600 px-4 py-2.5 font-medium text-zinc-950 transition hover:bg-amber-500">Publier</button>
+              <button
+                onClick={publish}
+                className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-amber-600 px-4 py-2 text-sm font-semibold text-zinc-950 transition-colors hover:bg-amber-500"
+              >
+                <IconPlus size={15} />
+                Publier
+              </button>
             </div>
-            {msg && <p className="text-sm text-amber-500">{msg}</p>}
+            {msg && <p className="text-sm text-amber-400">{msg}</p>}
           </div>
         )}
 
-        <div className="mb-4 flex gap-2">
-          <button onClick={() => setOnlyFriends(false)} className={`rounded-full px-4 py-1.5 text-sm transition ${!onlyFriends ? "bg-amber-600 text-zinc-950" : "border border-zinc-700 text-zinc-400 hover:border-amber-500"}`}>Tous</button>
-          <button onClick={() => setOnlyFriends(true)} className={`rounded-full px-4 py-1.5 text-sm transition ${onlyFriends ? "bg-amber-600 text-zinc-950" : "border border-zinc-700 text-zinc-400 hover:border-amber-500"}`}>Amis</button>
+        {/* Feed filter */}
+        <div className="mb-5 flex gap-2">
+          {[
+            { val: false, label: "Tous" },
+            { val: true, label: "Amis" },
+          ].map(({ val, label }) => (
+            <button
+              key={label}
+              onClick={() => setOnlyFriends(val)}
+              className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
+                onlyFriends === val ? "bg-amber-600 text-zinc-950" : "border border-zinc-800 text-zinc-400 hover:border-zinc-700"
+              }`}
+            >
+              {label}
+            </button>
+          ))}
         </div>
 
+        {/* Posts */}
         {visiblePosts.length === 0 ? (
-          <p className="text-sm text-zinc-500">{onlyFriends ? "Aucune publication de tes amis pour l&apos;instant." : "Aucune publication pour l&apos;instant. Sois le premier à partager !"}</p>
+          <p className="py-8 text-center text-sm text-zinc-600">
+            {onlyFriends ? "Aucune publication de tes amis." : "Aucune publication. Sois le premier à partager !"}
+          </p>
         ) : (
           <div className="space-y-4">
             {visiblePosts.map((p) => {
               const rel = p.user_id !== userId ? relation(p.user_id) : null;
               return (
-              <div key={p.id} className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-4">
-                <div className="flex items-center gap-2">
-                  <Link href={`/u/${p.user_id}`} className="flex min-w-0 items-center gap-2">
-                    {p.author?.avatar_url ? (
-                      <Image src={p.author.avatar_url} alt="" width={32} height={32} className="h-8 w-8 rounded-full border border-zinc-700 object-cover" />
-                    ) : (
-                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-zinc-800 text-sm">👤</div>
-                    )}
-                    <span className="truncate text-sm font-medium">{p.author?.pseudo || "Anonyme"}</span>
-                  </Link>
-
-                  <div className="ml-auto flex items-center gap-2">
-                    {rel && rel.state === "none" && (
-                      <button onClick={() => addFriend(p.user_id)} className="rounded-lg border border-zinc-700 px-2.5 py-1 text-xs text-zinc-300 transition hover:border-amber-500 hover:text-amber-500">+ Ami</button>
-                    )}
-                    {rel && rel.state === "sent" && <span className="text-xs text-zinc-500">En attente</span>}
-                    {rel && rel.state === "incoming" && rel.row && (
-                      <button onClick={() => acceptFriend(rel.row!.id)} className="rounded-lg bg-amber-600 px-2.5 py-1 text-xs font-medium text-zinc-950 transition hover:bg-amber-500">Accepter</button>
-                    )}
-                    {rel && rel.state === "friends" && <span className="text-xs text-amber-500">Ami ✓</span>}
-
-                    {(p.user_id === userId || isAdmin) && (
-                      <button onClick={() => deletePost(p.id)} className="rounded-md px-2 py-1 text-zinc-500 transition hover:bg-zinc-800 hover:text-orange-400" aria-label="Supprimer">✕</button>
-                    )}
-                  </div>
-                </div>
-
-                <p className="mt-3 font-semibold">{p.cigare_nom}{p.marque ? <span className="font-normal text-zinc-500"> · {p.marque}</span> : null}</p>
-                {p.rating ? <p className="text-sm text-amber-500">{"★".repeat(p.rating)}</p> : null}
-                {p.photo_url && (
-                  <div className="relative mt-2 h-72 w-full overflow-hidden rounded-lg border border-zinc-800">
-                    <Image src={p.photo_url} alt={p.cigare_nom} fill sizes="448px" className="object-cover" />
-                  </div>
-                )}
-                {p.texte && <p className="mt-2 text-sm text-zinc-300">{p.texte}</p>}
-
-                <div className="mt-3 flex items-center gap-4 text-sm">
-                  <button onClick={() => toggleLike(p)} className={`flex items-center gap-1 transition ${p.likedByMe ? "text-amber-500" : "text-zinc-400 hover:text-amber-500"}`}>
-                    {p.likedByMe ? "♥" : "♡"} {p.likeCount}
-                  </button>
-                  <button onClick={() => toggleComments(p.id)} className="flex items-center gap-1 text-zinc-400 transition hover:text-amber-500">
-                    💬 {p.commentCount}
-                  </button>
-                </div>
-
-                {openComments[p.id] && (
-                  <div className="mt-3 space-y-2 border-t border-zinc-800 pt-3">
-                    {openComments[p.id].map((c) => (
-                      <div key={c.id} className="flex items-start gap-2">
-                        {c.author?.avatar_url ? (
-                          <Image src={c.author.avatar_url} alt="" width={24} height={24} className="h-6 w-6 rounded-full border border-zinc-700 object-cover" />
-                        ) : (
-                          <div className="flex h-6 w-6 items-center justify-center rounded-full bg-zinc-800 text-xs">👤</div>
-                        )}
-                        <p className="flex-1 text-sm text-zinc-300"><span className="font-medium text-zinc-100">{c.author?.pseudo || "Anonyme"}</span> {c.texte}</p>
-                        {(c.user_id === userId || isAdmin) && (
-                          <button onClick={() => deleteComment(p.id, c.id)} className="flex-shrink-0 text-xs text-zinc-600 transition hover:text-orange-400" aria-label="Supprimer le commentaire">✕</button>
-                        )}
-                      </div>
-                    ))}
-                    <div className="flex gap-2 pt-1">
-                      <input value={commentInput[p.id] || ""} onChange={(e) => setCommentInput((m) => ({ ...m, [p.id]: e.target.value }))} placeholder="Commenter…" className="flex-1 rounded-lg bg-zinc-800 px-3 py-2 text-sm outline-none" />
-                      <button onClick={() => addComment(p.id)} className="rounded-lg bg-amber-600 px-3 py-2 text-sm font-medium text-zinc-950 transition hover:bg-amber-500">Envoyer</button>
+                <div key={p.id} className="overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900/40">
+                  {/* Post header */}
+                  <div className="flex items-center gap-3 px-4 py-3 border-b border-zinc-800/60">
+                    <Link href={`/u/${p.user_id}`} className="flex items-center gap-2.5 min-w-0 flex-1">
+                      <Avatar url={p.author?.avatar_url} size={32} />
+                      <span className="truncate text-sm font-medium text-zinc-100">{p.author?.pseudo || "Anonyme"}</span>
+                    </Link>
+                    <div className="flex items-center gap-2">
+                      {rel?.state === "none" && (
+                        <button onClick={() => addFriend(p.user_id)} className="rounded-lg border border-zinc-700 px-2.5 py-1 text-xs font-medium text-zinc-400 transition-colors hover:border-zinc-600 hover:text-zinc-200">
+                          + Ami
+                        </button>
+                      )}
+                      {rel?.state === "sent" && <span className="text-xs text-zinc-600">En attente</span>}
+                      {rel?.state === "incoming" && rel.row && (
+                        <button onClick={() => acceptFriend(rel.row!.id)} className="rounded-lg bg-amber-600 px-2.5 py-1 text-xs font-semibold text-zinc-950 transition-colors hover:bg-amber-500">Accepter</button>
+                      )}
+                      {rel?.state === "friends" && <span className="text-xs text-amber-400">Ami</span>}
+                      {(p.user_id === userId || isAdmin) && (
+                        <button
+                          onClick={() => deletePost(p.id)}
+                          className="flex h-7 w-7 items-center justify-center rounded-lg text-zinc-600 transition-colors hover:bg-zinc-800 hover:text-orange-400"
+                          aria-label="Supprimer"
+                        >
+                          <IconX size={13} />
+                        </button>
+                      )}
                     </div>
                   </div>
-                )}
-              </div>
+
+                  {/* Post body */}
+                  <div className="px-4 py-3">
+                    <p className="font-semibold text-zinc-50">
+                      {p.cigare_nom}
+                      {p.marque && <span className="font-normal text-zinc-500"> · {p.marque}</span>}
+                    </p>
+                    {p.rating ? (
+                      <div className="mt-1 flex gap-0.5">
+                        {Array.from({ length: p.rating }).map((_, i) => <IconStar key={i} size={12} filled className="text-amber-400" />)}
+                      </div>
+                    ) : null}
+                    {p.photo_url && (
+                      <div className="relative mt-3 h-72 w-full overflow-hidden rounded-xl border border-zinc-800">
+                        <Image src={p.photo_url} alt={p.cigare_nom} fill sizes="448px" className="object-cover" />
+                      </div>
+                    )}
+                    {p.texte && <p className="mt-2 text-sm text-zinc-300 leading-relaxed">{p.texte}</p>}
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex items-center gap-4 border-t border-zinc-800/60 px-4 py-2.5">
+                    <button
+                      onClick={() => toggleLike(p)}
+                      className={`flex items-center gap-1.5 text-sm transition-colors ${p.likedByMe ? "text-amber-400" : "text-zinc-500 hover:text-zinc-300"}`}
+                    >
+                      <span className="text-base leading-none">{p.likedByMe ? "♥" : "♡"}</span>
+                      <span>{p.likeCount}</span>
+                    </button>
+                    <button
+                      onClick={() => toggleComments(p.id)}
+                      className="flex items-center gap-1.5 text-sm text-zinc-500 transition-colors hover:text-zinc-300"
+                    >
+                      <span className="text-base leading-none">○</span>
+                      <span>{p.commentCount}</span>
+                    </button>
+                  </div>
+
+                  {/* Comments */}
+                  {openComments[p.id] && (
+                    <div className="border-t border-zinc-800/60 px-4 py-3 space-y-3">
+                      {openComments[p.id].map((c) => (
+                        <div key={c.id} className="flex items-start gap-2.5">
+                          <Avatar url={c.author?.avatar_url} size={24} />
+                          <p className="flex-1 text-sm text-zinc-300 leading-relaxed">
+                            <span className="font-medium text-zinc-100">{c.author?.pseudo || "Anonyme"} </span>
+                            {c.texte}
+                          </p>
+                          {(c.user_id === userId || isAdmin) && (
+                            <button
+                              onClick={() => deleteComment(p.id, c.id)}
+                              className="flex-shrink-0 text-zinc-700 transition-colors hover:text-orange-400"
+                              aria-label="Supprimer"
+                            >
+                              <IconX size={12} />
+                            </button>
+                          )}
+                        </div>
+                      ))}
+                      <div className="flex gap-2 pt-1">
+                        <input
+                          value={commentInput[p.id] || ""}
+                          onChange={(e) => setCommentInput((m) => ({ ...m, [p.id]: e.target.value }))}
+                          placeholder="Commenter…"
+                          className="flex-1 rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-600 outline-none focus:border-zinc-700 transition-colors"
+                        />
+                        <button onClick={() => addComment(p.id)} className="rounded-xl bg-amber-600 px-3 py-2 text-sm font-semibold text-zinc-950 transition-colors hover:bg-amber-500">
+                          Envoyer
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
               );
             })}
           </div>

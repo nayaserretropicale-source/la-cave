@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import AuthBar from "@/components/AuthBar";
 import { supabase } from "@/lib/supabase";
+import { IconX, IconPlus, IconChevronRight } from "@/components/Icons";
 
 type Envie = { id: string; nom: string; marque: string | null; note: string | null };
 
@@ -60,36 +61,75 @@ export default function Wishlist() {
   }
 
   return (
-    <main className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col items-center px-6 py-12">
+    <main className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col items-center px-4 py-10">
       <div className="w-full max-w-md">
-        <p className="text-xs tracking-[0.3em] uppercase text-amber-500">Envies</p>
-        <h1 className="text-3xl font-semibold mt-1 mb-6">À essayer ✨</h1>
+        <header className="mb-8">
+          <p className="text-[11px] font-medium tracking-widest text-amber-500/80 uppercase mb-1">Liste</p>
+          <h1 className="text-3xl font-semibold tracking-tight text-zinc-50">Mes envies</h1>
+        </header>
 
         <AuthBar />
 
-        <div className="mb-8 space-y-3 rounded-xl border border-zinc-800 bg-zinc-900/50 p-4">
-          <input value={nom} onChange={(e) => setNom(e.target.value)} placeholder="Nom du cigare *" className="w-full rounded-lg bg-zinc-800 px-3 py-2 text-sm outline-none" />
-          <input value={marque} onChange={(e) => setMarque(e.target.value)} placeholder="Marque (optionnel)" className="w-full rounded-lg bg-zinc-800 px-3 py-2 text-sm outline-none" />
-          <textarea value={note} onChange={(e) => setNote(e.target.value)} rows={2} placeholder="Pourquoi / où tu l'as repéré…" className="w-full rounded-lg bg-zinc-800 px-3 py-2 text-sm outline-none" />
-          <button onClick={add} className="w-full rounded-lg bg-amber-600 px-4 py-2.5 font-medium text-zinc-950 transition hover:bg-amber-500">+ Ajouter une envie</button>
-          {msg && <p className="text-sm text-amber-500">{msg}</p>}
+        <div className="mb-8 space-y-3 rounded-2xl border border-zinc-800 bg-zinc-900/40 p-5">
+          <input
+            value={nom}
+            onChange={(e) => setNom(e.target.value)}
+            placeholder="Nom du cigare *"
+            className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 outline-none focus:border-zinc-700 transition-colors"
+          />
+          <input
+            value={marque}
+            onChange={(e) => setMarque(e.target.value)}
+            placeholder="Marque (optionnel)"
+            className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 outline-none focus:border-zinc-700 transition-colors"
+          />
+          <textarea
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            rows={2}
+            placeholder="Pourquoi / où tu l'as repéré…"
+            className="w-full resize-none rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 outline-none focus:border-zinc-700 transition-colors"
+          />
+          <button
+            onClick={add}
+            className="flex w-full items-center justify-center gap-2 rounded-xl bg-amber-600 px-4 py-2.5 text-sm font-semibold text-zinc-950 transition-colors hover:bg-amber-500"
+          >
+            <IconPlus size={15} />
+            Ajouter une envie
+          </button>
+          {msg && <p className="text-sm text-amber-400">{msg}</p>}
         </div>
 
         {items.length === 0 ? (
-          <p className="text-sm text-zinc-500">Aucune envie pour l&apos;instant. Note les cigares que tu veux goûter !</p>
+          <p className="py-8 text-center text-sm text-zinc-600">Aucune envie pour l&apos;instant.</p>
         ) : (
-          <div className="space-y-2">
-            {items.map((it) => (
-              <div key={it.id} className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-4">
+          <div className="overflow-hidden rounded-2xl border border-zinc-800">
+            {items.map((it, i) => (
+              <div
+                key={it.id}
+                className={`bg-zinc-900/40 p-4 ${i < items.length - 1 ? "border-b border-zinc-800/60" : ""}`}
+              >
                 <div className="flex items-start justify-between gap-2">
-                  <div className="min-w-0">
-                    <p className="truncate font-medium">{it.nom}</p>
-                    {it.marque && <p className="text-sm text-zinc-500">{it.marque}</p>}
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate font-medium text-zinc-100">{it.nom}</p>
+                    {it.marque && <p className="text-sm text-zinc-500 mt-0.5">{it.marque}</p>}
+                    {it.note && <p className="mt-2 text-sm text-zinc-400 leading-relaxed">{it.note}</p>}
+                    <button
+                      onClick={() => toCave(it)}
+                      className="mt-3 flex items-center gap-1 text-xs text-zinc-500 transition-colors hover:text-amber-400"
+                    >
+                      Ajouter à ma cave
+                      <IconChevronRight size={12} />
+                    </button>
                   </div>
-                  <button onClick={() => remove(it.id)} className="flex-shrink-0 rounded-md px-2 py-1 text-zinc-500 transition hover:bg-zinc-800 hover:text-orange-400" aria-label="Retirer">✕</button>
+                  <button
+                    onClick={() => remove(it.id)}
+                    className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg text-zinc-600 transition-colors hover:bg-zinc-800 hover:text-orange-400"
+                    aria-label="Retirer"
+                  >
+                    <IconX size={13} />
+                  </button>
                 </div>
-                {it.note && <p className="mt-2 text-sm text-zinc-300">{it.note}</p>}
-                <button onClick={() => toCave(it)} className="mt-3 rounded-lg border border-zinc-700 px-3 py-1.5 text-sm text-zinc-300 transition hover:border-amber-500 hover:text-amber-500">→ Ajouter à ma cave</button>
               </div>
             ))}
           </div>

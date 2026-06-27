@@ -31,22 +31,46 @@ export default function AuthBar() {
 
   if (user) {
     return (
-      <div className="mb-6 flex items-center justify-between rounded-lg border border-zinc-800 bg-zinc-900/50 px-4 py-2 text-sm">
-        <span className="text-zinc-400">Connecté : <span className="text-amber-500">{user}</span></span>
-        <button onClick={signOut} className="text-zinc-400 hover:text-zinc-100">Déconnexion</button>
+      <div className="mb-6 flex items-center justify-between rounded-xl border border-zinc-800 bg-zinc-900/40 px-4 py-2.5 text-sm">
+        <span className="text-zinc-400">
+          <span className="text-amber-400">{user}</span>
+        </span>
+        <button onClick={signOut} className="text-xs text-zinc-500 transition-colors hover:text-zinc-300">
+          Déconnexion
+        </button>
       </div>
     );
   }
 
   return (
-    <div className="mb-6 space-y-2 rounded-lg border border-zinc-800 bg-zinc-900/50 p-4">
-      <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" type="email"
-        className="w-full rounded bg-zinc-800 px-3 py-2 text-sm outline-none" />
-      <input value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Mot de passe" type="password"
-        className="w-full rounded bg-zinc-800 px-3 py-2 text-sm outline-none" />
-      <div className="flex gap-2">
-        <button onClick={signIn} className="flex-1 rounded bg-amber-600 px-3 py-2 text-sm font-medium text-zinc-950 hover:bg-amber-500">Se connecter</button>
-        <button onClick={signUp} className="flex-1 rounded border border-zinc-700 px-3 py-2 text-sm hover:border-amber-500">Créer un compte</button>
+    <div className="mb-6 space-y-2 rounded-xl border border-zinc-800 bg-zinc-900/40 p-4">
+      <input
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        placeholder="Email"
+        type="email"
+        className="w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 outline-none focus:border-zinc-700 transition-colors"
+      />
+      <input
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        placeholder="Mot de passe"
+        type="password"
+        className="w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 outline-none focus:border-zinc-700 transition-colors"
+      />
+      <div className="flex gap-2 pt-1">
+        <button
+          onClick={signIn}
+          className="flex-1 rounded-lg bg-amber-600 px-3 py-2.5 text-sm font-semibold text-zinc-950 transition-colors hover:bg-amber-500"
+        >
+          Se connecter
+        </button>
+        <button
+          onClick={signUp}
+          className="flex-1 rounded-lg border border-zinc-700 px-3 py-2.5 text-sm text-zinc-300 transition-colors hover:border-zinc-600"
+        >
+          Créer un compte
+        </button>
       </div>
       {msg && <p className="text-xs text-zinc-400">{msg}</p>}
     </div>

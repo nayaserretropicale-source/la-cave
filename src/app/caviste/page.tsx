@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 
 type Msg = { role: "user" | "assistant"; content: string };
@@ -84,51 +83,109 @@ export default function Caviste() {
   }
 
   return (
-    <main className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col items-center px-6 py-12">
+    <main className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col items-center px-4 py-10">
       <div className="w-full max-w-md">
-        <Link href="/" className="text-sm text-zinc-500 hover:text-amber-500">← Ma cave</Link>
-        <h1 className="text-3xl font-semibold mt-2 mb-6">Le caviste 🥃</h1>
+        <header className="mb-8">
+          <p className="text-[11px] font-medium tracking-widest text-amber-500/80 uppercase mb-1">Expert</p>
+          <h1 className="text-3xl font-semibold tracking-tight text-zinc-50">Le Caviste</h1>
+        </header>
 
         {messages.length === 0 && (
-          <div className="mb-4 flex flex-wrap gap-2">
+          <div className="mb-6 flex flex-wrap gap-2">
             {SUGGESTIONS.map((s) => (
-              <button key={s} onClick={() => send(s)} className="rounded-full border border-zinc-700 px-3 py-1.5 text-xs text-zinc-300 transition hover:border-amber-500 hover:text-amber-500">
+              <button
+                key={s}
+                onClick={() => send(s)}
+                className="rounded-full border border-zinc-800 px-3 py-1.5 text-xs text-zinc-400 transition-colors hover:border-zinc-600 hover:text-zinc-200"
+              >
                 {s}
               </button>
             ))}
           </div>
         )}
 
-        <div className="space-y-3 mb-4 min-h-[120px]">
+        <div className="mb-4 min-h-[120px] space-y-3">
           {messages.map((m, i) => (
-            <div key={i} className={m.role === "user" ? "ml-auto max-w-[85%] rounded-lg bg-zinc-800 px-4 py-2.5 text-sm" : "mr-auto max-w-[85%] rounded-lg border border-zinc-800 bg-zinc-900/50 px-4 py-2.5 text-sm text-zinc-200 whitespace-pre-wrap"}>
+            <div
+              key={i}
+              className={
+                m.role === "user"
+                  ? "ml-auto max-w-[85%] rounded-2xl rounded-tr-sm bg-zinc-800 px-4 py-3 text-sm text-zinc-100"
+                  : "mr-auto max-w-[85%] rounded-2xl rounded-tl-sm border border-zinc-800 bg-zinc-900/60 px-4 py-3 text-sm text-zinc-200 whitespace-pre-wrap leading-relaxed"
+              }
+            >
               {m.content}
             </div>
           ))}
-          {thinking && <p className="animate-pulse text-sm text-amber-500">Le caviste cherche…</p>}
+          {thinking && (
+            <div className="mr-auto flex items-center gap-2 rounded-2xl rounded-tl-sm border border-zinc-800 bg-zinc-900/60 px-4 py-3">
+              <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-zinc-700 border-t-amber-500" />
+              <span className="text-sm text-zinc-500">Le caviste cherche…</span>
+            </div>
+          )}
         </div>
 
         <div className="flex gap-2">
-          <input value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") send(); }} placeholder="Pose ta question…" className="flex-1 rounded-lg bg-zinc-800 px-3 py-2.5 text-sm outline-none" />
-          <button onClick={() => send()} disabled={thinking} className="rounded-lg bg-amber-600 px-4 py-2.5 font-medium text-zinc-950 transition hover:bg-amber-500 disabled:opacity-50">Envoyer</button>
+          <input
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Enter") send(); }}
+            placeholder="Pose ta question…"
+            className="flex-1 rounded-xl border border-zinc-800 bg-zinc-900/60 px-4 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 outline-none focus:border-zinc-700 transition-colors"
+          />
+          <button
+            onClick={() => send()}
+            disabled={thinking}
+            className="rounded-xl bg-amber-600 px-4 py-2.5 text-sm font-semibold text-zinc-950 transition-colors hover:bg-amber-500 disabled:opacity-50"
+          >
+            Envoyer
+          </button>
         </div>
       </div>
 
       {showLogin && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-6" onClick={() => setShowLogin(false)}>
-          <div className="w-full max-w-sm rounded-2xl border border-zinc-800 bg-zinc-900 p-6" onClick={(e) => e.stopPropagation()}>
-            <h2 className="text-lg font-semibold">Connexion 🔒</h2>
-            <p className="mt-1 text-sm text-zinc-400">Connecte-toi pour parler au caviste — ta question sera envoyée juste après.</p>
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm px-4"
+          onClick={() => setShowLogin(false)}
+        >
+          <div
+            className="w-full max-w-sm rounded-2xl border border-zinc-800 bg-zinc-950 p-6 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 className="text-lg font-semibold tracking-tight">Connexion requise</h2>
+            <p className="mt-1 text-sm text-zinc-400">Ta question sera envoyée juste après la connexion.</p>
 
-            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" autoComplete="email" className="mt-4 w-full rounded-lg bg-zinc-800 px-3 py-2.5 text-sm outline-none" />
-            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") login(); }} placeholder="Mot de passe" autoComplete="current-password" className="mt-2 w-full rounded-lg bg-zinc-800 px-3 py-2.5 text-sm outline-none" />
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Email"
+              autoComplete="email"
+              className="mt-5 w-full rounded-xl border border-zinc-800 bg-zinc-900/60 px-3 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 outline-none focus:border-zinc-700 transition-colors"
+            />
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Enter") login(); }}
+              placeholder="Mot de passe"
+              autoComplete="current-password"
+              className="mt-2 w-full rounded-xl border border-zinc-800 bg-zinc-900/60 px-3 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 outline-none focus:border-zinc-700 transition-colors"
+            />
 
             {loginError && <p className="mt-2 text-sm text-red-400">{loginError}</p>}
 
-            <button onClick={login} disabled={loggingIn} className="mt-4 w-full rounded-lg bg-amber-600 px-4 py-2.5 font-medium text-zinc-950 transition hover:bg-amber-500 disabled:opacity-50">
+            <button
+              onClick={login}
+              disabled={loggingIn}
+              className="mt-4 w-full rounded-xl bg-amber-600 px-4 py-2.5 text-sm font-semibold text-zinc-950 transition-colors hover:bg-amber-500 disabled:opacity-50"
+            >
               {loggingIn ? "Connexion…" : "Se connecter"}
             </button>
-            <button onClick={() => setShowLogin(false)} className="mt-2 w-full rounded-lg border border-zinc-700 px-4 py-2.5 text-sm text-zinc-300 transition hover:border-zinc-500">
+            <button
+              onClick={() => setShowLogin(false)}
+              className="mt-2 w-full rounded-xl border border-zinc-800 px-4 py-2.5 text-sm text-zinc-400 transition-colors hover:border-zinc-700"
+            >
               Annuler
             </button>
           </div>

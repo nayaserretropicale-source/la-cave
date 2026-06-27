@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { supabase } from "@/lib/supabase";
+import { IconUser, IconCamera, IconCercle, IconChevronRight } from "@/components/Icons";
 
 export default function Profil() {
   const [userId, setUserId] = useState<string | null>(null);
@@ -57,15 +58,17 @@ export default function Profil() {
       bio: bio || null,
       avatar_url: avatarUrl,
     });
-    setMsg(error ? "Erreur : " + error.message : "Profil enregistré ✓");
+    setMsg(error ? "Erreur : " + error.message : "Profil enregistré");
   }
 
   if (!userId) {
     return (
-      <main className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col items-center px-6 py-12">
+      <main className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col items-center px-4 py-10">
         <div className="w-full max-w-md">
-          <p className="text-xs tracking-[0.3em] uppercase text-amber-500">Compte</p>
-          <h1 className="text-3xl font-semibold mt-1 mb-6">Mon profil 👤</h1>
+          <header className="mb-8">
+            <p className="text-[11px] font-medium tracking-widest text-amber-500/80 uppercase mb-1">Compte</p>
+            <h1 className="text-3xl font-semibold tracking-tight text-zinc-50">Mon profil</h1>
+          </header>
           <p className="text-sm text-zinc-400">Connecte-toi depuis l&apos;onglet Cave pour créer ton profil.</p>
         </div>
       </main>
@@ -73,41 +76,72 @@ export default function Profil() {
   }
 
   return (
-    <main className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col items-center px-6 py-12">
+    <main className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col items-center px-4 py-10">
       <div className="w-full max-w-md">
-        <p className="text-xs tracking-[0.3em] uppercase text-amber-500">Compte</p>
-        <h1 className="text-3xl font-semibold mt-1 mb-6">Mon profil 👤</h1>
+        <header className="mb-8">
+          <p className="text-[11px] font-medium tracking-widest text-amber-500/80 uppercase mb-1">Compte</p>
+          <h1 className="text-3xl font-semibold tracking-tight text-zinc-50">Mon profil</h1>
+        </header>
 
-        <div className="flex flex-col items-center gap-3">
-          {avatarUrl ? (
-            <Image src={avatarUrl} alt="avatar" width={112} height={112} className="h-28 w-28 rounded-full border-2 border-amber-500 object-cover" />
-          ) : (
-            <div className="flex h-28 w-28 items-center justify-center rounded-full border-2 border-zinc-700 bg-zinc-800 text-4xl">👤</div>
-          )}
-          <label className="cursor-pointer rounded-lg border border-zinc-700 px-4 py-2 text-sm text-zinc-300 transition hover:border-amber-500 hover:text-amber-500">
+        {/* Avatar */}
+        <div className="mb-6 flex flex-col items-center gap-4">
+          <div className="relative">
+            {avatarUrl ? (
+              <Image src={avatarUrl} alt="avatar" width={96} height={96} className="h-24 w-24 rounded-full border-2 border-zinc-700 object-cover" />
+            ) : (
+              <div className="flex h-24 w-24 items-center justify-center rounded-full border-2 border-zinc-700 bg-zinc-800 text-zinc-500">
+                <IconUser size={32} />
+              </div>
+            )}
+          </div>
+          <label className="flex cursor-pointer items-center gap-2 rounded-xl border border-zinc-800 px-4 py-2 text-sm text-zinc-400 transition-colors hover:border-zinc-700 hover:text-zinc-200">
+            <IconCamera size={14} />
             {uploading ? "Envoi…" : "Changer la photo"}
             <input type="file" accept="image/*" onChange={onAvatar} className="hidden" />
           </label>
         </div>
 
-        <Link href="/amis" className="mt-6 flex items-center justify-between rounded-xl border border-zinc-800 bg-zinc-900/50 px-4 py-3 transition hover:border-amber-500">
-          <span className="text-sm">Mes amis 👥</span>
-          <span className="text-amber-500">→</span>
+        {/* Amis */}
+        <Link
+          href="/amis"
+          className="mb-6 flex items-center justify-between rounded-xl border border-zinc-800 bg-zinc-900/40 px-4 py-3.5 transition-colors hover:border-zinc-700"
+        >
+          <div className="flex items-center gap-3">
+            <IconCercle size={16} className="text-zinc-400" />
+            <span className="text-sm text-zinc-200">Mes amis</span>
+          </div>
+          <IconChevronRight size={15} className="text-zinc-600" />
         </Link>
 
-        <div className="mt-6 space-y-4">
+        {/* Formulaire */}
+        <div className="space-y-4">
           <div>
-            <label className="mb-1 block text-xs uppercase tracking-wider text-zinc-500">Pseudo</label>
-            <input value={pseudo} onChange={(e) => setPseudo(e.target.value)} placeholder="Ton nom d'aficionado" className="w-full rounded-lg bg-zinc-800 px-3 py-2 text-sm outline-none" />
+            <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-zinc-500">Pseudo</label>
+            <input
+              value={pseudo}
+              onChange={(e) => setPseudo(e.target.value)}
+              placeholder="Ton nom d'aficionado"
+              className="w-full rounded-xl border border-zinc-800 bg-zinc-900/60 px-3 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 outline-none focus:border-zinc-700 transition-colors"
+            />
           </div>
           <div>
-            <label className="mb-1 block text-xs uppercase tracking-wider text-zinc-500">Bio</label>
-            <textarea value={bio} onChange={(e) => setBio(e.target.value)} rows={3} placeholder="Tes goûts, tes origines préférées…" className="w-full rounded-lg bg-zinc-800 px-3 py-2 text-sm outline-none" />
+            <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-zinc-500">Bio</label>
+            <textarea
+              value={bio}
+              onChange={(e) => setBio(e.target.value)}
+              rows={3}
+              placeholder="Tes goûts, tes origines préférées…"
+              className="w-full resize-none rounded-xl border border-zinc-800 bg-zinc-900/60 px-3 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 outline-none focus:border-zinc-700 transition-colors"
+            />
           </div>
-          <p className="text-xs text-zinc-600">Connecté : {email}</p>
-
-          <button onClick={save} className="w-full rounded-lg bg-amber-600 px-4 py-2.5 font-medium text-zinc-950 transition hover:bg-amber-500">Enregistrer le profil</button>
-          {msg && <p className="text-sm text-amber-500">{msg}</p>}
+          <p className="text-xs text-zinc-600">{email}</p>
+          <button
+            onClick={save}
+            className="w-full rounded-xl bg-amber-600 px-4 py-2.5 text-sm font-semibold text-zinc-950 transition-colors hover:bg-amber-500"
+          >
+            Enregistrer
+          </button>
+          {msg && <p className="text-sm text-amber-400">{msg}</p>}
         </div>
       </div>
     </main>

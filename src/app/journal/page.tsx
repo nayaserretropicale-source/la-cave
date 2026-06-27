@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import AuthBar from "@/components/AuthBar";
 import { supabase } from "@/lib/supabase";
+import { IconX, IconStar, IconPlus } from "@/components/Icons";
 
 type CaveLite = { id: string; nom: string; origine: string | null; photo_url: string | null };
 type Session = {
@@ -74,10 +75,7 @@ export default function Journal() {
 
   async function save() {
     const cig = cave.find((c) => c.id === cigareId);
-    if (!cig) {
-      setMsg("Choisis un cigare de ta cave.");
-      return;
-    }
+    if (!cig) { setMsg("Choisis un cigare de ta cave."); return; }
     setMsg("Enregistrement…");
     const { error } = await supabase.from("degustation").insert({
       cigare_id: cig.id,
@@ -88,11 +86,8 @@ export default function Journal() {
       rating: rating || null,
       commentaire: commentaire || null,
     });
-    if (error) {
-      setMsg("Connecte-toi d'abord pour enregistrer.");
-      return;
-    }
-    setMsg("Dégustation enregistrée ✓");
+    if (error) { setMsg("Connecte-toi d'abord pour enregistrer."); return; }
+    setMsg("Dégustation enregistrée");
     resetForm();
     setOpen(false);
     loadSessions();
@@ -139,10 +134,12 @@ export default function Journal() {
   const hasData = cave.length > 0 || sessions.length > 0;
 
   return (
-    <main className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col items-center px-6 py-12">
+    <main className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col items-center px-4 py-10">
       <div className="w-full max-w-md">
-        <p className="text-xs tracking-[0.3em] uppercase text-amber-500">Carnet</p>
-        <h1 className="text-3xl font-semibold mt-1 mb-6">Journal de dégustation 📓</h1>
+        <header className="mb-8">
+          <p className="text-[11px] font-medium tracking-widest text-amber-500/80 uppercase mb-1">Carnet</p>
+          <h1 className="text-3xl font-semibold tracking-tight text-zinc-50">Journal</h1>
+        </header>
 
         <AuthBar />
 
@@ -151,89 +148,150 @@ export default function Journal() {
             <Stat label="En cave" value={String(cave.length)} />
             <Stat label="Dégustations" value={String(sessions.length)} />
             <Stat label="Ce mois-ci" value={String(moisCount)} />
-            <Stat label="Note moyenne" value={moyenne ? `${moyenne.toFixed(1)} ★` : "—"} />
-            <div className="col-span-2 rounded-xl border border-zinc-800 bg-zinc-900/50 px-4 py-3">
-              <p className="text-[11px] uppercase tracking-wider text-zinc-500">Origine préférée</p>
-              <p className="mt-0.5 text-amber-500">{originePref}</p>
+            <Stat label="Note moyenne" value={moyenne ? `${moyenne.toFixed(1)} / 5` : "—"} />
+            <div className="col-span-2 rounded-xl border border-zinc-800 bg-zinc-900/40 px-4 py-3">
+              <p className="text-[11px] font-medium uppercase tracking-wider text-zinc-500">Origine préférée</p>
+              <p className="mt-0.5 text-amber-400">{originePref}</p>
             </div>
           </div>
         )}
 
-        <button onClick={() => setOpen((v) => !v)} className="mb-6 w-full rounded-lg bg-amber-600 px-4 py-2.5 font-medium text-zinc-950 transition hover:bg-amber-500">
-          {open ? "Fermer" : "+ Nouvelle dégustation"}
+        <button
+          onClick={() => setOpen((v) => !v)}
+          className="mb-6 flex w-full items-center justify-center gap-2 rounded-xl bg-amber-600 px-4 py-2.5 text-sm font-semibold text-zinc-950 transition-colors hover:bg-amber-500"
+        >
+          {open ? "Fermer" : <><IconPlus size={15} /> Nouvelle dégustation</>}
         </button>
 
         {open && (
-          <div className="mb-8 space-y-3 rounded-xl border border-zinc-800 bg-zinc-900/50 p-4">
+          <div className="mb-8 space-y-4 rounded-2xl border border-zinc-800 bg-zinc-900/40 p-5">
             <div>
-              <label className="mb-1 block text-xs uppercase tracking-wider text-zinc-500">Cigare</label>
-              <select value={cigareId} onChange={(e) => setCigareId(e.target.value)} className="w-full rounded-lg bg-zinc-800 px-3 py-2 text-sm outline-none">
+              <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-zinc-500">Cigare</label>
+              <select
+                value={cigareId}
+                onChange={(e) => setCigareId(e.target.value)}
+                className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-zinc-100 outline-none focus:border-zinc-700 transition-colors"
+              >
                 <option value="">— Choisir dans ma cave —</option>
                 {cave.map((c) => (<option key={c.id} value={c.id}>{c.nom}</option>))}
               </select>
-              {cave.length === 0 && <p className="mt-1 text-xs text-zinc-500">Ta cave est vide : ajoute d&apos;abord un cigare depuis l&apos;onglet Cave.</p>}
+              {cave.length === 0 && <p className="mt-1 text-xs text-zinc-500">Ta cave est vide — ajoute d&apos;abord un cigare.</p>}
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="mb-1 block text-xs uppercase tracking-wider text-zinc-500">Date</label>
-                <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="w-full rounded-lg bg-zinc-800 px-3 py-2 text-sm outline-none" />
+                <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-zinc-500">Date</label>
+                <input
+                  type="date"
+                  value={date}
+                  onChange={(e) => setDate(e.target.value)}
+                  className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-zinc-100 outline-none focus:border-zinc-700 transition-colors"
+                />
               </div>
               <div>
-                <label className="mb-1 block text-xs uppercase tracking-wider text-zinc-500">Durée (min)</label>
-                <input type="number" inputMode="numeric" value={duree} onChange={(e) => setDuree(e.target.value)} placeholder="45" className="w-full rounded-lg bg-zinc-800 px-3 py-2 text-sm outline-none" />
+                <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-zinc-500">Durée (min)</label>
+                <input
+                  type="number"
+                  inputMode="numeric"
+                  value={duree}
+                  onChange={(e) => setDuree(e.target.value)}
+                  placeholder="45"
+                  className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 outline-none focus:border-zinc-700 transition-colors"
+                />
               </div>
             </div>
 
             <div>
-              <label className="mb-1 block text-xs uppercase tracking-wider text-zinc-500">Accord</label>
-              <input value={accord} onChange={(e) => setAccord(e.target.value)} placeholder="Rhum vieux, café…" className="w-full rounded-lg bg-zinc-800 px-3 py-2 text-sm outline-none" />
+              <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-zinc-500">Accord</label>
+              <input
+                value={accord}
+                onChange={(e) => setAccord(e.target.value)}
+                placeholder="Rhum vieux, café…"
+                className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 outline-none focus:border-zinc-700 transition-colors"
+              />
             </div>
 
             <div>
-              <label className="mb-1 block text-xs uppercase tracking-wider text-zinc-500">Note</label>
-              <div className="flex gap-1">
+              <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-zinc-500">Note</label>
+              <div className="flex gap-1.5">
                 {[1, 2, 3, 4, 5].map((n) => (
-                  <button key={n} type="button" onClick={() => setRating(n)} className={`text-2xl ${n <= rating ? "text-amber-500" : "text-zinc-600"}`} aria-label={`${n} étoiles`}>★</button>
+                  <button key={n} type="button" onClick={() => setRating(n)} aria-label={`${n} étoile${n > 1 ? "s" : ""}`}>
+                    <IconStar size={24} filled={n <= rating} className={n <= rating ? "text-amber-400" : "text-zinc-700"} />
+                  </button>
                 ))}
               </div>
             </div>
 
             <div>
-              <label className="mb-1 block text-xs uppercase tracking-wider text-zinc-500">Ressenti</label>
-              <textarea value={commentaire} onChange={(e) => setCommentaire(e.target.value)} rows={3} placeholder="Arômes, tirage, évolution…" className="w-full rounded-lg bg-zinc-800 px-3 py-2 text-sm outline-none" />
+              <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-zinc-500">Ressenti</label>
+              <textarea
+                value={commentaire}
+                onChange={(e) => setCommentaire(e.target.value)}
+                rows={3}
+                placeholder="Arômes, tirage, évolution…"
+                className="w-full resize-none rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 outline-none focus:border-zinc-700 transition-colors"
+              />
             </div>
 
-            <button onClick={save} className="w-full rounded-lg bg-amber-600 px-4 py-2.5 font-medium text-zinc-950 transition hover:bg-amber-500">Enregistrer la dégustation</button>
-            {msg && <p className="text-sm text-amber-500">{msg}</p>}
+            <button
+              onClick={save}
+              className="w-full rounded-xl bg-amber-600 px-4 py-2.5 text-sm font-semibold text-zinc-950 transition-colors hover:bg-amber-500"
+            >
+              Enregistrer la dégustation
+            </button>
+            {msg && <p className="text-sm text-amber-400">{msg}</p>}
           </div>
         )}
 
-        {shareMsg && <p className="mb-3 text-sm text-amber-500">{shareMsg}</p>}
+        {shareMsg && <p className="mb-4 text-sm text-amber-400">{shareMsg}</p>}
 
         {sessions.length === 0 ? (
-          <p className="text-sm text-zinc-500">Aucune dégustation pour l&apos;instant. Note ta première session !</p>
+          <p className="py-8 text-center text-sm text-zinc-600">Aucune dégustation pour l&apos;instant.</p>
         ) : (
-          <div className="space-y-3">
-            {sessions.map((s) => (
-              <div key={s.id} className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-4">
+          <div className="overflow-hidden rounded-2xl border border-zinc-800">
+            {sessions.map((s, i) => (
+              <div
+                key={s.id}
+                className={`bg-zinc-900/40 p-4 ${i < sessions.length - 1 ? "border-b border-zinc-800/60" : ""}`}
+              >
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
-                    <p className="truncate font-medium">{s.nom}</p>
-                    <p className="text-xs text-zinc-500">{frDate(s.date_fume)}</p>
+                    <p className="truncate font-medium text-zinc-100">{s.nom}</p>
+                    <p className="text-xs text-zinc-500 mt-0.5">{frDate(s.date_fume)}</p>
                   </div>
-                  <button onClick={() => removeSession(s.id)} className="flex-shrink-0 rounded-md px-2 py-1 text-zinc-500 transition hover:bg-zinc-800 hover:text-orange-400" aria-label="Supprimer">✕</button>
+                  <button
+                    onClick={() => removeSession(s.id)}
+                    className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg text-zinc-600 transition-colors hover:bg-zinc-800 hover:text-orange-400"
+                    aria-label="Supprimer"
+                  >
+                    <IconX size={13} />
+                  </button>
                 </div>
-                {s.rating ? <p className="mt-1 text-sm text-amber-500">{"★".repeat(s.rating)}</p> : null}
+
+                {s.rating ? (
+                  <div className="mt-1.5 flex gap-0.5">
+                    {Array.from({ length: s.rating }).map((_, i) => (
+                      <IconStar key={i} size={12} filled className="text-amber-400" />
+                    ))}
+                  </div>
+                ) : null}
+
                 {(s.duree_min || s.accord) && (
-                  <p className="mt-1 text-sm text-zinc-400">{[s.duree_min ? `${s.duree_min} min` : null, s.accord].filter(Boolean).join(" · ")}</p>
+                  <p className="mt-1.5 text-sm text-zinc-400">
+                    {[s.duree_min ? `${s.duree_min} min` : null, s.accord].filter(Boolean).join(" · ")}
+                  </p>
                 )}
-                {s.commentaire && <p className="mt-2 text-sm text-zinc-300">{s.commentaire}</p>}
+                {s.commentaire && <p className="mt-2 text-sm text-zinc-300 leading-relaxed">{s.commentaire}</p>}
 
                 {sharedIds.has(s.id) ? (
-                  <p className="mt-3 text-sm text-amber-500">Partagé au cercle ✓</p>
+                  <p className="mt-3 text-xs text-amber-400">Partagé au cercle</p>
                 ) : (
-                  <button onClick={() => shareSession(s)} className="mt-3 rounded-lg border border-zinc-700 px-3 py-1.5 text-sm text-zinc-300 transition hover:border-amber-500 hover:text-amber-500">Partager au cercle 👥</button>
+                  <button
+                    onClick={() => shareSession(s)}
+                    className="mt-3 rounded-lg border border-zinc-800 px-3 py-1.5 text-xs text-zinc-400 transition-colors hover:border-zinc-700 hover:text-zinc-200"
+                  >
+                    Partager au cercle
+                  </button>
                 )}
               </div>
             ))}
@@ -246,9 +304,9 @@ export default function Journal() {
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 px-4 py-3">
-      <p className="text-[11px] uppercase tracking-wider text-zinc-500">{label}</p>
-      <p className="mt-0.5 text-xl font-semibold">{value}</p>
+    <div className="rounded-xl border border-zinc-800 bg-zinc-900/40 px-4 py-3">
+      <p className="text-[11px] font-medium uppercase tracking-wider text-zinc-500">{label}</p>
+      <p className="mt-0.5 text-xl font-semibold text-zinc-50">{value}</p>
     </div>
   );
 }

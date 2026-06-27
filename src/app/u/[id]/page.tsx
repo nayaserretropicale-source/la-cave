@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { IconUser, IconStar } from "@/components/Icons";
 
 type Profile = { id: string; pseudo: string | null; avatar_url: string | null; bio: string | null };
 type Friendship = { id: string; requester_id: string; addressee_id: string; status: string };
@@ -79,51 +80,116 @@ export default function PublicProfile() {
   }
 
   if (notFound) {
-    return (<main className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col items-center px-6 py-12"><div className="w-full max-w-md"><Link href="/communaute" className="text-sm text-amber-500">← Communauté</Link><p className="mt-6 text-sm text-zinc-400">Profil introuvable.</p></div></main>);
+    return (
+      <main className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col items-center px-4 py-10">
+        <div className="w-full max-w-md">
+          <Link href="/communaute" className="text-sm text-zinc-500 transition-colors hover:text-zinc-300">← Communauté</Link>
+          <p className="mt-8 text-sm text-zinc-500">Profil introuvable.</p>
+        </div>
+      </main>
+    );
   }
+
   if (!prof) {
-    return (<main className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col items-center px-6 py-12"><div className="w-full max-w-md"><p className="text-sm text-zinc-500">Chargement…</p></div></main>);
+    return (
+      <main className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col items-center px-4 py-10">
+        <div className="w-full max-w-md">
+          <div className="flex items-center gap-3 py-8">
+            <div className="h-4 w-4 animate-spin rounded-full border-2 border-zinc-700 border-t-amber-500" />
+            <p className="text-sm text-zinc-400">Chargement…</p>
+          </div>
+        </div>
+      </main>
+    );
   }
 
   const isMe = me === profileId;
   const rel = relation();
 
   return (
-    <main className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col items-center px-6 py-12">
+    <main className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col items-center px-4 py-10">
       <div className="w-full max-w-md">
-        <Link href="/communaute" className="text-sm text-amber-500">← Communauté</Link>
+        <Link href="/communaute" className="text-sm text-zinc-500 transition-colors hover:text-zinc-300">← Communauté</Link>
 
+        {/* Profile header */}
         <div className="mt-6 flex items-center gap-4">
-          {prof.avatar_url ? <Image src={prof.avatar_url} alt="" width={80} height={80} className="h-20 w-20 rounded-full border-2 border-amber-500 object-cover" /> : <div className="flex h-20 w-20 items-center justify-center rounded-full border-2 border-zinc-700 bg-zinc-800 text-3xl">👤</div>}
+          {prof.avatar_url ? (
+            <Image src={prof.avatar_url} alt="" width={72} height={72} className="h-18 w-18 rounded-full border-2 border-zinc-700 object-cover flex-shrink-0" />
+          ) : (
+            <div className="flex h-[72px] w-[72px] flex-shrink-0 items-center justify-center rounded-full border-2 border-zinc-700 bg-zinc-800 text-zinc-500">
+              <IconUser size={28} />
+            </div>
+          )}
           <div className="min-w-0 flex-1">
-            <h1 className="truncate text-2xl font-semibold">{prof.pseudo || "Membre"}</h1>
-            {!isMe && rel.state === "none" && <button onClick={addFriend} className="mt-1 rounded-lg border border-zinc-700 px-3 py-1.5 text-sm text-zinc-300 transition hover:border-amber-500 hover:text-amber-500">+ Ajouter en ami</button>}
-            {!isMe && rel.state === "sent" && <button onClick={() => rel.row && removeLink(rel.row.id)} className="mt-1 rounded-lg border border-zinc-700 px-3 py-1.5 text-sm text-zinc-400 transition hover:border-orange-400 hover:text-orange-400">Demande envoyée · Annuler</button>}
-            {!isMe && rel.state === "incoming" && rel.row && <button onClick={() => accept(rel.row!.id)} className="mt-1 rounded-lg bg-amber-600 px-3 py-1.5 text-sm font-medium text-zinc-950 transition hover:bg-amber-500">Accepter la demande</button>}
-            {!isMe && rel.state === "friends" && <button onClick={() => rel.row && removeLink(rel.row.id)} className="mt-1 rounded-lg border border-amber-700/50 px-3 py-1.5 text-sm text-amber-500 transition hover:border-orange-400 hover:text-orange-400">Ami ✓ · Retirer</button>}
+            <h1 className="truncate text-2xl font-semibold tracking-tight text-zinc-50">{prof.pseudo || "Membre"}</h1>
+            {!isMe && (
+              <div className="mt-2">
+                {rel.state === "none" && (
+                  <button onClick={addFriend} className="rounded-lg border border-zinc-700 px-3 py-1.5 text-xs font-medium text-zinc-400 transition-colors hover:border-zinc-600 hover:text-zinc-200">
+                    + Ajouter en ami
+                  </button>
+                )}
+                {rel.state === "sent" && (
+                  <button onClick={() => rel.row && removeLink(rel.row.id)} className="rounded-lg border border-zinc-700 px-3 py-1.5 text-xs text-zinc-500 transition-colors hover:border-orange-400/40 hover:text-orange-400">
+                    Demande envoyée · Annuler
+                  </button>
+                )}
+                {rel.state === "incoming" && rel.row && (
+                  <button onClick={() => accept(rel.row!.id)} className="rounded-lg bg-amber-600 px-3 py-1.5 text-xs font-semibold text-zinc-950 transition-colors hover:bg-amber-500">
+                    Accepter la demande
+                  </button>
+                )}
+                {rel.state === "friends" && (
+                  <button onClick={() => rel.row && removeLink(rel.row.id)} className="rounded-lg border border-amber-700/30 px-3 py-1.5 text-xs text-amber-400 transition-colors hover:border-orange-400/40 hover:text-orange-400">
+                    Ami · Retirer
+                  </button>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
-        {prof.bio && <p className="mt-4 text-sm text-zinc-300">{prof.bio}</p>}
+        {prof.bio && <p className="mt-4 text-sm text-zinc-400 leading-relaxed">{prof.bio}</p>}
 
-        <p className="mt-8 mb-3 text-xs uppercase tracking-[0.3em] text-amber-500">Publications</p>
+        {/* Posts */}
+        <p className="mt-8 mb-3 text-xs font-medium uppercase tracking-widest text-zinc-500">
+          Publications ({posts.length})
+        </p>
         {posts.length === 0 ? (
-          <p className="text-sm text-zinc-500">Aucune publication.</p>
+          <p className="py-6 text-center text-sm text-zinc-600">Aucune publication.</p>
         ) : (
           <div className="space-y-4">
             {posts.map((p) => (
-              <div key={p.id} className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-4">
-                <p className="font-semibold">{p.cigare_nom}{p.marque ? <span className="font-normal text-zinc-500"> · {p.marque}</span> : null}</p>
-                {p.rating ? <p className="text-sm text-amber-500">{"★".repeat(p.rating)}</p> : null}
-                {p.photo_url && (
-                  <div className="relative mt-2 h-72 w-full overflow-hidden rounded-lg border border-zinc-800">
-                    <Image src={p.photo_url} alt={p.cigare_nom} fill sizes="448px" className="object-cover" />
-                  </div>
-                )}
-                {p.texte && <p className="mt-2 text-sm text-zinc-300">{p.texte}</p>}
-                <div className="mt-3 flex items-center gap-4 text-sm">
-                  <button onClick={() => toggleLike(p)} className={`flex items-center gap-1 transition ${p.likedByMe ? "text-amber-500" : "text-zinc-400 hover:text-amber-500"}`}>{p.likedByMe ? "♥" : "♡"} {p.likeCount}</button>
-                  <span className="text-zinc-400">💬 {p.commentCount}</span>
+              <div key={p.id} className="overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900/40">
+                <div className="px-4 py-3">
+                  <p className="font-semibold text-zinc-50">
+                    {p.cigare_nom}
+                    {p.marque && <span className="font-normal text-zinc-500"> · {p.marque}</span>}
+                  </p>
+                  {p.rating ? (
+                    <div className="mt-1 flex gap-0.5">
+                      {Array.from({ length: p.rating }).map((_, i) => <IconStar key={i} size={12} filled className="text-amber-400" />)}
+                    </div>
+                  ) : null}
+                  {p.photo_url && (
+                    <div className="relative mt-3 h-72 w-full overflow-hidden rounded-xl border border-zinc-800">
+                      <Image src={p.photo_url} alt={p.cigare_nom} fill sizes="448px" className="object-cover" />
+                    </div>
+                  )}
+                  {p.texte && <p className="mt-2 text-sm text-zinc-300 leading-relaxed">{p.texte}</p>}
+                </div>
+                <div className="flex items-center gap-4 border-t border-zinc-800/60 px-4 py-2.5">
+                  <button
+                    onClick={() => toggleLike(p)}
+                    className={`flex items-center gap-1.5 text-sm transition-colors ${p.likedByMe ? "text-amber-400" : "text-zinc-500 hover:text-zinc-300"}`}
+                  >
+                    <span className="text-base leading-none">{p.likedByMe ? "♥" : "♡"}</span>
+                    <span>{p.likeCount}</span>
+                  </button>
+                  <span className="flex items-center gap-1.5 text-sm text-zinc-600">
+                    <span className="text-base leading-none">○</span>
+                    <span>{p.commentCount}</span>
+                  </span>
                 </div>
               </div>
             ))}
