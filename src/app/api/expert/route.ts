@@ -1,10 +1,15 @@
 import { NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
+import MemoryClient from "mem0ai";
 import { requireUser } from "@/lib/api-guard";
 
 export const runtime = "nodejs";
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+
+const mem0 = process.env.MEM0_API_KEY
+  ? new MemoryClient({ apiKey: process.env.MEM0_API_KEY })
+  : null;
 
 const SYSTEM = `Tu es un caviste-tabac francophone avec 30 ans de métier (dégustateur passionné de cigares). Réponses précises, concrètes et concises (4 à 6 phrases max), ton chaleureux et accessible. Tu conseilles sur les formats, capes, accords boissons, conservation et dégustation, et le choix selon le goût. Tu n'encourages pas à fumer ; tu informes celui qui fume déjà.`;
 
@@ -32,7 +37,7 @@ function sanitize(messages: unknown): IncomingMsg[] | null {
 }
 
 export async function POST(req: Request) {
-  const { error } = await requireUser(req);
+  const { user, error } = await requireUser(req);
   if (error) return error;
 
   try {
@@ -42,16 +47,36 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "requête invalide" }, { status: 400 });
     }
 
+    // Injecter les souvenirs mem0 dans le system prompt
+    let system = SYSTEM;
+    if (mem0 && user) {
+      const lastMsg = messages[messages.length - 1];
+      const { results } = await mem0.search(lastMsg.content, { filters: { user_id: user.id } }) as { results: { memory: string }[] };
+      if (results?.length) {
+        system += "\n\nCe que tu sais déjà de cet amateur :\n" + results.map((r) => `- ${r.memory}`).join("\n");
+      }
+    }
+
     const msg = await anthropic.messages.create({
       model: "claude-sonnet-4-6",
       max_tokens: 600,
-      system: SYSTEM,
+      system,
       messages,
     });
     const reply = msg.content
       .filter((b): b is Anthropic.TextBlock => b.type === "text")
       .map((b) => b.text)
       .join("");
+
+    // Sauvegarder l'échange dans mem0
+    if (mem0 && user && reply) {
+      const lastMsg = messages[messages.length - 1];
+      await mem0.add(
+        [{ role: "user", content: lastMsg.content }, { role: "assistant", content: reply }],
+        { userId: user.id }
+      ).catch(() => {});
+    }
+
     return NextResponse.json({ reply });
   } catch (err) {
     console.error(err);
