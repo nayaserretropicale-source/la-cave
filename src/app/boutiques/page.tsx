@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import AuthBar from "@/components/AuthBar";
 import { IconMap } from "@/components/Icons";
+import { useConfirm } from "@/components/Confirm";
 import { supabase } from "@/lib/supabase";
 
 type Lieu = {
@@ -23,6 +24,7 @@ function mapsUrl(l: { nom: string; adresse: string | null; ville: string | null;
 }
 
 export default function Boutiques() {
+  const confirm = useConfirm();
   const [userId, setUserId] = useState<string | null>(null);
   const [list, setList] = useState<Lieu[]>([]);
   const [paysF, setPaysF] = useState("");
@@ -75,7 +77,7 @@ export default function Boutiques() {
   }
 
   async function remove(id: string) {
-    if (!window.confirm("Retirer cette boutique de l'annuaire ?")) return;
+    if (!(await confirm({ message: "Retirer cette boutique de l'annuaire ?", confirmLabel: "Retirer", danger: true }))) return;
     await supabase.from("lieux").delete().eq("id", id);
     load();
   }

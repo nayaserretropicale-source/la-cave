@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { IconCave } from "./Icons";
 
 export default function AgeGate() {
   const [status, setStatus] = useState<"loading" | "ask" | "ok" | "denied">("loading");
@@ -20,8 +21,10 @@ export default function AgeGate() {
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-zinc-950 px-6">
       <div className="rise w-full max-w-sm rounded-2xl border border-zinc-800 bg-zinc-900 p-6 text-center text-zinc-100">
-        <p className="text-4xl">🥃</p>
-        <h2 className="mt-3 text-xl font-semibold">La Cave</h2>
+        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-amber-600/10 text-amber-400">
+          <IconCave size={24} />
+        </div>
+        <h2 className="mt-3 font-display text-xl font-semibold">La Cave</h2>
 
         {status === "ask" ? (
           <>
@@ -41,7 +44,7 @@ export default function AgeGate() {
           </>
         ) : (
           <p className="mt-2 text-sm text-zinc-400">
-            Désolé, La Cave est réservée aux personnes majeures. 🔞
+            Désolé, La Cave est réservée aux personnes majeures.
           </p>
         )}
       </div>

@@ -4,10 +4,12 @@ import { useEffect, useState } from "react";
 import AuthBar from "@/components/AuthBar";
 import { supabase } from "@/lib/supabase";
 import { IconX, IconPlus, IconChevronRight } from "@/components/Icons";
+import { useConfirm } from "@/components/Confirm";
 
 type Envie = { id: string; nom: string; marque: string | null; note: string | null };
 
 export default function Wishlist() {
+  const confirm = useConfirm();
   const [items, setItems] = useState<Envie[]>([]);
   const [nom, setNom] = useState("");
   const [marque, setMarque] = useState("");
@@ -43,13 +45,13 @@ export default function Wishlist() {
   }
 
   async function remove(id: string) {
-    if (!window.confirm("Retirer de tes envies ?")) return;
+    if (!(await confirm({ message: "Retirer de tes envies ?", confirmLabel: "Retirer", danger: true }))) return;
     await supabase.from("wishlist").delete().eq("id", id);
     load();
   }
 
   async function toCave(item: Envie) {
-    if (!window.confirm(`Ajouter « ${item.nom} » à ta cave ?`)) return;
+    if (!(await confirm({ message: `Ajouter « ${item.nom} » à ta cave ?`, confirmLabel: "Ajouter" }))) return;
     const { error } = await supabase.from("cave").insert({
       nom: item.nom,
       marque: item.marque,

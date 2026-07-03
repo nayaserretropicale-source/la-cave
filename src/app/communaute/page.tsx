@@ -6,6 +6,7 @@ import Image from "next/image";
 import AuthBar from "@/components/AuthBar";
 import { supabase } from "@/lib/supabase";
 import { IconUser, IconX, IconStar, IconCamera, IconPlus } from "@/components/Icons";
+import { useConfirm } from "@/components/Confirm";
 
 type Author = { pseudo: string | null; avatar_url: string | null };
 type Comment = { id: string; user_id: string; texte: string; author?: Author };
@@ -51,6 +52,7 @@ export default function Communaute() {
   const [msg, setMsg] = useState("");
   const [openComments, setOpenComments] = useState<Record<string, Comment[]>>({});
   const [commentInput, setCommentInput] = useState<Record<string, string>>({});
+  const confirm = useConfirm();
 
   async function loadMe() {
     const { data: { session } } = await supabase.auth.getSession();
@@ -59,7 +61,14 @@ export default function Communaute() {
     setUserId(user.id);
     const { data } = await supabase.from("profiles").select("pseudo,majeur,is_admin").eq("id", user.id).single();
     setPseudo(data?.pseudo ?? null);
-    setMajeur(data?.majeur === true);
+    // Gate d'âge unifié : avoir passé l'AgeGate global (localStorage) vaut
+    // confirmation majeur. On synchronise vers la DB pour le rendre durable.
+    const passedGate = typeof window !== "undefined" && localStorage.getItem("lacave_age_ok") === "1";
+    const dbMajeur = data?.majeur === true;
+    setMajeur(dbMajeur || passedGate);
+    if (passedGate && !dbMajeur) {
+      supabase.from("profiles").upsert({ id: user.id, majeur: true });
+    }
     setIsAdmin(data?.is_admin === true);
   }
 
@@ -102,6 +111,8 @@ export default function Communaute() {
 
   async function confirmMajeur() {
     if (!userId) return;
+    // On garde les deux gates en phase : confirmer ici satisfait aussi l'AgeGate global.
+    if (typeof window !== "undefined") localStorage.setItem("lacave_age_ok", "1");
     await supabase.from("profiles").upsert({ id: userId, majeur: true });
     setMajeur(true);
   }
@@ -164,17 +175,26 @@ export default function Communaute() {
   }
 
   async function toggleLike(p: Post) {
-    if (p.likedByMe) {
-      await supabase.from("likes").delete().eq("post_id", p.id).eq("user_id", userId);
-    } else {
-      await supabase.from("likes").insert({ post_id: p.id });
-      sendPush("like", p.user_id, p.id);
+    const liking = !p.likedByMe;
+    // Mise à jour optimiste : le geste le plus fréquent doit être instantané.
+    setPosts((prev) => prev.map((x) =>
+      x.id === p.id ? { ...x, likedByMe: liking, likeCount: x.likeCount + (liking ? 1 : -1) } : x
+    ));
+    const { error } = liking
+      ? await supabase.from("likes").insert({ post_id: p.id })
+      : await supabase.from("likes").delete().eq("post_id", p.id).eq("user_id", userId);
+    if (error) {
+      // rollback si l'écriture échoue
+      setPosts((prev) => prev.map((x) =>
+        x.id === p.id ? { ...x, likedByMe: !liking, likeCount: x.likeCount + (liking ? -1 : 1) } : x
+      ));
+      return;
     }
-    loadFeed();
+    if (liking) sendPush("like", p.user_id, p.id);
   }
 
   async function deletePost(id: string) {
-    if (!window.confirm("Supprimer cette publication ?")) return;
+    if (!(await confirm({ message: "Supprimer cette publication ?", confirmLabel: "Supprimer", danger: true }))) return;
     await supabase.from("posts").delete().eq("id", id);
     loadFeed();
   }
@@ -208,7 +228,7 @@ export default function Communaute() {
   }
 
   async function deleteComment(postId: string, commentId: string) {
-    if (!window.confirm("Supprimer ce commentaire ?")) return;
+    if (!(await confirm({ message: "Supprimer ce commentaire ?", confirmLabel: "Supprimer", danger: true }))) return;
     await supabase.from("comments").delete().eq("id", commentId);
     await refreshComments(postId);
     loadFeed();

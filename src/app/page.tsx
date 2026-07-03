@@ -6,6 +6,7 @@ import Image from "next/image";
 import AuthBar from "@/components/AuthBar";
 import { supabase } from "@/lib/supabase";
 import { compressImage } from "@/lib/image";
+import { useConfirm } from "@/components/Confirm";
 import {
   IconCamera, IconPlus, IconEdit, IconX, IconStar,
   IconMoon, IconCaviste, IconMap, IconHeart, IconBook, IconChevronRight,
@@ -77,6 +78,7 @@ export default function Home() {
   const [file, setFile] = useState<File | null>(null);
   const [cave, setCave] = useState<CaveItem[]>([]);
   const [saveMsg, setSaveMsg] = useState("");
+  const confirm = useConfirm();
   const [selected, setSelected] = useState<CaveItem | null>(null);
   const [ratingDraft, setRatingDraft] = useState(0);
   const [noteDraft, setNoteDraft] = useState("");
@@ -213,7 +215,7 @@ export default function Home() {
   }
 
   async function removeFromCave(id: string) {
-    if (!window.confirm("Supprimer ce cigare de ta cave ?")) return;
+    if (!(await confirm({ message: "Supprimer ce cigare de ta cave ?", confirmLabel: "Supprimer", danger: true }))) return;
     await supabase.from("cave").delete().eq("id", id);
     loadCave();
   }
@@ -241,6 +243,29 @@ export default function Home() {
     });
     setHistoire(null);
     setHistoireLoading(false);
+  }
+
+  function isDetailDirty() {
+    if (!selected) return false;
+    if (ratingDraft !== (selected.rating ?? 0)) return true;
+    if (noteDraft !== (selected.note_perso ?? "")) return true;
+    if (qteDraft !== (selected.quantite ?? 1)) return true;
+    if (statutDraft !== (selected.statut ?? "en_cave")) return true;
+    if (editing) {
+      const orig = {
+        nom: selected.nom ?? "", marque: selected.marque ?? "", origine: selected.origine ?? "",
+        format: selected.format ?? "", cape: selected.cape ?? "", force: selected.force ?? "",
+        duree_fume: selected.duree_fume ?? "", accord: selected.accord ?? "", conservation: selected.conservation ?? "",
+        premier_tiers: selected.premier_tiers ?? "", deuxieme_tiers: selected.deuxieme_tiers ?? "", troisieme_tiers: selected.troisieme_tiers ?? "",
+      };
+      if (JSON.stringify(orig) !== JSON.stringify(form)) return true;
+    }
+    return false;
+  }
+
+  async function requestCloseDetail() {
+    if (isDetailDirty() && !(await confirm({ message: "Fermer sans enregistrer tes modifications ?", confirmLabel: "Fermer", danger: true }))) return;
+    setSelected(null);
   }
 
   async function saveDetail() {
@@ -610,7 +635,7 @@ export default function Home() {
       {selected && (
         <div
           className="fixed inset-0 z-[60] flex items-end justify-center overflow-y-auto bg-black/80 backdrop-blur-sm p-4 sm:items-center"
-          onClick={() => setSelected(null)}
+          onClick={requestCloseDetail}
         >
           <div
             className="rise my-auto w-full max-w-md rounded-2xl border border-zinc-800 bg-zinc-950 shadow-2xl shadow-black/60"
@@ -798,7 +823,7 @@ export default function Home() {
                 <button onClick={saveDetail} className="btn-press flex-1 rounded-xl bg-amber-600 px-4 py-2.5 text-sm font-semibold text-zinc-950 transition-colors hover:bg-amber-500">
                   Enregistrer
                 </button>
-                <button onClick={() => setSelected(null)} className="rounded-xl border border-zinc-800 px-4 py-2.5 text-sm text-zinc-400 transition-colors hover:border-zinc-700">
+                <button onClick={requestCloseDetail} className="rounded-xl border border-zinc-800 px-4 py-2.5 text-sm text-zinc-400 transition-colors hover:border-zinc-700">
                   Fermer
                 </button>
               </div>

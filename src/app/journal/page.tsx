@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import AuthBar from "@/components/AuthBar";
 import { supabase } from "@/lib/supabase";
 import { IconX, IconStar, IconPlus } from "@/components/Icons";
+import { useConfirm } from "@/components/Confirm";
 
 type CaveLite = { id: string; nom: string; origine: string | null; photo_url: string | null };
 type Session = {
@@ -18,6 +19,7 @@ type Session = {
 };
 
 export default function Journal() {
+  const confirm = useConfirm();
   const [cave, setCave] = useState<CaveLite[]>([]);
   const [sessions, setSessions] = useState<Session[]>([]);
   const [pseudo, setPseudo] = useState<string | null>(null);
@@ -94,7 +96,7 @@ export default function Journal() {
   }
 
   async function removeSession(id: string) {
-    if (!window.confirm("Supprimer cette dégustation ?")) return;
+    if (!(await confirm({ message: "Supprimer cette dégustation ?", confirmLabel: "Supprimer", danger: true }))) return;
     await supabase.from("degustation").delete().eq("id", id);
     loadSessions();
   }
