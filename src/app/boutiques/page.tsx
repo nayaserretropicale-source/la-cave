@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import AuthBar from "@/components/AuthBar";
+import { IconMap } from "@/components/Icons";
 import { supabase } from "@/lib/supabase";
 
 type Lieu = {
@@ -83,15 +84,20 @@ export default function Boutiques() {
     if (!aiPays.trim()) { return; }
     setAiLoading(true);
     setAiResults(null);
-    const { data: { session } } = await supabase.auth.getSession();
-    const res = await fetch("/api/boutiques", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${session?.access_token ?? ""}` },
-      body: JSON.stringify({ pays: aiPays.trim(), ville: aiVille.trim() || null }),
-    });
-    const data = await res.json();
-    setAiResults(Array.isArray(data.boutiques) ? data.boutiques : []);
-    setAiLoading(false);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const res = await fetch("/api/boutiques", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${session?.access_token ?? ""}` },
+        body: JSON.stringify({ pays: aiPays.trim(), ville: aiVille.trim() || null }),
+      });
+      const data = await res.json();
+      setAiResults(Array.isArray(data.boutiques) ? data.boutiques : []);
+    } catch {
+      setAiResults([]);
+    } finally {
+      setAiLoading(false);
+    }
   }
 
   async function addFromAI(r: { nom: string; ville: string; note: string }) {
@@ -118,10 +124,10 @@ export default function Boutiques() {
   const groupNames = Object.keys(groups).sort();
 
   return (
-    <main className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col items-center px-6 py-12">
+    <main className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col items-center px-4 py-10">
       <div className="w-full max-w-md">
         <p className="text-xs tracking-[0.3em] uppercase text-amber-500">Annuaire</p>
-        <h1 className="font-display text-3xl font-semibold mt-1 mb-6">Boutiques 🗺️</h1>
+        <h1 className="font-display text-3xl font-semibold mt-1 mb-6">Boutiques</h1>
 
         <AuthBar />
 
@@ -135,12 +141,12 @@ export default function Boutiques() {
 
             {showAdd && (
               <div className="mb-8 space-y-3 rounded-xl border border-zinc-800 bg-zinc-900/50 p-4">
-                <input value={nom} onChange={(e) => setNom(e.target.value)} placeholder="Nom de la boutique *" className="w-full rounded-lg bg-zinc-800 px-3 py-2 text-sm outline-none" />
-                <input list="pays-list" value={pays} onChange={(e) => setPays(e.target.value)} placeholder="Pays *" className="w-full rounded-lg bg-zinc-800 px-3 py-2 text-sm outline-none" />
+                <input value={nom} onChange={(e) => setNom(e.target.value)} placeholder="Nom de la boutique *" className="w-full rounded-xl border border-zinc-800 bg-zinc-900/60 px-3 py-2.5 text-sm text-zinc-100 placeholder-zinc-400 outline-none focus:border-zinc-700 transition-colors" />
+                <input list="pays-list" value={pays} onChange={(e) => setPays(e.target.value)} placeholder="Pays *" className="w-full rounded-xl border border-zinc-800 bg-zinc-900/60 px-3 py-2.5 text-sm text-zinc-100 placeholder-zinc-400 outline-none focus:border-zinc-700 transition-colors" />
                 <datalist id="pays-list">{PAYS.map((p) => <option key={p} value={p} />)}</datalist>
-                <input value={ville} onChange={(e) => setVille(e.target.value)} placeholder="Ville (optionnel)" className="w-full rounded-lg bg-zinc-800 px-3 py-2 text-sm outline-none" />
-                <input value={adresse} onChange={(e) => setAdresse(e.target.value)} placeholder="Adresse / repère (optionnel)" className="w-full rounded-lg bg-zinc-800 px-3 py-2 text-sm outline-none" />
-                <textarea value={note} onChange={(e) => setNote(e.target.value)} rows={2} placeholder="Note (horaires, spécialité…)" className="w-full rounded-lg bg-zinc-800 px-3 py-2 text-sm outline-none" />
+                <input value={ville} onChange={(e) => setVille(e.target.value)} placeholder="Ville (optionnel)" className="w-full rounded-xl border border-zinc-800 bg-zinc-900/60 px-3 py-2.5 text-sm text-zinc-100 placeholder-zinc-400 outline-none focus:border-zinc-700 transition-colors" />
+                <input value={adresse} onChange={(e) => setAdresse(e.target.value)} placeholder="Adresse / repère (optionnel)" className="w-full rounded-xl border border-zinc-800 bg-zinc-900/60 px-3 py-2.5 text-sm text-zinc-100 placeholder-zinc-400 outline-none focus:border-zinc-700 transition-colors" />
+                <textarea value={note} onChange={(e) => setNote(e.target.value)} rows={2} placeholder="Note (horaires, spécialité…)" className="w-full rounded-xl border border-zinc-800 bg-zinc-900/60 px-3 py-2.5 text-sm text-zinc-100 placeholder-zinc-400 outline-none focus:border-zinc-700 transition-colors" />
                 <p className="text-xs text-zinc-600">Ton ajout est visible par toute la communauté.</p>
                 <button onClick={add} className="btn-press w-full rounded-lg bg-amber-600 px-4 py-2.5 font-medium text-zinc-950 transition hover:bg-amber-500">Ajouter à l&apos;annuaire</button>
                 {msg && <p className="text-sm text-amber-500">{msg}</p>}
@@ -149,7 +155,7 @@ export default function Boutiques() {
 
             {list.length >= 5 && (
               <div className="mb-4 space-y-2">
-                <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Rechercher (nom, ville)…" className="w-full rounded-lg bg-zinc-800 px-3 py-2 text-sm outline-none" />
+                <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Rechercher (nom, ville)…" className="w-full rounded-xl border border-zinc-800 bg-zinc-900/60 px-3 py-2.5 text-sm text-zinc-100 placeholder-zinc-400 outline-none focus:border-zinc-700 transition-colors" />
                 {paysList.length > 1 && (
                   <div className="flex flex-wrap gap-2">
                     <button onClick={() => setPaysF("")} className={`rounded-full px-3 py-1 text-xs transition ${paysF === "" ? "bg-amber-600 text-zinc-950" : "border border-zinc-700 text-zinc-400 hover:border-amber-500"}`}>Tous pays</button>
@@ -167,7 +173,7 @@ export default function Boutiques() {
               <div className="space-y-6">
                 {groupNames.map((name) => (
                   <div key={name}>
-                    <p className="mb-2 text-sm font-medium text-amber-500">📍 {name}</p>
+                    <p className="mb-2 flex items-center gap-1.5 text-sm font-medium text-amber-500"><IconMap size={14} />{name}</p>
                     <div className="stagger space-y-2">
                       {groups[name].map((l) => (
                         <div key={l.id} className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-4">
@@ -194,10 +200,10 @@ export default function Boutiques() {
               <p className="text-sm font-medium text-amber-500">Trouver des boutiques (IA)</p>
               <p className="mt-1 text-xs text-zinc-500">Suggestions issues du web — <span className="text-zinc-400">à vérifier</span> avant de t&apos;y rendre.</p>
               <div className="mt-3 space-y-2">
-                <input list="pays-list" value={aiPays} onChange={(e) => setAiPays(e.target.value)} placeholder="Pays" className="w-full rounded-lg bg-zinc-800 px-3 py-2 text-sm outline-none" />
-                <input value={aiVille} onChange={(e) => setAiVille(e.target.value)} placeholder="Ville (optionnel)" className="w-full rounded-lg bg-zinc-800 px-3 py-2 text-sm outline-none" />
+                <input list="pays-list" value={aiPays} onChange={(e) => setAiPays(e.target.value)} placeholder="Pays" className="w-full rounded-xl border border-zinc-800 bg-zinc-900/60 px-3 py-2.5 text-sm text-zinc-100 placeholder-zinc-400 outline-none focus:border-zinc-700 transition-colors" />
+                <input value={aiVille} onChange={(e) => setAiVille(e.target.value)} placeholder="Ville (optionnel)" className="w-full rounded-xl border border-zinc-800 bg-zinc-900/60 px-3 py-2.5 text-sm text-zinc-100 placeholder-zinc-400 outline-none focus:border-zinc-700 transition-colors" />
                 <button onClick={findAI} disabled={aiLoading} className="w-full rounded-lg border border-amber-600/60 bg-amber-950/20 px-4 py-2 text-sm text-amber-400 transition hover:border-amber-500 disabled:opacity-50">
-                  {aiLoading ? "Recherche…" : "Chercher des boutiques 🔎"}
+                  {aiLoading ? "Recherche…" : "Chercher des boutiques"}
                 </button>
               </div>
 

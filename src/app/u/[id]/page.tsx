@@ -21,6 +21,9 @@ export default function PublicProfile() {
   const [notFound, setNotFound] = useState(false);
 
   async function loadAll() {
+    // Reset : évite d'afficher le profil précédent en naviguant entre deux /u/*
+    setNotFound(false);
+    setProf(null);
     const { data: { session } } = await supabase.auth.getSession();
     const meId = session?.user?.id ?? null;
     setMe(meId);

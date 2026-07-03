@@ -118,7 +118,8 @@ export default function Communaute() {
   }
 
   async function addFriend(otherId: string) {
-    await supabase.from("friendships").insert({ addressee_id: otherId });
+    const { error } = await supabase.from("friendships").insert({ addressee_id: otherId });
+    if (error) { setMsg("Demande impossible (déjà envoyée ?)."); return; }
     sendPush("friend_request", otherId);
     loadFriends();
   }
@@ -398,16 +399,19 @@ export default function Communaute() {
                   <div className="flex items-center gap-4 border-t border-zinc-800/60 px-4 py-2.5">
                     <button
                       onClick={() => toggleLike(p)}
+                      aria-label={p.likedByMe ? "Retirer le like" : "Aimer"}
+                      aria-pressed={p.likedByMe}
                       className={`flex items-center gap-1.5 text-sm transition-colors ${p.likedByMe ? "text-amber-400" : "text-zinc-500 hover:text-zinc-300"}`}
                     >
-                      <span className="text-base leading-none">{p.likedByMe ? "♥" : "♡"}</span>
+                      <span aria-hidden className="text-base leading-none">{p.likedByMe ? "♥" : "♡"}</span>
                       <span>{p.likeCount}</span>
                     </button>
                     <button
                       onClick={() => toggleComments(p.id)}
+                      aria-label="Commentaires"
                       className="flex items-center gap-1.5 text-sm text-zinc-500 transition-colors hover:text-zinc-300"
                     >
-                      <span className="text-base leading-none">○</span>
+                      <span aria-hidden className="text-base leading-none">○</span>
                       <span>{p.commentCount}</span>
                     </button>
                   </div>

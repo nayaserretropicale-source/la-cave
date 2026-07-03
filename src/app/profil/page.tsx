@@ -142,6 +142,12 @@ export default function Profil() {
             Enregistrer
           </button>
           {msg && <p className="text-sm text-amber-400">{msg}</p>}
+          <button
+            onClick={() => supabase.auth.signOut()}
+            className="w-full rounded-xl border border-zinc-800 px-4 py-2.5 text-sm text-zinc-400 transition-colors hover:border-zinc-700 hover:text-zinc-200"
+          >
+            Se déconnecter
+          </button>
         </div>
       </div>
     </main>

@@ -36,13 +36,17 @@ export async function POST(req: Request) {
 
   try {
     const { criteres } = await req.json();
+    // Bornes anti prompt-injection / coût : entrées client tronquées
+    const s = (v: unknown, max = 60) => String(v ?? "").slice(0, max);
 
     // La cave est relue côté serveur — jamais depuis le corps de la requête
     // (le client pouvait envoyer une liste falsifiée).
     const token = req.headers.get("authorization")!.slice(7);
     const { data: rows } = await authedClient(token)
       .from("cave")
-      .select("id,nom,marque,origine,force,format,profil,duree_fume,accord,note_perso,rating,quantite,statut");
+      .select("id,nom,marque,origine,force,format,profil,duree_fume,accord,note_perso,rating,quantite,statut")
+      // ordre déterministe avant le cap 50 : sous-ensemble de candidats stable
+      .order("created_at", { ascending: false });
 
     const liste = ((rows ?? []) as Cigare[])
       .filter((c) => c.statut !== "fume" && (c.quantite ?? 1) > 0)
@@ -61,11 +65,11 @@ export async function POST(req: Request) {
 ${JSON.stringify(liste)}
 
 Critères pour ce soir :
-- Temps disponible : ${criteres?.temps || "peu importe"}
-- Occasion : ${criteres?.occasion || "non précisée"}
-- Accord/boisson : ${criteres?.accord || "non précisé"}
-- Force souhaitée : ${criteres?.force || "peu importe"}
-- Envie particulière : ${String(criteres?.notes || "aucune").slice(0, 300)}
+- Temps disponible : ${s(criteres?.temps) || "peu importe"}
+- Occasion : ${s(criteres?.occasion) || "non précisée"}
+- Accord/boisson : ${s(criteres?.accord) || "non précisé"}
+- Force souhaitée : ${s(criteres?.force) || "peu importe"}
+- Envie particulière : ${s(criteres?.notes, 300) || "aucune"}
 
 Choisis LE cigare le plus adapté parmi ceux de la liste. Tiens compte de la force, de la durée de fume face au temps dispo, du profil et de l'accord. Si pertinent, propose une alternative de la liste.
 "pourquoi" : 2 à 3 phrases en français, concrètes. "alternative_pourquoi" : 1 phrase ou null. "conseil" : 1 phrase (accord, moment, tirage) ou null.`;

@@ -114,22 +114,34 @@ export default function Home() {
     if (!f0) return;
     const f = await compressImage(f0);
     setFile(f);
-    setPreview(URL.createObjectURL(f));
+    setPreview((prev) => {
+      if (prev) URL.revokeObjectURL(prev); // libère l'aperçu précédent
+      return URL.createObjectURL(f);
+    });
     setLoading(true);
     setFiche(null);
     setSaveMsg("");
 
     const reader = new FileReader();
     reader.onload = async () => {
-      const base64 = (reader.result as string).split(",")[1];
-      const { data: { session } } = await supabase.auth.getSession();
-      const res = await fetch("/api/scan", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${session?.access_token ?? ""}` },
-        body: JSON.stringify({ imageBase64: base64, mediaType: f.type }),
-      });
-      const data = (await res.json()) as Fiche;
-      setFiche(data);
+      try {
+        const base64 = (reader.result as string).split(",")[1];
+        const { data: { session } } = await supabase.auth.getSession();
+        const res = await fetch("/api/scan", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${session?.access_token ?? ""}` },
+          body: JSON.stringify({ imageBase64: base64, mediaType: f.type }),
+        });
+        const data = (await res.json()) as Fiche;
+        setFiche(data);
+      } catch {
+        setFiche({ identifie: false, commentaire: "Analyse impossible (connexion ?). Réessaie." });
+      } finally {
+        setLoading(false);
+      }
+    };
+    reader.onerror = () => {
+      setFiche({ identifie: false, commentaire: "Lecture de l'image impossible. Réessaie." });
       setLoading(false);
     };
     reader.readAsDataURL(f);
@@ -274,15 +286,20 @@ export default function Home() {
   async function fetchHistoire() {
     if (!selected) return;
     setHistoireLoading(true);
-    const { data: { session } } = await supabase.auth.getSession();
-    const res = await fetch("/api/histoire", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${session?.access_token ?? ""}` },
-      body: JSON.stringify({ marque: selected.marque, nom: selected.nom }),
-    });
-    const data = await res.json();
-    setHistoire(data.histoire || "Histoire indisponible pour le moment.");
-    setHistoireLoading(false);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const res = await fetch("/api/histoire", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${session?.access_token ?? ""}` },
+        body: JSON.stringify({ marque: selected.marque, nom: selected.nom }),
+      });
+      const data = await res.json();
+      setHistoire(data.histoire || "Histoire indisponible pour le moment.");
+    } catch {
+      setHistoire("Histoire indisponible pour le moment.");
+    } finally {
+      setHistoireLoading(false);
+    }
   }
 
   const profil = Array.isArray(fiche?.profil) ? fiche?.profil.join(", ") : fiche?.profil;

@@ -73,11 +73,14 @@ export async function POST(req: Request) {
         `\nQuand tu recommandes un cigare à fumer maintenant, privilégie ceux de cette liste et cite-les par leur nom exact. Ne propose un cigare hors cave que si l'utilisateur demande explicitement une découverte ou un achat.`;
     }
     if (mem0 && user) {
-      const lastMsg = messages[messages.length - 1];
-      const { results } = await mem0.search(lastMsg.content, { filters: { user_id: user.id } }) as { results: { memory: string }[] };
-      if (results?.length) {
-        system += "\n\nCe que tu sais déjà de cet amateur :\n" + results.map((r) => `- ${r.memory}`).join("\n");
-      }
+      // La mémoire est un bonus : si mem0 est indisponible, le chat ne doit pas tomber en 500.
+      try {
+        const lastMsg = messages[messages.length - 1];
+        const { results } = await mem0.search(lastMsg.content, { filters: { user_id: user.id } }) as { results: { memory: string }[] };
+        if (results?.length) {
+          system += "\n\nCe que tu sais déjà de cet amateur :\n" + results.map((r) => `- ${r.memory}`).join("\n");
+        }
+      } catch { /* mémoire indisponible : on continue sans */ }
     }
 
     const msg = await anthropic.messages.create({

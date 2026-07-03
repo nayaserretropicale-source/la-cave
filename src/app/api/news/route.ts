@@ -57,7 +57,8 @@ export async function GET() {
       }
     }
 
-    if (all.length === 0) return Response.json({ articles: [], _diag: diag });
+    const debug = process.env.NODE_ENV !== "production";
+    if (all.length === 0) return Response.json({ articles: [], ...(debug && { _diag: diag }) });
 
     all.sort((a, b) => {
       const da = a.date ? new Date(a.date).getTime() : 0;
@@ -97,6 +98,6 @@ export async function GET() {
     return Response.json({ articles: translated });
   } catch (e) {
     const message = e instanceof Error ? e.message : "erreur";
-    return Response.json({ articles: [], _diag: diag, _error: message });
+    return Response.json({ articles: [], ...(process.env.NODE_ENV !== "production" && { _diag: diag, _error: message }) });
   }
 }

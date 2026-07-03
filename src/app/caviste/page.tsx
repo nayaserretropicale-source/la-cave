@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 
 type Msg = { role: "user" | "assistant"; content: string };
@@ -22,6 +22,11 @@ export default function Caviste() {
   const [password, setPassword] = useState("");
   const [loginError, setLoginError] = useState("");
   const [loggingIn, setLoggingIn] = useState(false);
+  const endRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+  }, [messages, thinking]);
 
   async function send(text?: string) {
     const q = (text ?? input).trim();
@@ -104,7 +109,7 @@ export default function Caviste() {
           </div>
         )}
 
-        <div className="mb-4 min-h-[120px] space-y-3">
+        <div className="mb-4 min-h-[120px] space-y-3" aria-live="polite">
           {messages.map((m, i) => (
             <div
               key={i}
@@ -123,6 +128,7 @@ export default function Caviste() {
               <div className="skeleton h-3 w-24" />
             </div>
           )}
+          <div ref={endRef} />
         </div>
 
         <div className="flex gap-2">
