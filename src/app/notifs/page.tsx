@@ -130,7 +130,7 @@ export default function Notifs() {
       <div className="w-full max-w-md">
         <header className="mb-8">
           <p className="text-[11px] font-medium tracking-widest text-amber-500/80 uppercase mb-1">Activité</p>
-          <h1 className="text-3xl font-semibold tracking-tight text-zinc-50">Notifications</h1>
+          <h1 className="font-display text-3xl font-semibold tracking-tight text-zinc-50">Notifications</h1>
         </header>
 
         {signedIn === false && (
@@ -138,9 +138,16 @@ export default function Notifs() {
         )}
 
         {loading && signedIn !== false && (
-          <div className="flex items-center gap-3 py-8">
-            <div className="h-4 w-4 animate-spin rounded-full border-2 border-zinc-700 border-t-amber-500" />
-            <p className="text-sm text-zinc-400">Chargement…</p>
+          <div className="overflow-hidden rounded-2xl border border-zinc-800">
+            {[0, 1, 2].map((i) => (
+              <div key={i} className={`flex items-center gap-3 p-3.5 ${i < 2 ? "border-b border-zinc-800/60" : ""}`}>
+                <div className="skeleton h-8 w-8 rounded-full" />
+                <div className="flex-1">
+                  <div className="skeleton h-3.5 w-3/4" />
+                  <div className="skeleton mt-1.5 h-2.5 w-1/3" />
+                </div>
+              </div>
+            ))}
           </div>
         )}
 
@@ -152,7 +159,7 @@ export default function Notifs() {
         )}
 
         {notifs.length > 0 && (
-          <div className="overflow-hidden rounded-2xl border border-zinc-800">
+          <div className="stagger overflow-hidden rounded-2xl border border-zinc-800">
             {notifs.map((n, i) => (
               <div
                 key={n.key}
@@ -180,7 +187,7 @@ export default function Notifs() {
                 {n.type === "friend" && n.friendshipId && (
                   <button
                     onClick={() => acceptFriend(n.friendshipId!)}
-                    className="flex-shrink-0 rounded-lg bg-amber-600 px-2.5 py-1 text-xs font-semibold text-zinc-950 transition-colors hover:bg-amber-500"
+                    className="btn-press flex-shrink-0 rounded-lg bg-amber-600 px-2.5 py-1 text-xs font-semibold text-zinc-950 transition-colors hover:bg-amber-500"
                   >
                     Accepter
                   </button>

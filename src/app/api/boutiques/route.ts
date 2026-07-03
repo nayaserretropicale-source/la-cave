@@ -15,10 +15,13 @@ export async function POST(req: Request) {
   if (error) return error;
 
   try {
-    const { pays, ville } = await req.json();
+    const body = await req.json();
+    // Bornes anti prompt-injection / pollution du cache : entrées courtes, texte simple
+    const pays = String(body?.pays || "").trim().slice(0, 60);
+    const ville = String(body?.ville || "").trim().slice(0, 60);
     if (!pays) return Response.json({ boutiques: [] });
     const lieu = ville ? `${ville}, ${pays}` : pays;
-    const key = `boutiques:${String(pays).trim().toLowerCase()}:${String(ville || "").trim().toLowerCase()}`;
+    const key = `boutiques:${pays.toLowerCase()}:${ville.toLowerCase()}`;
 
     const boutiques = await cached(key, TTL_MS, async () => {
       const prompt = `Recherche des boutiques, civettes ou points de vente de cigares à ${lieu}. Donne uniquement celles que tu peux raisonnablement identifier via des sources. Pour chacune : nom, ville, et une courte note (quartier, type d'enseigne). N'invente jamais d'adresse précise. Si tu ne trouves rien de fiable, renvoie une liste vide.

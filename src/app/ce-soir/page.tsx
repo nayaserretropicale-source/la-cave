@@ -89,7 +89,7 @@ export default function CeSoir() {
     const res = await fetch("/api/cesoir", {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${session?.access_token ?? ""}` },
-      body: JSON.stringify({ criteres: { temps, occasion, accord, force, notes }, cigares: cave }),
+      body: JSON.stringify({ criteres: { temps, occasion, accord, force, notes } }),
     });
     const data = (await res.json()) as Result;
     setResult(data);
@@ -104,7 +104,7 @@ export default function CeSoir() {
       <div className="w-full max-w-md">
         <header className="mb-8">
           <p className="text-[11px] font-medium tracking-widest text-amber-500/80 uppercase mb-1">Suggestion</p>
-          <h1 className="text-3xl font-semibold tracking-tight text-zinc-50">Ce soir</h1>
+          <h1 className="font-display text-3xl font-semibold tracking-tight text-zinc-50">Ce soir</h1>
         </header>
 
         <AuthBar />
@@ -135,14 +135,14 @@ export default function CeSoir() {
               <button
                 onClick={suggest}
                 disabled={loading}
-                className="w-full rounded-xl bg-amber-600 px-4 py-3 text-sm font-semibold text-zinc-950 transition-colors hover:bg-amber-500 disabled:opacity-50"
+                className="btn-press w-full rounded-xl bg-amber-600 px-4 py-3 text-sm font-semibold text-zinc-950 transition-colors hover:bg-amber-500 disabled:opacity-50"
               >
                 {loading ? "Analyse en cours…" : "Trouver un cigare"}
               </button>
             </div>
 
             {result && !loading && (
-              <div className="mt-6">
+              <div className="rise mt-6">
                 {result.error || !choix ? (
                   <p className="rounded-xl border border-orange-500/20 bg-orange-950/20 px-4 py-3 text-sm text-orange-300">
                     Je n&apos;ai pas réussi à choisir. Réessaie ou précise un critère.

@@ -1,11 +1,20 @@
 import Anthropic from "@anthropic-ai/sdk";
+import { createClient } from "@supabase/supabase-js";
 import { requireUser } from "@/lib/api-guard";
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
 export const maxDuration = 30;
 
-type CigareInput = {
+function authedClient(token: string) {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    { global: { headers: { Authorization: `Bearer ${token}` } } }
+  );
+}
+
+type Cigare = {
   id: string;
   nom: string;
   marque: string | null;
@@ -17,14 +26,8 @@ type CigareInput = {
   accord: string | null;
   note_perso: string | null;
   rating: number | null;
-};
-
-type Recommandation = {
-  choix_id: string;
-  pourquoi: string;
-  alternative_id: string | null;
-  alternative_pourquoi: string | null;
-  conseil: string | null;
+  quantite: number | null;
+  statut: string | null;
 };
 
 export async function POST(req: Request) {
@@ -32,24 +35,27 @@ export async function POST(req: Request) {
   if (error) return error;
 
   try {
-    const { criteres, cigares } = await req.json();
-    if (!Array.isArray(cigares) || cigares.length === 0) {
-      return Response.json({ error: "cave_vide" });
+    const { criteres } = await req.json();
+
+    // La cave est relue côté serveur — jamais depuis le corps de la requête
+    // (le client pouvait envoyer une liste falsifiée).
+    const token = req.headers.get("authorization")!.slice(7);
+    const { data: rows } = await authedClient(token)
+      .from("cave")
+      .select("id,nom,marque,origine,force,format,profil,duree_fume,accord,note_perso,rating,quantite,statut");
+
+    const liste = ((rows ?? []) as Cigare[])
+      .filter((c) => c.statut !== "fume" && (c.quantite ?? 1) > 0)
+      // ponytail: cap à 50 candidats pour borner le prompt — pré-filtrage par critères si les caves grossissent
+      .slice(0, 50)
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      .map(({ quantite, statut, ...c }) => c);
+
+    if (liste.length === 0) {
+      return Response.json({ error: "cave_vide" }, { status: 400 });
     }
 
-    const liste: CigareInput[] = cigares.map((c: CigareInput) => ({
-      id: c.id,
-      nom: c.nom,
-      marque: c.marque,
-      origine: c.origine,
-      force: c.force,
-      format: c.format,
-      profil: c.profil,
-      duree_fume: c.duree_fume,
-      accord: c.accord,
-      note_perso: c.note_perso,
-      rating: c.rating,
-    }));
+    const ids = liste.map((c) => c.id);
 
     const prompt = `Tu es un caviste expert. Voici la cave de l'utilisateur (cigares réellement disponibles), en JSON :
 ${JSON.stringify(liste)}
@@ -59,37 +65,44 @@ Critères pour ce soir :
 - Occasion : ${criteres?.occasion || "non précisée"}
 - Accord/boisson : ${criteres?.accord || "non précisé"}
 - Force souhaitée : ${criteres?.force || "peu importe"}
-- Envie particulière : ${criteres?.notes || "aucune"}
+- Envie particulière : ${String(criteres?.notes || "aucune").slice(0, 300)}
 
-Choisis LE cigare le plus adapté UNIQUEMENT parmi ceux de la liste (via leur "id"). Tiens compte de la force, de la durée de fume face au temps dispo, du profil et de l'accord. Si pertinent, propose une alternative de la liste.
-
-Réponds UNIQUEMENT par un objet JSON valide, sans texte autour ni backticks, schéma exact :
-{
-  "choix_id": "id du cigare choisi (obligatoirement un id de la liste)",
-  "pourquoi": "2 à 3 phrases en français, concrètes, qui justifient le choix",
-  "alternative_id": "id d'un autre cigare de la liste, ou null",
-  "alternative_pourquoi": "1 phrase, ou null",
-  "conseil": "1 phrase de conseil (accord, moment, tirage), ou null"
-}`;
+Choisis LE cigare le plus adapté parmi ceux de la liste. Tiens compte de la force, de la durée de fume face au temps dispo, du profil et de l'accord. Si pertinent, propose une alternative de la liste.
+"pourquoi" : 2 à 3 phrases en français, concrètes. "alternative_pourquoi" : 1 phrase ou null. "conseil" : 1 phrase (accord, moment, tirage) ou null.`;
 
     const msg = await anthropic.messages.create({
       model: "claude-sonnet-4-6",
       max_tokens: 600,
+      // Le schéma contraint choix_id/alternative_id aux ids réels de la cave :
+      // l'IA ne peut structurellement pas inventer un cigare.
+      output_config: {
+        format: {
+          type: "json_schema",
+          schema: {
+            type: "object",
+            additionalProperties: false,
+            required: ["choix_id", "pourquoi", "alternative_id", "alternative_pourquoi", "conseil"],
+            properties: {
+              choix_id: { type: "string", enum: ids },
+              pourquoi: { type: "string" },
+              alternative_id: { type: ["string", "null"], enum: [...ids, null] },
+              alternative_pourquoi: { type: ["string", "null"] },
+              conseil: { type: ["string", "null"] },
+            },
+          },
+        },
+      },
       messages: [{ role: "user", content: prompt }],
     });
+
     const raw = msg.content
       .filter((b): b is Anthropic.TextBlock => b.type === "text")
       .map((b) => b.text)
       .join("");
-    const start = raw.indexOf("{");
-    const end = raw.lastIndexOf("}");
-    let out: Recommandation | { error: string } = { error: "parse" };
-    if (start !== -1 && end !== -1) {
-      try { out = JSON.parse(raw.slice(start, end + 1)); } catch {}
-    }
-    return Response.json(out);
+
+    return Response.json(JSON.parse(raw));
   } catch (e) {
-    const message = e instanceof Error ? e.message : "erreur";
-    return Response.json({ error: message });
+    console.error(e);
+    return Response.json({ error: "suggestion_impossible" }, { status: 500 });
   }
 }

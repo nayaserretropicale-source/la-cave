@@ -101,7 +101,7 @@ export default function Amis() {
         <div className="w-full max-w-md">
           <header className="mb-8">
             <p className="text-[11px] font-medium tracking-widest text-amber-500/80 uppercase mb-1">Réseau</p>
-            <h1 className="text-3xl font-semibold tracking-tight text-zinc-50">Mes amis</h1>
+            <h1 className="font-display text-3xl font-semibold tracking-tight text-zinc-50">Mes amis</h1>
           </header>
           <p className="text-sm text-zinc-400">Connecte-toi pour gérer tes amis.</p>
         </div>
@@ -134,13 +134,13 @@ export default function Amis() {
               placeholder="Pseudo…"
               className="flex-1 rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 outline-none focus:border-zinc-700 transition-colors"
             />
-            <button onClick={search} className="rounded-xl bg-amber-600 px-4 py-2.5 text-sm font-semibold text-zinc-950 transition-colors hover:bg-amber-500">
+            <button onClick={search} className="btn-press rounded-xl bg-amber-600 px-4 py-2.5 text-sm font-semibold text-zinc-950 transition-colors hover:bg-amber-500">
               Chercher
             </button>
           </div>
           {msg && <p className="mt-2 text-sm text-amber-400">{msg}</p>}
           {results.length > 0 && (
-            <div className="mt-3 overflow-hidden rounded-xl border border-zinc-800">
+            <div className="stagger mt-3 overflow-hidden rounded-xl border border-zinc-800">
               {results.map((r, i) => {
                 const rel = relation(r.id);
                 return (
@@ -150,7 +150,7 @@ export default function Amis() {
                     {rel.state === "none" && <button onClick={() => addFriend(r.id)} className="rounded-lg border border-zinc-700 px-3 py-1.5 text-xs font-medium text-zinc-400 transition-colors hover:border-zinc-600 hover:text-zinc-200">Ajouter</button>}
                     {rel.state === "sent" && <span className="text-xs text-zinc-600">En attente</span>}
                     {rel.state === "friends" && <span className="text-xs text-amber-400">Ami</span>}
-                    {rel.state === "incoming" && rel.row && <button onClick={() => accept(rel.row!.id)} className="rounded-lg bg-amber-600 px-3 py-1.5 text-xs font-semibold text-zinc-950 transition-colors hover:bg-amber-500">Accepter</button>}
+                    {rel.state === "incoming" && rel.row && <button onClick={() => accept(rel.row!.id)} className="btn-press rounded-lg bg-amber-600 px-3 py-1.5 text-xs font-semibold text-zinc-950 transition-colors hover:bg-amber-500">Accepter</button>}
                   </div>
                 );
               })}
@@ -162,14 +162,14 @@ export default function Amis() {
         {incoming.length > 0 && (
           <div className="mb-8">
             <p className="mb-2 text-xs font-medium uppercase tracking-widest text-amber-500/80">Demandes reçues</p>
-            <div className="overflow-hidden rounded-2xl border border-zinc-800">
+            <div className="stagger overflow-hidden rounded-2xl border border-zinc-800">
               {incoming.map((f, i) => (
                 <FriendRow
                   key={f.id}
                   profile={profiles[otherOf(f)]}
                   right={
                     <div className={`flex gap-2 ${i < incoming.length - 1 ? "" : ""}`}>
-                      <button onClick={() => accept(f.id)} className="rounded-lg bg-amber-600 px-3 py-1.5 text-xs font-semibold text-zinc-950 transition-colors hover:bg-amber-500">Accepter</button>
+                      <button onClick={() => accept(f.id)} className="btn-press rounded-lg bg-amber-600 px-3 py-1.5 text-xs font-semibold text-zinc-950 transition-colors hover:bg-amber-500">Accepter</button>
                       <button onClick={() => removeLink(f.id)} className="rounded-lg border border-zinc-700 px-3 py-1.5 text-xs text-zinc-400 transition-colors hover:border-orange-400/40 hover:text-orange-400">Refuser</button>
                     </div>
                   }
@@ -184,7 +184,7 @@ export default function Amis() {
         {friends.length === 0 ? (
           <p className="py-6 text-center text-sm text-zinc-600">Pas encore d&apos;amis. Cherche un pseudo ci-dessus.</p>
         ) : (
-          <div className="overflow-hidden rounded-2xl border border-zinc-800">
+          <div className="stagger overflow-hidden rounded-2xl border border-zinc-800">
             {friends.map((f, i) => (
               <div key={f.id} className={`bg-zinc-900/40 ${i < friends.length - 1 ? "border-b border-zinc-800/60" : ""}`}>
                 <FriendRow
@@ -204,7 +204,7 @@ export default function Amis() {
         {outgoing.length > 0 && (
           <div className="mt-8">
             <p className="mb-2 text-xs font-medium uppercase tracking-widest text-zinc-500">Demandes envoyées</p>
-            <div className="overflow-hidden rounded-2xl border border-zinc-800">
+            <div className="stagger overflow-hidden rounded-2xl border border-zinc-800">
               {outgoing.map((f, i) => (
                 <div key={f.id} className={`bg-zinc-900/40 ${i < outgoing.length - 1 ? "border-b border-zinc-800/60" : ""}`}>
                   <FriendRow

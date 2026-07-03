@@ -24,12 +24,18 @@ export default function NavBar() {
             <Link
               key={href}
               href={href}
-              className={`flex flex-1 flex-col items-center gap-1 py-3 text-[10px] font-medium tracking-wide transition-colors duration-150 ${
+              className={`relative flex flex-1 flex-col items-center gap-1 py-3 text-[10px] font-medium tracking-wide transition-all duration-200 ${
                 active
                   ? "text-amber-400"
-                  : "text-zinc-500 hover:text-zinc-300"
+                  : "text-zinc-500 hover:text-zinc-300 active:scale-95"
               }`}
             >
+              <span
+                aria-hidden
+                className={`absolute top-0 h-0.5 rounded-full bg-amber-400 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                  active ? "w-8 opacity-100 shadow-[0_0_8px_0_var(--color-amber-400)]" : "w-0 opacity-0"
+                }`}
+              />
               <Icon size={20} strokeWidth={active ? 2 : 1.5} />
               <span>{label}</span>
             </Link>

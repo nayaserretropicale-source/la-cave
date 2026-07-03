@@ -35,7 +35,7 @@ export default function AuthBar() {
         <span className="text-zinc-400">
           <span className="text-amber-400">{user}</span>
         </span>
-        <button onClick={signOut} className="text-xs text-zinc-500 transition-colors hover:text-zinc-300">
+        <button onClick={signOut} className="btn-press text-xs text-zinc-500 transition-colors hover:text-zinc-300">
           Déconnexion
         </button>
       </div>
@@ -61,13 +61,13 @@ export default function AuthBar() {
       <div className="flex gap-2 pt-1">
         <button
           onClick={signIn}
-          className="flex-1 rounded-lg bg-amber-600 px-3 py-2.5 text-sm font-semibold text-zinc-950 transition-colors hover:bg-amber-500"
+          className="btn-press flex-1 rounded-lg bg-amber-600 px-3 py-2.5 text-sm font-semibold text-zinc-950 transition-colors hover:bg-amber-500"
         >
           Se connecter
         </button>
         <button
           onClick={signUp}
-          className="flex-1 rounded-lg border border-zinc-700 px-3 py-2.5 text-sm text-zinc-300 transition-colors hover:border-zinc-600"
+          className="btn-press flex-1 rounded-lg border border-zinc-700 px-3 py-2.5 text-sm text-zinc-300 transition-colors hover:border-zinc-600"
         >
           Créer un compte
         </button>

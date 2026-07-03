@@ -1,27 +1,159 @@
 @import "tailwindcss";
 
+@theme {
+  /*
+   * Palette « cave » — les échelles zinc/amber sont redéfinies avec une teinte
+   * chaude (tabac, braise) : tout l'existant se rethème sans toucher aux pages.
+   * Contrastes vérifiés AA sur fond sombre.
+   */
+  --color-zinc-950: oklch(0.13 0.008 60);
+  --color-zinc-900: oklch(0.18 0.01 55);
+  --color-zinc-800: oklch(0.26 0.012 50);
+  --color-zinc-700: oklch(0.36 0.013 48);
+  --color-zinc-600: oklch(0.5 0.012 50);
+  --color-zinc-500: oklch(0.62 0.012 55);
+  --color-zinc-400: oklch(0.72 0.01 60);
+  --color-zinc-300: oklch(0.81 0.01 65);
+  --color-zinc-200: oklch(0.88 0.008 70);
+  --color-zinc-100: oklch(0.93 0.006 70);
+  --color-zinc-50: oklch(0.96 0.006 70);
+
+  /* Braise / cuivre */
+  --color-amber-300: oklch(0.84 0.11 70);
+  --color-amber-400: oklch(0.76 0.14 62);
+  --color-amber-500: oklch(0.7 0.16 55);
+  --color-amber-600: oklch(0.6 0.15 50);
+  --color-amber-700: oklch(0.5 0.13 48);
+
+  --ease-cave: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
 @theme inline {
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-fraunces);
 }
 
 body {
-  background-color: oklch(0.09 0 0);
-  color: oklch(0.95 0 0);
+  background-color: var(--color-zinc-950);
+  color: oklch(0.95 0.006 70);
   font-family: var(--font-sans), system-ui, sans-serif;
+  /* Profondeur de cave : halo de braise en haut, pénombre en bas */
+  background-image:
+    radial-gradient(120% 70% at 50% -10%, oklch(0.28 0.05 55 / 0.22), transparent 60%),
+    radial-gradient(90% 50% at 100% 110%, oklch(0.2 0.035 40 / 0.14), transparent 55%);
+  background-attachment: fixed;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 :focus-visible {
-  outline: 2px solid oklch(0.72 0.15 62);
+  outline: 2px solid var(--color-amber-400);
   outline-offset: 2px;
   border-radius: 4px;
 }
 
+/* ---- Animations d'entrée ---- */
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.rise {
+  animation: rise 360ms var(--ease-cave) both;
+}
+
+/* Cascade : chaque enfant entre avec un léger décalage */
+.stagger > * {
+  animation: rise 360ms var(--ease-cave) both;
+}
+.stagger > *:nth-child(1) { animation-delay: 40ms; }
+.stagger > *:nth-child(2) { animation-delay: 90ms; }
+.stagger > *:nth-child(3) { animation-delay: 140ms; }
+.stagger > *:nth-child(4) { animation-delay: 190ms; }
+.stagger > *:nth-child(5) { animation-delay: 235ms; }
+.stagger > *:nth-child(n + 6) { animation-delay: 270ms; }
+
+/* ---- Skeletons (remplacent les spinners) ---- */
+
+@keyframes shimmer {
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--color-zinc-900) 25%,
+    var(--color-zinc-800) 37%,
+    var(--color-zinc-900) 63%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+  border-radius: 0.75rem;
+}
+
+/* ---- Surfaces & micro-interactions ---- */
+
+.surface {
+  background: linear-gradient(180deg, oklch(0.19 0.011 55 / 0.9), oklch(0.15 0.009 55 / 0.95));
+  border: 1px solid oklch(0.76 0.14 62 / 0.08);
+  box-shadow:
+    0 1px 0 0 oklch(1 0 0 / 0.03) inset,
+    0 8px 24px -12px oklch(0 0 0 / 0.6);
+}
+
+.interactive {
+  transition:
+    transform 160ms var(--ease-cave),
+    border-color 160ms ease,
+    background-color 160ms ease,
+    box-shadow 160ms ease;
+}
+.interactive:hover {
+  transform: translateY(-1px);
+  border-color: oklch(0.76 0.14 62 / 0.35);
+}
+.interactive:active {
+  transform: translateY(0) scale(0.99);
+}
+
+.btn-press {
+  transition: transform 160ms var(--ease-cave), filter 160ms ease;
+}
+.btn-press:hover {
+  filter: brightness(1.1);
+}
+.btn-press:active {
+  transform: scale(0.97);
+}
+
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
+  *,
+  *::before,
+  *::after {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
+  }
+  .rise,
+  .stagger > * {
+    animation: fade-in 0.01ms both;
   }
 }

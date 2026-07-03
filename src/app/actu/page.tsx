@@ -12,7 +12,7 @@ export default function Actu() {
   useEffect(() => {
     (async () => {
       try {
-        const res = await fetch("/api/news", { cache: "no-store" });
+        const res = await fetch("/api/news");
         const data = await res.json();
         setArticles(Array.isArray(data.articles) ? data.articles : []);
       } catch {}
@@ -31,23 +31,28 @@ export default function Actu() {
       <div className="w-full max-w-md">
         <header className="mb-8">
           <p className="text-[11px] font-medium tracking-widest text-amber-500/80 uppercase mb-1">Presse</p>
-          <h1 className="text-3xl font-semibold tracking-tight text-zinc-50">Actu cigares</h1>
+          <h1 className="font-display text-3xl font-semibold tracking-tight text-zinc-50">Actu cigares</h1>
         </header>
 
         {loading ? (
-          <div className="flex items-center gap-3 py-8">
-            <div className="h-4 w-4 animate-spin rounded-full border-2 border-zinc-700 border-t-amber-500" />
-            <p className="text-sm text-zinc-400">Chargement…</p>
+          <div className="overflow-hidden rounded-2xl border border-zinc-800">
+            {[0, 1, 2].map((i) => (
+              <div key={i} className={`p-4 ${i < 2 ? "border-b border-zinc-800/60" : ""}`}>
+                <div className="skeleton h-2.5 w-28" />
+                <div className="skeleton mt-2 h-4 w-3/4" />
+                <div className="skeleton mt-2 h-3 w-full" />
+              </div>
+            ))}
           </div>
         ) : articles.length === 0 ? (
           <p className="py-8 text-center text-sm text-zinc-600">Pas d&apos;actualité disponible pour l&apos;instant.</p>
         ) : (
-          <div className="overflow-hidden rounded-2xl border border-zinc-800">
+          <div className="stagger overflow-hidden rounded-2xl border border-zinc-800">
             {articles.map((a, i) => (
               <button
                 key={i}
                 onClick={() => setSel(a)}
-                className={`block w-full bg-zinc-900/40 p-4 text-left transition-colors hover:bg-zinc-900/80 ${
+                className={`interactive block w-full bg-zinc-900/40 p-4 text-left transition-colors hover:bg-zinc-900/80 ${
                   i < articles.length - 1 ? "border-b border-zinc-800/60" : ""
                 }`}
               >

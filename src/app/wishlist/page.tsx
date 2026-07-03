@@ -65,7 +65,7 @@ export default function Wishlist() {
       <div className="w-full max-w-md">
         <header className="mb-8">
           <p className="text-[11px] font-medium tracking-widest text-amber-500/80 uppercase mb-1">Liste</p>
-          <h1 className="text-3xl font-semibold tracking-tight text-zinc-50">Mes envies</h1>
+          <h1 className="font-display text-3xl font-semibold tracking-tight text-zinc-50">Mes envies</h1>
         </header>
 
         <AuthBar />
@@ -92,7 +92,7 @@ export default function Wishlist() {
           />
           <button
             onClick={add}
-            className="flex w-full items-center justify-center gap-2 rounded-xl bg-amber-600 px-4 py-2.5 text-sm font-semibold text-zinc-950 transition-colors hover:bg-amber-500"
+            className="btn-press flex w-full items-center justify-center gap-2 rounded-xl bg-amber-600 px-4 py-2.5 text-sm font-semibold text-zinc-950 transition-colors hover:bg-amber-500"
           >
             <IconPlus size={15} />
             Ajouter une envie
@@ -103,7 +103,7 @@ export default function Wishlist() {
         {items.length === 0 ? (
           <p className="py-8 text-center text-sm text-zinc-600">Aucune envie pour l&apos;instant.</p>
         ) : (
-          <div className="overflow-hidden rounded-2xl border border-zinc-800">
+          <div className="stagger overflow-hidden rounded-2xl border border-zinc-800">
             {items.map((it, i) => (
               <div
                 key={it.id}

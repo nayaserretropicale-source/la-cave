@@ -87,7 +87,7 @@ export default function Caviste() {
       <div className="w-full max-w-md">
         <header className="mb-8">
           <p className="text-[11px] font-medium tracking-widest text-amber-500/80 uppercase mb-1">Expert</p>
-          <h1 className="text-3xl font-semibold tracking-tight text-zinc-50">Le Caviste</h1>
+          <h1 className="font-display text-3xl font-semibold tracking-tight text-zinc-50">Le Caviste</h1>
         </header>
 
         {messages.length === 0 && (
@@ -111,16 +111,16 @@ export default function Caviste() {
               className={
                 m.role === "user"
                   ? "ml-auto max-w-[85%] rounded-2xl rounded-tr-sm bg-zinc-800 px-4 py-3 text-sm text-zinc-100"
-                  : "mr-auto max-w-[85%] rounded-2xl rounded-tl-sm border border-zinc-800 bg-zinc-900/60 px-4 py-3 text-sm text-zinc-200 whitespace-pre-wrap leading-relaxed"
+                  : "rise mr-auto max-w-[85%] rounded-2xl rounded-tl-sm border border-zinc-800 bg-zinc-900/60 px-4 py-3 text-sm text-zinc-200 whitespace-pre-wrap leading-relaxed"
               }
             >
               {m.content}
             </div>
           ))}
           {thinking && (
-            <div className="mr-auto flex items-center gap-2 rounded-2xl rounded-tl-sm border border-zinc-800 bg-zinc-900/60 px-4 py-3">
-              <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-zinc-700 border-t-amber-500" />
-              <span className="text-sm text-zinc-500">Le caviste cherche…</span>
+            <div className="mr-auto max-w-[85%] space-y-2 rounded-2xl rounded-tl-sm border border-zinc-800 bg-zinc-900/60 px-4 py-3">
+              <div className="skeleton h-3 w-40" />
+              <div className="skeleton h-3 w-24" />
             </div>
           )}
         </div>
@@ -136,7 +136,7 @@ export default function Caviste() {
           <button
             onClick={() => send()}
             disabled={thinking}
-            className="rounded-xl bg-amber-600 px-4 py-2.5 text-sm font-semibold text-zinc-950 transition-colors hover:bg-amber-500 disabled:opacity-50"
+            className="btn-press rounded-xl bg-amber-600 px-4 py-2.5 text-sm font-semibold text-zinc-950 transition-colors hover:bg-amber-500 disabled:opacity-50"
           >
             Envoyer
           </button>
@@ -178,7 +178,7 @@ export default function Caviste() {
             <button
               onClick={login}
               disabled={loggingIn}
-              className="mt-4 w-full rounded-xl bg-amber-600 px-4 py-2.5 text-sm font-semibold text-zinc-950 transition-colors hover:bg-amber-500 disabled:opacity-50"
+              className="btn-press mt-4 w-full rounded-xl bg-amber-600 px-4 py-2.5 text-sm font-semibold text-zinc-950 transition-colors hover:bg-amber-500 disabled:opacity-50"
             >
               {loggingIn ? "Connexion…" : "Se connecter"}
             </button>

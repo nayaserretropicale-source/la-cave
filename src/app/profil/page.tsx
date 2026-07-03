@@ -67,7 +67,7 @@ export default function Profil() {
         <div className="w-full max-w-md">
           <header className="mb-8">
             <p className="text-[11px] font-medium tracking-widest text-amber-500/80 uppercase mb-1">Compte</p>
-            <h1 className="text-3xl font-semibold tracking-tight text-zinc-50">Mon profil</h1>
+            <h1 className="font-display text-3xl font-semibold tracking-tight text-zinc-50">Mon profil</h1>
           </header>
           <p className="text-sm text-zinc-400">Connecte-toi depuis l&apos;onglet Cave pour créer ton profil.</p>
         </div>
@@ -104,7 +104,7 @@ export default function Profil() {
         {/* Amis */}
         <Link
           href="/amis"
-          className="mb-6 flex items-center justify-between rounded-xl border border-zinc-800 bg-zinc-900/40 px-4 py-3.5 transition-colors hover:border-zinc-700"
+          className="interactive mb-6 flex items-center justify-between rounded-xl border border-zinc-800 bg-zinc-900/40 px-4 py-3.5 hover:border-zinc-700"
         >
           <div className="flex items-center gap-3">
             <IconCercle size={16} className="text-zinc-400" />
@@ -137,7 +137,7 @@ export default function Profil() {
           <p className="text-xs text-zinc-600">{email}</p>
           <button
             onClick={save}
-            className="w-full rounded-xl bg-amber-600 px-4 py-2.5 text-sm font-semibold text-zinc-950 transition-colors hover:bg-amber-500"
+            className="btn-press w-full rounded-xl bg-amber-600 px-4 py-2.5 text-sm font-semibold text-zinc-950 transition-colors hover:bg-amber-500"
           >
             Enregistrer
           </button>

@@ -138,13 +138,13 @@ export default function Journal() {
       <div className="w-full max-w-md">
         <header className="mb-8">
           <p className="text-[11px] font-medium tracking-widest text-amber-500/80 uppercase mb-1">Carnet</p>
-          <h1 className="text-3xl font-semibold tracking-tight text-zinc-50">Journal</h1>
+          <h1 className="font-display text-3xl font-semibold tracking-tight text-zinc-50">Journal</h1>
         </header>
 
         <AuthBar />
 
         {hasData && (
-          <div className="mb-6 grid grid-cols-2 gap-2">
+          <div className="stagger mb-6 grid grid-cols-2 gap-2">
             <Stat label="En cave" value={String(cave.length)} />
             <Stat label="Dégustations" value={String(sessions.length)} />
             <Stat label="Ce mois-ci" value={String(moisCount)} />
@@ -158,7 +158,7 @@ export default function Journal() {
 
         <button
           onClick={() => setOpen((v) => !v)}
-          className="mb-6 flex w-full items-center justify-center gap-2 rounded-xl bg-amber-600 px-4 py-2.5 text-sm font-semibold text-zinc-950 transition-colors hover:bg-amber-500"
+          className="btn-press mb-6 flex w-full items-center justify-center gap-2 rounded-xl bg-amber-600 px-4 py-2.5 text-sm font-semibold text-zinc-950 transition-colors hover:bg-amber-500"
         >
           {open ? "Fermer" : <><IconPlus size={15} /> Nouvelle dégustation</>}
         </button>
@@ -235,7 +235,7 @@ export default function Journal() {
 
             <button
               onClick={save}
-              className="w-full rounded-xl bg-amber-600 px-4 py-2.5 text-sm font-semibold text-zinc-950 transition-colors hover:bg-amber-500"
+              className="btn-press w-full rounded-xl bg-amber-600 px-4 py-2.5 text-sm font-semibold text-zinc-950 transition-colors hover:bg-amber-500"
             >
               Enregistrer la dégustation
             </button>
@@ -248,7 +248,7 @@ export default function Journal() {
         {sessions.length === 0 ? (
           <p className="py-8 text-center text-sm text-zinc-600">Aucune dégustation pour l&apos;instant.</p>
         ) : (
-          <div className="overflow-hidden rounded-2xl border border-zinc-800">
+          <div className="stagger overflow-hidden rounded-2xl border border-zinc-800">
             {sessions.map((s, i) => (
               <div
                 key={s.id}

@@ -119,7 +119,7 @@ export default function Communaute() {
 
   async function addFriend(otherId: string) {
     await supabase.from("friendships").insert({ addressee_id: otherId });
-    sendPush(otherId, "Demande d'ami", `${pseudo || "Quelqu'un"} t'a envoyé une demande d'ami`);
+    sendPush("friend_request", otherId);
     loadFriends();
   }
 
@@ -151,9 +151,15 @@ export default function Communaute() {
     loadFeed();
   }
 
-  async function sendPush(toUserId: string, title: string, body: string) {
+  async function sendPush(type: "like" | "comment" | "friend_request", toUserId: string, postId?: string) {
     if (toUserId === userId) return;
-    fetch("/api/push/send", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ userId: toUserId, title, body }) }).catch(() => {});
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return;
+    fetch("/api/push/send", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${session.access_token}` },
+      body: JSON.stringify({ type, toUserId, postId }),
+    }).catch(() => {});
   }
 
   async function toggleLike(p: Post) {
@@ -161,7 +167,7 @@ export default function Communaute() {
       await supabase.from("likes").delete().eq("post_id", p.id).eq("user_id", userId);
     } else {
       await supabase.from("likes").insert({ post_id: p.id });
-      sendPush(p.user_id, "Nouveau like", `${pseudo || "Quelqu'un"} a aimé ton cigare « ${p.cigare_nom} »`);
+      sendPush("like", p.user_id, p.id);
     }
     loadFeed();
   }
@@ -195,7 +201,7 @@ export default function Communaute() {
     await supabase.from("comments").insert({ post_id: postId, texte: txt });
     setCommentInput((m) => ({ ...m, [postId]: "" }));
     const post = posts.find((p) => p.id === postId);
-    if (post) sendPush(post.user_id, "Nouveau commentaire", `${pseudo || "Quelqu'un"} a commenté « ${post.cigare_nom} » : ${txt.slice(0, 60)}`);
+    if (post) sendPush("comment", post.user_id, postId);
     await refreshComments(postId);
     loadFeed();
   }
@@ -212,7 +218,7 @@ export default function Communaute() {
       <p className="text-[11px] font-medium tracking-widest text-amber-500/80 uppercase mb-1">
         Cercle{isAdmin ? " · admin" : ""}
       </p>
-      <h1 className="text-3xl font-semibold tracking-tight text-zinc-50">Communauté</h1>
+      <h1 className="font-display text-3xl font-semibold tracking-tight text-zinc-50">Communauté</h1>
     </header>
   );
 
@@ -236,7 +242,7 @@ export default function Communaute() {
           <div className="rounded-2xl border border-amber-700/30 bg-amber-950/15 p-5">
             <p className="text-zinc-200 leading-relaxed">Espace réservé aux personnes ayant l&apos;âge légal pour le tabac (18 ans ou plus).</p>
             <p className="mt-2 text-sm text-zinc-400">Le cigare se savoure avec modération. En continuant, tu confirmes avoir l&apos;âge légal.</p>
-            <button onClick={confirmMajeur} className="mt-5 w-full rounded-xl bg-amber-600 px-4 py-2.5 text-sm font-semibold text-zinc-950 transition-colors hover:bg-amber-500">
+            <button onClick={confirmMajeur} className="btn-press mt-5 w-full rounded-xl bg-amber-600 px-4 py-2.5 text-sm font-semibold text-zinc-950 transition-colors hover:bg-amber-500">
               Je confirme avoir 18 ans ou plus
             </button>
           </div>
@@ -301,7 +307,7 @@ export default function Communaute() {
               </label>
               <button
                 onClick={publish}
-                className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-amber-600 px-4 py-2 text-sm font-semibold text-zinc-950 transition-colors hover:bg-amber-500"
+                className="btn-press flex flex-1 items-center justify-center gap-2 rounded-xl bg-amber-600 px-4 py-2 text-sm font-semibold text-zinc-950 transition-colors hover:bg-amber-500"
               >
                 <IconPlus size={15} />
                 Publier
@@ -335,7 +341,7 @@ export default function Communaute() {
             {onlyFriends ? "Aucune publication de tes amis." : "Aucune publication. Sois le premier à partager !"}
           </p>
         ) : (
-          <div className="space-y-4">
+          <div className="stagger space-y-4">
             {visiblePosts.map((p) => {
               const rel = p.user_id !== userId ? relation(p.user_id) : null;
               return (
@@ -354,7 +360,7 @@ export default function Communaute() {
                       )}
                       {rel?.state === "sent" && <span className="text-xs text-zinc-600">En attente</span>}
                       {rel?.state === "incoming" && rel.row && (
-                        <button onClick={() => acceptFriend(rel.row!.id)} className="rounded-lg bg-amber-600 px-2.5 py-1 text-xs font-semibold text-zinc-950 transition-colors hover:bg-amber-500">Accepter</button>
+                        <button onClick={() => acceptFriend(rel.row!.id)} className="btn-press rounded-lg bg-amber-600 px-2.5 py-1 text-xs font-semibold text-zinc-950 transition-colors hover:bg-amber-500">Accepter</button>
                       )}
                       {rel?.state === "friends" && <span className="text-xs text-amber-400">Ami</span>}
                       {(p.user_id === userId || isAdmin) && (
@@ -434,7 +440,7 @@ export default function Communaute() {
                           placeholder="Commenter…"
                           className="flex-1 rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-600 outline-none focus:border-zinc-700 transition-colors"
                         />
-                        <button onClick={() => addComment(p.id)} className="rounded-xl bg-amber-600 px-3 py-2 text-sm font-semibold text-zinc-950 transition-colors hover:bg-amber-500">
+                        <button onClick={() => addComment(p.id)} className="btn-press rounded-xl bg-amber-600 px-3 py-2 text-sm font-semibold text-zinc-950 transition-colors hover:bg-amber-500">
                           Envoyer
                         </button>
                       </div>

@@ -310,7 +310,7 @@ export default function Home() {
         {/* Header */}
         <header className="mb-8">
           <p className="text-[11px] font-medium tracking-widest text-amber-500/80 uppercase mb-1">Collection personnelle</p>
-          <h1 className="text-3xl font-semibold tracking-tight text-zinc-50">La Cave</h1>
+          <h1 className="font-display text-3xl font-semibold tracking-tight text-zinc-50">La <em className="italic">Cave</em></h1>
         </header>
 
         <AuthBar />
@@ -366,15 +366,23 @@ export default function Home() {
         )}
 
         {loading && (
-          <div className="mb-6 flex items-center gap-3 rounded-xl border border-zinc-800 bg-zinc-900/40 px-4 py-3">
-            <div className="h-4 w-4 animate-spin rounded-full border-2 border-zinc-700 border-t-amber-500" />
-            <p className="text-sm text-zinc-400">Analyse en cours…</p>
+          <div className="mb-6 space-y-4">
+            <div className="skeleton h-40 w-full rounded-2xl" />
+            <div className="space-y-2">
+              <div className="skeleton h-4 w-2/3" />
+              <div className="skeleton h-4 w-1/3" />
+            </div>
+            <div className="space-y-2 rounded-xl border border-zinc-800 p-4">
+              <div className="skeleton h-4 w-full" />
+              <div className="skeleton h-4 w-5/6" />
+              <div className="skeleton h-4 w-2/3" />
+            </div>
           </div>
         )}
 
         {/* Scan result */}
         {fiche && !loading && (
-          <div className="mb-6">
+          <div className="rise mb-6">
             {fiche.identifie ? (
               <div className="space-y-4">
                 <div>
@@ -424,7 +432,7 @@ export default function Home() {
 
             <div className="mt-5 flex gap-2">
               {fiche.identifie && (
-                <button onClick={saveToCave} className="flex-1 rounded-xl bg-amber-600 px-4 py-2.5 text-sm font-semibold text-zinc-950 transition-colors hover:bg-amber-500">
+                <button onClick={saveToCave} className="btn-press flex-1 rounded-xl bg-amber-600 px-4 py-2.5 text-sm font-semibold text-zinc-950 transition-colors hover:bg-amber-500">
                   Ajouter à ma cave
                 </button>
               )}
@@ -507,7 +515,7 @@ export default function Home() {
             {filtered.length === 0 ? (
               <p className="py-8 text-center text-sm text-zinc-600">Aucun cigare ne correspond.</p>
             ) : (
-              <div className="space-y-6">
+              <div className="stagger space-y-6">
                 {groupNames.map((name) => (
                   <div key={name}>
                     <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-zinc-500">{name}</p>
@@ -516,7 +524,7 @@ export default function Home() {
                         <div
                           key={c.id}
                           onClick={() => openDetail(c)}
-                          className={`flex cursor-pointer items-center gap-3 bg-zinc-900/40 px-3 py-3 transition-colors hover:bg-zinc-900/80 ${
+                          className={`interactive flex cursor-pointer items-center gap-3 bg-zinc-900/40 px-3 py-3 ${
                             i < groups[name].length - 1 ? "border-b border-zinc-800/60" : ""
                           } ${c.statut === "fume" ? "opacity-50" : ""}`}
                         >
@@ -529,7 +537,7 @@ export default function Home() {
                               className="h-11 w-11 flex-shrink-0 rounded-lg object-cover"
                             />
                           ) : (
-                            <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-lg bg-zinc-800 text-zinc-600">
+                            <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-zinc-800 to-zinc-900 text-amber-700/50">
                               <IconBook size={18} />
                             </div>
                           )}
@@ -588,7 +596,7 @@ export default function Home() {
           onClick={() => setSelected(null)}
         >
           <div
-            className="my-auto w-full max-w-md rounded-2xl border border-zinc-800 bg-zinc-950 shadow-2xl shadow-black/60"
+            className="rise my-auto w-full max-w-md rounded-2xl border border-zinc-800 bg-zinc-950 shadow-2xl shadow-black/60"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Photo */}
@@ -770,7 +778,7 @@ export default function Home() {
 
               {/* Actions */}
               <div className="mt-5 flex gap-2">
-                <button onClick={saveDetail} className="flex-1 rounded-xl bg-amber-600 px-4 py-2.5 text-sm font-semibold text-zinc-950 transition-colors hover:bg-amber-500">
+                <button onClick={saveDetail} className="btn-press flex-1 rounded-xl bg-amber-600 px-4 py-2.5 text-sm font-semibold text-zinc-950 transition-colors hover:bg-amber-500">
                   Enregistrer
                 </button>
                 <button onClick={() => setSelected(null)} className="rounded-xl border border-zinc-800 px-4 py-2.5 text-sm text-zinc-400 transition-colors hover:border-zinc-700">
@@ -812,7 +820,7 @@ export default function Home() {
             {manualMsg && <p className="mt-3 text-sm text-amber-400">{manualMsg}</p>}
 
             <div className="mt-5 flex gap-2">
-              <button onClick={saveManual} className="flex-1 rounded-xl bg-amber-600 px-4 py-2.5 text-sm font-semibold text-zinc-950 transition-colors hover:bg-amber-500">
+              <button onClick={saveManual} className="btn-press flex-1 rounded-xl bg-amber-600 px-4 py-2.5 text-sm font-semibold text-zinc-950 transition-colors hover:bg-amber-500">
                 Ajouter à ma cave
               </button>
               <button onClick={() => setManual(false)} className="rounded-xl border border-zinc-800 px-4 py-2.5 text-sm text-zinc-400 transition-colors hover:border-zinc-700">

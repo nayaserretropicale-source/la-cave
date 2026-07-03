@@ -1,7 +1,16 @@
 import { NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import MemoryClient from "mem0ai";
+import { createClient } from "@supabase/supabase-js";
 import { requireUser } from "@/lib/api-guard";
+
+function authedClient(token: string) {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    { global: { headers: { Authorization: `Bearer ${token}` } } }
+  );
+}
 
 export const runtime = "nodejs";
 
@@ -47,8 +56,22 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "requête invalide" }, { status: 400 });
     }
 
-    // Injecter les souvenirs mem0 dans le system prompt
+    // Grounding : le caviste connaît la vraie cave de l'utilisateur
     let system = SYSTEM;
+    const token = req.headers.get("authorization")!.slice(7);
+    const { data: rows } = await authedClient(token)
+      .from("cave")
+      .select("nom,marque,origine,force,duree_fume,accord,rating,quantite,statut")
+      .limit(100);
+    const dispo = (rows ?? []).filter((c) => c.statut !== "fume" && (c.quantite ?? 1) > 0);
+    if (dispo.length) {
+      system +=
+        `\n\nCave réelle de l'utilisateur (${dispo.length} cigares disponibles) :\n` +
+        dispo
+          .map((c) => `- ${c.nom}${c.marque ? ` (${c.marque})` : ""}${c.origine ? `, ${c.origine}` : ""}${c.force ? `, force ${c.force}` : ""}${c.duree_fume ? `, ${c.duree_fume}` : ""}${c.rating ? `, noté ${c.rating}/5` : ""}`)
+          .join("\n") +
+        `\nQuand tu recommandes un cigare à fumer maintenant, privilégie ceux de cette liste et cite-les par leur nom exact. Ne propose un cigare hors cave que si l'utilisateur demande explicitement une découverte ou un achat.`;
+    }
     if (mem0 && user) {
       const lastMsg = messages[messages.length - 1];
       const { results } = await mem0.search(lastMsg.content, { filters: { user_id: user.id } }) as { results: { memory: string }[] };

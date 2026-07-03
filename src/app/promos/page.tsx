@@ -78,13 +78,17 @@ export default function Promos() {
       <div className="w-full max-w-md">
         <header className="mb-8">
           <p className="text-[11px] font-medium tracking-widest text-amber-500/80 uppercase mb-1">Deals</p>
-          <h1 className="text-3xl font-semibold tracking-tight text-zinc-50">Bons plans</h1>
+          <h1 className="font-display text-3xl font-semibold tracking-tight text-zinc-50">Bons plans</h1>
         </header>
 
         {loading ? (
-          <div className="flex items-center gap-3 py-8">
-            <div className="h-4 w-4 animate-spin rounded-full border-2 border-zinc-700 border-t-amber-500" />
-            <p className="text-sm text-zinc-400">Recherche des bons plans…</p>
+          <div className="mb-8 overflow-hidden rounded-2xl border border-zinc-800">
+            {[0, 1, 2].map((i) => (
+              <div key={i} className={`p-4 ${i < 2 ? "border-b border-zinc-800/60" : ""}`}>
+                <div className="skeleton h-2.5 w-20" />
+                <div className="skeleton mt-2 h-4 w-2/3" />
+              </div>
+            ))}
           </div>
         ) : (
           <>
@@ -101,7 +105,7 @@ export default function Promos() {
             {deals.length === 0 ? (
               <p className="py-4 text-sm text-zinc-500">Rien trouvé à l&apos;instant — vois les sites de référence ci-dessous.</p>
             ) : (
-              <div className="mb-8 overflow-hidden rounded-2xl border border-zinc-800">
+              <div className="stagger mb-8 overflow-hidden rounded-2xl border border-zinc-800">
                 {deals.map((d, i) => (
                   <div
                     key={i}
@@ -151,14 +155,14 @@ export default function Promos() {
             )}
 
             <p className="mb-3 text-xs font-medium uppercase tracking-widest text-zinc-500">Sites de référence</p>
-            <div className="overflow-hidden rounded-2xl border border-zinc-800">
+            <div className="stagger overflow-hidden rounded-2xl border border-zinc-800">
               {SHORTCUTS.map((s, i) => (
                 <a
                   key={s.url}
                   href={s.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={`flex items-center justify-between bg-zinc-900/40 px-4 py-3.5 transition-colors hover:bg-zinc-900/80 ${
+                  className={`interactive flex items-center justify-between bg-zinc-900/40 px-4 py-3.5 transition-colors hover:bg-zinc-900/80 ${
                     i < SHORTCUTS.length - 1 ? "border-b border-zinc-800/60" : ""
                   }`}
                 >

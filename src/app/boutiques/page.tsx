@@ -121,7 +121,7 @@ export default function Boutiques() {
     <main className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col items-center px-6 py-12">
       <div className="w-full max-w-md">
         <p className="text-xs tracking-[0.3em] uppercase text-amber-500">Annuaire</p>
-        <h1 className="text-3xl font-semibold mt-1 mb-6">Boutiques 🗺️</h1>
+        <h1 className="font-display text-3xl font-semibold mt-1 mb-6">Boutiques 🗺️</h1>
 
         <AuthBar />
 
@@ -129,7 +129,7 @@ export default function Boutiques() {
           <p className="text-sm text-zinc-400">Connecte-toi pour voir et enrichir l&apos;annuaire des boutiques.</p>
         ) : (
           <>
-            <button onClick={() => setShowAdd((v) => !v)} className="mb-6 w-full rounded-lg bg-amber-600 px-4 py-2.5 font-medium text-zinc-950 transition hover:bg-amber-500">
+            <button onClick={() => setShowAdd((v) => !v)} className="btn-press mb-6 w-full rounded-lg bg-amber-600 px-4 py-2.5 font-medium text-zinc-950 transition hover:bg-amber-500">
               {showAdd ? "Fermer" : "+ Ajouter une boutique"}
             </button>
 
@@ -142,7 +142,7 @@ export default function Boutiques() {
                 <input value={adresse} onChange={(e) => setAdresse(e.target.value)} placeholder="Adresse / repère (optionnel)" className="w-full rounded-lg bg-zinc-800 px-3 py-2 text-sm outline-none" />
                 <textarea value={note} onChange={(e) => setNote(e.target.value)} rows={2} placeholder="Note (horaires, spécialité…)" className="w-full rounded-lg bg-zinc-800 px-3 py-2 text-sm outline-none" />
                 <p className="text-xs text-zinc-600">Ton ajout est visible par toute la communauté.</p>
-                <button onClick={add} className="w-full rounded-lg bg-amber-600 px-4 py-2.5 font-medium text-zinc-950 transition hover:bg-amber-500">Ajouter à l&apos;annuaire</button>
+                <button onClick={add} className="btn-press w-full rounded-lg bg-amber-600 px-4 py-2.5 font-medium text-zinc-950 transition hover:bg-amber-500">Ajouter à l&apos;annuaire</button>
                 {msg && <p className="text-sm text-amber-500">{msg}</p>}
               </div>
             )}
@@ -168,7 +168,7 @@ export default function Boutiques() {
                 {groupNames.map((name) => (
                   <div key={name}>
                     <p className="mb-2 text-sm font-medium text-amber-500">📍 {name}</p>
-                    <div className="space-y-2">
+                    <div className="stagger space-y-2">
                       {groups[name].map((l) => (
                         <div key={l.id} className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-4">
                           <div className="flex items-start justify-between gap-2">
@@ -202,7 +202,7 @@ export default function Boutiques() {
               </div>
 
               {aiResults && (
-                <div className="mt-4 space-y-2">
+                <div className="stagger mt-4 space-y-2">
                   {aiResults.length === 0 ? (
                     <p className="text-sm text-zinc-500">Aucune suggestion fiable trouvée. Tu peux ajouter une adresse que tu connais.</p>
                   ) : (

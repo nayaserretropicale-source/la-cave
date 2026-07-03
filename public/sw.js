@@ -14,7 +14,12 @@ self.addEventListener("push", (event) => {
 
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
-  const url = event.notification.data?.url || "/";
+  // N'ouvre que des chemins same-origin — jamais une URL externe poussée
+  let url = "/";
+  try {
+    const parsed = new URL(event.notification.data?.url || "/", self.location.origin);
+    if (parsed.origin === self.location.origin) url = parsed.pathname + parsed.search;
+  } catch {}
   event.waitUntil(
     clients.matchAll({ type: "window", includeUncontrolled: true }).then((list) => {
       for (const client of list) {
