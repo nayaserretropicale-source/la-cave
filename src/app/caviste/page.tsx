@@ -131,7 +131,7 @@ export default function Caviste() {
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => { if (e.key === "Enter") send(); }}
             placeholder="Pose ta question…"
-            className="flex-1 rounded-xl border border-zinc-800 bg-zinc-900/60 px-4 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 outline-none focus:border-zinc-700 transition-colors"
+            className="flex-1 rounded-xl border border-zinc-800 bg-zinc-900/60 px-4 py-2.5 text-sm text-zinc-100 placeholder-zinc-400 outline-none focus:border-zinc-700 transition-colors"
           />
           <button
             onClick={() => send()}
@@ -161,7 +161,7 @@ export default function Caviste() {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Email"
               autoComplete="email"
-              className="mt-5 w-full rounded-xl border border-zinc-800 bg-zinc-900/60 px-3 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 outline-none focus:border-zinc-700 transition-colors"
+              className="mt-5 w-full rounded-xl border border-zinc-800 bg-zinc-900/60 px-3 py-2.5 text-sm text-zinc-100 placeholder-zinc-400 outline-none focus:border-zinc-700 transition-colors"
             />
             <input
               type="password"
@@ -170,7 +170,7 @@ export default function Caviste() {
               onKeyDown={(e) => { if (e.key === "Enter") login(); }}
               placeholder="Mot de passe"
               autoComplete="current-password"
-              className="mt-2 w-full rounded-xl border border-zinc-800 bg-zinc-900/60 px-3 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 outline-none focus:border-zinc-700 transition-colors"
+              className="mt-2 w-full rounded-xl border border-zinc-800 bg-zinc-900/60 px-3 py-2.5 text-sm text-zinc-100 placeholder-zinc-400 outline-none focus:border-zinc-700 transition-colors"
             />
 
             {loginError && <p className="mt-2 text-sm text-red-400">{loginError}</p>}

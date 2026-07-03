@@ -465,7 +465,7 @@ export default function Home() {
                   value={q}
                   onChange={(e) => setQ(e.target.value)}
                   placeholder="Rechercher…"
-                  className="w-full rounded-xl border border-zinc-800 bg-zinc-900/60 px-4 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 outline-none focus:border-zinc-600 transition-colors"
+                  className="w-full rounded-xl border border-zinc-800 bg-zinc-900/60 px-4 py-2.5 text-sm text-zinc-100 placeholder-zinc-400 outline-none focus:border-zinc-600 transition-colors"
                 />
                 <div className="flex flex-wrap gap-1.5">
                   {[
@@ -772,7 +772,7 @@ export default function Home() {
                   onChange={(e) => setNoteDraft(e.target.value)}
                   rows={3}
                   placeholder="Ce que j'en ai pensé…"
-                  className="w-full rounded-xl border border-zinc-800 bg-zinc-900/60 px-3 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 outline-none focus:border-zinc-700 transition-colors resize-none"
+                  className="w-full rounded-xl border border-zinc-800 bg-zinc-900/60 px-3 py-2.5 text-sm text-zinc-100 placeholder-zinc-400 outline-none focus:border-zinc-700 transition-colors resize-none"
                 />
               </div>
 
@@ -852,7 +852,7 @@ function FieldEdit({ label, value, onChange, placeholder }: { label: string; val
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full rounded-xl border border-zinc-800 bg-zinc-900/60 px-3 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 outline-none focus:border-zinc-700 transition-colors"
+        className="w-full rounded-xl border border-zinc-800 bg-zinc-900/60 px-3 py-2.5 text-sm text-zinc-100 placeholder-zinc-400 outline-none focus:border-zinc-700 transition-colors"
       />
     </div>
   );

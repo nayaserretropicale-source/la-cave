@@ -129,7 +129,7 @@ export default function CeSoir() {
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   placeholder="ex. quelque chose de doux, boisé…"
-                  className="w-full rounded-xl border border-zinc-800 bg-zinc-900/60 px-3 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 outline-none focus:border-zinc-700 transition-colors"
+                  className="w-full rounded-xl border border-zinc-800 bg-zinc-900/60 px-3 py-2.5 text-sm text-zinc-100 placeholder-zinc-400 outline-none focus:border-zinc-700 transition-colors"
                 />
               </div>
               <button

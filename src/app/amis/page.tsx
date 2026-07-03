@@ -132,7 +132,7 @@ export default function Amis() {
               onChange={(e) => setTerm(e.target.value)}
               onKeyDown={(e) => { if (e.key === "Enter") search(); }}
               placeholder="Pseudo…"
-              className="flex-1 rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 outline-none focus:border-zinc-700 transition-colors"
+              className="flex-1 rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-zinc-100 placeholder-zinc-400 outline-none focus:border-zinc-700 transition-colors"
             />
             <button onClick={search} className="btn-press rounded-xl bg-amber-600 px-4 py-2.5 text-sm font-semibold text-zinc-950 transition-colors hover:bg-amber-500">
               Chercher

@@ -49,14 +49,14 @@ export default function AuthBar() {
         onChange={(e) => setEmail(e.target.value)}
         placeholder="Email"
         type="email"
-        className="w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 outline-none focus:border-zinc-700 transition-colors"
+        className="w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-zinc-100 placeholder-zinc-400 outline-none focus:border-zinc-700 transition-colors"
       />
       <input
         value={password}
         onChange={(e) => setPassword(e.target.value)}
         placeholder="Mot de passe"
         type="password"
-        className="w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 outline-none focus:border-zinc-700 transition-colors"
+        className="w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-zinc-100 placeholder-zinc-400 outline-none focus:border-zinc-700 transition-colors"
       />
       <div className="flex gap-2 pt-1">
         <button

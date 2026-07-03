@@ -10,7 +10,7 @@
   --color-zinc-900: oklch(0.18 0.01 55);
   --color-zinc-800: oklch(0.26 0.012 50);
   --color-zinc-700: oklch(0.36 0.013 48);
-  --color-zinc-600: oklch(0.5 0.012 50);
+  --color-zinc-600: oklch(0.58 0.012 52); /* remonté pour AA sur texte secondaire (fond ~0.13) */
   --color-zinc-500: oklch(0.62 0.012 55);
   --color-zinc-400: oklch(0.72 0.01 60);
   --color-zinc-300: oklch(0.81 0.01 65);
@@ -51,6 +51,14 @@ body {
   outline: 2px solid var(--color-amber-400);
   outline-offset: 2px;
   border-radius: 4px;
+}
+
+/* a11y : zone tactile minimale 44px (WCAG / HIG) sur tous les contrôles.
+   Les boutons icône-seuls reçoivent en plus une largeur 44px dans les composants. */
+button,
+select,
+input:not([type="file"]):not([type="checkbox"]):not([type="radio"]) {
+  min-height: 2.75rem;
 }
 
 /* ---- Animations d'entrée ---- */

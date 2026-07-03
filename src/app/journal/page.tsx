@@ -196,7 +196,7 @@ export default function Journal() {
                   value={duree}
                   onChange={(e) => setDuree(e.target.value)}
                   placeholder="45"
-                  className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 outline-none focus:border-zinc-700 transition-colors"
+                  className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-zinc-100 placeholder-zinc-400 outline-none focus:border-zinc-700 transition-colors"
                 />
               </div>
             </div>
@@ -207,7 +207,7 @@ export default function Journal() {
                 value={accord}
                 onChange={(e) => setAccord(e.target.value)}
                 placeholder="Rhum vieux, café…"
-                className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 outline-none focus:border-zinc-700 transition-colors"
+                className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-zinc-100 placeholder-zinc-400 outline-none focus:border-zinc-700 transition-colors"
               />
             </div>
 
@@ -229,7 +229,7 @@ export default function Journal() {
                 onChange={(e) => setCommentaire(e.target.value)}
                 rows={3}
                 placeholder="Arômes, tirage, évolution…"
-                className="w-full resize-none rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 outline-none focus:border-zinc-700 transition-colors"
+                className="w-full resize-none rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-zinc-100 placeholder-zinc-400 outline-none focus:border-zinc-700 transition-colors"
               />
             </div>
 

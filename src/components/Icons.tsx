@@ -11,6 +11,8 @@ const defaults = (size = 20) => ({
   strokeWidth: 1.5,
   strokeLinecap: "round" as const,
   strokeLinejoin: "round" as const,
+  // a11y : icônes toujours décoratives — le texte/aria-label du parent porte le sens
+  "aria-hidden": true,
 });
 
 export function IconCave({ size, ...p }: IconProps) {

@@ -272,13 +272,13 @@ export default function Communaute() {
               value={cNom}
               onChange={(e) => setCNom(e.target.value)}
               placeholder="Cigare dégusté *"
-              className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 outline-none focus:border-zinc-700 transition-colors"
+              className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-zinc-100 placeholder-zinc-400 outline-none focus:border-zinc-700 transition-colors"
             />
             <input
               value={cMarque}
               onChange={(e) => setCMarque(e.target.value)}
               placeholder="Marque (optionnel)"
-              className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 outline-none focus:border-zinc-700 transition-colors"
+              className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-zinc-100 placeholder-zinc-400 outline-none focus:border-zinc-700 transition-colors"
             />
             <div className="flex gap-1.5">
               {[1, 2, 3, 4, 5].map((n) => (
@@ -292,7 +292,7 @@ export default function Communaute() {
               onChange={(e) => setCTexte(e.target.value)}
               rows={3}
               placeholder="Ton ressenti à partager…"
-              className="w-full resize-none rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 outline-none focus:border-zinc-700 transition-colors"
+              className="w-full resize-none rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-zinc-100 placeholder-zinc-400 outline-none focus:border-zinc-700 transition-colors"
             />
             {cPhoto && (
               <div className="relative h-48 w-full overflow-hidden rounded-xl border border-zinc-800">
@@ -438,7 +438,7 @@ export default function Communaute() {
                           value={commentInput[p.id] || ""}
                           onChange={(e) => setCommentInput((m) => ({ ...m, [p.id]: e.target.value }))}
                           placeholder="Commenter…"
-                          className="flex-1 rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-600 outline-none focus:border-zinc-700 transition-colors"
+                          className="flex-1 rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-400 outline-none focus:border-zinc-700 transition-colors"
                         />
                         <button onClick={() => addComment(p.id)} className="btn-press rounded-xl bg-amber-600 px-3 py-2 text-sm font-semibold text-zinc-950 transition-colors hover:bg-amber-500">
                           Envoyer
