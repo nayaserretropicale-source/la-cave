@@ -214,6 +214,12 @@ export default function Home() {
     loadCave();
   }
 
+  async function requestCloseManual() {
+    const dirty = Object.values(mForm).some((v) => v.trim() !== "");
+    if (dirty && !(await confirm({ message: "Fermer sans ajouter ce cigare ?", confirmLabel: "Fermer", danger: true }))) return;
+    setManual(false);
+  }
+
   async function removeFromCave(id: string) {
     if (!(await confirm({ message: "Supprimer ce cigare de ta cave ?", confirmLabel: "Supprimer", danger: true }))) return;
     await supabase.from("cave").delete().eq("id", id);
@@ -846,7 +852,7 @@ export default function Home() {
       {manual && (
         <div
           className="fixed inset-0 z-[60] flex items-end justify-center overflow-y-auto bg-black/80 backdrop-blur-sm p-4 sm:items-center"
-          onClick={() => setManual(false)}
+          onClick={requestCloseManual}
         >
           <div
             className="my-auto w-full max-w-md rounded-2xl border border-zinc-800 bg-zinc-950 p-5 shadow-2xl shadow-black/60"
@@ -875,7 +881,7 @@ export default function Home() {
               <button onClick={saveManual} className="btn-press flex-1 rounded-xl bg-amber-600 px-4 py-2.5 text-sm font-semibold text-zinc-950 transition-colors hover:bg-amber-500">
                 Ajouter à ma cave
               </button>
-              <button onClick={() => setManual(false)} className="rounded-xl border border-zinc-800 px-4 py-2.5 text-sm text-zinc-400 transition-colors hover:border-zinc-700">
+              <button onClick={requestCloseManual} className="rounded-xl border border-zinc-800 px-4 py-2.5 text-sm text-zinc-400 transition-colors hover:border-zinc-700">
                 Annuler
               </button>
             </div>
