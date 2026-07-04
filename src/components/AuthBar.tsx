@@ -18,8 +18,9 @@ export default function AuthBar() {
   }, []);
 
   async function signUp() {
-    const { error } = await supabase.auth.signUp({ email, password });
-    setMsg(error ? error.message : "Compte créé, tu es connecté.");
+    const { data, error } = await supabase.auth.signUp({ email, password });
+    if (error) { setMsg(error.message); return; }
+    setMsg(data.session ? "Compte créé, tu es connecté." : "Compte créé — confirme ton email pour te connecter.");
   }
   async function signIn() {
     const { error } = await supabase.auth.signInWithPassword({ email, password });

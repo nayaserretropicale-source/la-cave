@@ -401,6 +401,16 @@ export default function Home() {
           </div>
         )}
 
+        {/* Empty state — nouvel utilisateur, cave vide */}
+        {cave.length === 0 && !fiche && !loading && !preview && (
+          <div className="mb-6 rounded-2xl border border-zinc-800 bg-zinc-900/30 px-5 py-6 text-center">
+            <p className="text-sm font-medium text-zinc-200">Ta cave est vide</p>
+            <p className="mt-1.5 text-xs leading-relaxed text-zinc-500">
+              Scanne la bague d&apos;un cigare pour l&apos;identifier et le ranger dans ta cave — ou ajoute-le à la main. Connecte-toi pour que ta collection soit sauvegardée.
+            </p>
+          </div>
+        )}
+
         {preview && (
           <div className="relative mb-6 aspect-[4/3] w-full overflow-hidden rounded-2xl border border-zinc-800">
             <Image src={preview} alt="cigare" fill sizes="448px" className="object-cover" />
