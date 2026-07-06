@@ -30,7 +30,7 @@ const SCHEMA = {
     origine: nullableString,
     format: nullableString,
     cape: nullableString,
-    force: { type: ["string", "null"], enum: ["légère", "moyenne", "corsée", null] },
+    force: { anyOf: [{ type: "string", enum: ["légère", "moyenne", "corsée"] }, { type: "null" }] },
     profil: { type: ["array", "null"], items: { type: "string" } },
     prix_indicatif: nullableString,
     duree_fume: nullableString,
@@ -47,7 +47,7 @@ const SCHEMA = {
         troisieme_tiers: nullableString,
       },
     },
-    confiance: { type: ["string", "null"], enum: ["élevée", "moyenne", "faible", null] },
+    confiance: { anyOf: [{ type: "string", enum: ["élevée", "moyenne", "faible"] }, { type: "null" }] },
   },
 };
 

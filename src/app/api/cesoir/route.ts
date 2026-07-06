@@ -89,7 +89,7 @@ Choisis LE cigare le plus adapté parmi ceux de la liste. Tiens compte de la for
             properties: {
               choix_id: { type: "string", enum: ids },
               pourquoi: { type: "string" },
-              alternative_id: { type: ["string", "null"], enum: [...ids, null] },
+              alternative_id: { anyOf: [{ type: "string", enum: ids }, { type: "null" }] },
               alternative_pourquoi: { type: ["string", "null"] },
               conseil: { type: ["string", "null"] },
             },
