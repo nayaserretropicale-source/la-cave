@@ -72,7 +72,7 @@ Critères pour ce soir :
 - Envie particulière : ${s(criteres?.notes, 300) || "aucune"}
 
 Choisis LE cigare le plus adapté parmi ceux de la liste. Tiens compte de la force, de la durée de fume face au temps dispo, du profil et de l'accord. Si pertinent, propose une alternative de la liste.
-"pourquoi" : 2 à 3 phrases en français, concrètes. "alternative_pourquoi" : 1 phrase ou null. "conseil" : 1 phrase (accord, moment, tirage) ou null.`;
+"pourquoi" : 2 à 3 phrases en français, concrètes. "alternative_pourquoi" : 1 phrase ou null. "conseil" : 1 phrase (accord, moment, tirage) ou null. Les champs texte ("pourquoi", "alternative_pourquoi", "conseil") doivent être en texte brut sans markdown : pas d'astérisques, pas de gras, pas de puces, pas de titres.`;
 
     const msg = await anthropic.messages.create({
       model: "claude-sonnet-4-6",

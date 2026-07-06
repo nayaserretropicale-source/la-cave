@@ -20,12 +20,21 @@ const mem0 = process.env.MEM0_API_KEY
   ? new MemoryClient({ apiKey: process.env.MEM0_API_KEY })
   : null;
 
-const SYSTEM = `Tu es un caviste-tabac francophone avec 30 ans de métier (dégustateur passionné de cigares). Réponses précises, concrètes et concises (4 à 6 phrases max), ton chaleureux et accessible. Tu conseilles sur les formats, capes, accords boissons, conservation et dégustation, et le choix selon le goût. Tu n'encourages pas à fumer ; tu informes celui qui fume déjà.`;
+const SYSTEM = `Tu es un caviste-tabac francophone avec 30 ans de métier (dégustateur passionné de cigares). Réponses précises, concrètes et concises (4 à 6 phrases max), ton chaleureux et accessible. Tu conseilles sur les formats, capes, accords boissons, conservation et dégustation, et le choix selon le goût. Tu n'encourages pas à fumer ; tu informes celui qui fume déjà. Réponds en texte brut uniquement, jamais de markdown : pas d'astérisques, pas de gras **, pas de tirets de liste, pas de titres #, pas de puces •. Écris en phrases et paragraphes naturels.`;
 
 const MAX_MESSAGES = 12;
 const MAX_CHARS = 2000;
 
 type IncomingMsg = { role: "user" | "assistant"; content: string };
+
+// ponytail: filet de sécurité regex, pas de renderer markdown côté client
+function stripMarkdown(text: string): string {
+  return text
+    .replace(/\*\*([^*]+)\*\*/g, "$1") // **gras**
+    .replace(/(^|\s)\*([^*\n]+)\*(?=\s|[.,;:!?]|$)/g, "$1$2") // *italique*
+    .replace(/^#{1,6}\s+/gm, "") // # titres en début de ligne
+    .replace(/^\s*(?:[-*•]\s+)/gm, ""); // puces en début de ligne
+}
 
 function sanitize(messages: unknown): IncomingMsg[] | null {
   if (!Array.isArray(messages) || messages.length === 0) return null;
@@ -89,10 +98,12 @@ export async function POST(req: Request) {
       system,
       messages,
     });
-    const reply = msg.content
-      .filter((b): b is Anthropic.TextBlock => b.type === "text")
-      .map((b) => b.text)
-      .join("");
+    const reply = stripMarkdown(
+      msg.content
+        .filter((b): b is Anthropic.TextBlock => b.type === "text")
+        .map((b) => b.text)
+        .join("")
+    );
 
     // Sauvegarder l'échange dans mem0
     if (mem0 && user && reply) {
