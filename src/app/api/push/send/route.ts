@@ -3,11 +3,16 @@ import { createClient } from "@supabase/supabase-js";
 import webpush from "web-push";
 import { requireUser } from "@/lib/api-guard";
 
-webpush.setVapidDetails(
-  process.env.VAPID_SUBJECT!,
-  process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
-  process.env.VAPID_PRIVATE_KEY!
-);
+let vapidConfigured = false;
+function ensureVapid() {
+  if (vapidConfigured) return;
+  webpush.setVapidDetails(
+    process.env.VAPID_SUBJECT!,
+    process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
+    process.env.VAPID_PRIVATE_KEY!
+  );
+  vapidConfigured = true;
+}
 
 function authedClient(token: string) {
   return createClient(
@@ -20,6 +25,7 @@ function authedClient(token: string) {
 const TYPES = new Set(["like", "comment", "friend_request"]);
 
 export async function POST(req: NextRequest) {
+  ensureVapid();
   const { user, error } = await requireUser(req);
   if (error) return error;
 
