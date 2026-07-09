@@ -90,7 +90,7 @@ export default function Caviste() {
   return (
     <main className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col items-center px-4 py-10">
       <div className="w-full max-w-md">
-        <header className="mb-8">
+        <header className="mb-8" data-reveal>
           <p className="text-[11px] font-medium tracking-widest text-amber-500/80 uppercase mb-1">Expert</p>
           <h1 className="font-display text-3xl font-semibold tracking-tight text-zinc-50">Le Caviste</h1>
         </header>
@@ -142,7 +142,7 @@ export default function Caviste() {
           <button
             onClick={() => send()}
             disabled={thinking}
-            className="btn-press rounded-xl bg-amber-600 px-4 py-2.5 text-sm font-semibold text-zinc-950 transition-colors hover:bg-amber-500 disabled:opacity-50"
+            className="btn-3d px-4 py-2.5 text-sm disabled:opacity-50"
           >
             Envoyer
           </button>
@@ -155,7 +155,7 @@ export default function Caviste() {
           onClick={() => setShowLogin(false)}
         >
           <div
-            className="w-full max-w-sm rounded-2xl border border-zinc-800 bg-zinc-950 p-6 shadow-2xl"
+            className="glass w-full max-w-sm rounded-2xl border border-zinc-800 p-6 shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             <h2 className="text-lg font-semibold tracking-tight">Connexion requise</h2>
@@ -184,7 +184,7 @@ export default function Caviste() {
             <button
               onClick={login}
               disabled={loggingIn}
-              className="btn-press mt-4 w-full rounded-xl bg-amber-600 px-4 py-2.5 text-sm font-semibold text-zinc-950 transition-colors hover:bg-amber-500 disabled:opacity-50"
+              className="btn-3d mt-4 w-full px-4 py-2.5 text-sm disabled:opacity-50"
             >
               {loggingIn ? "Connexion…" : "Se connecter"}
             </button>

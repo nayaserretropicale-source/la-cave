@@ -32,7 +32,7 @@ export default function AuthBar() {
 
   if (user) {
     return (
-      <div className="mb-6 flex items-center justify-between rounded-xl border border-zinc-800 bg-zinc-900/40 px-4 py-2.5 text-sm">
+      <div data-reveal className="mb-6 flex items-center justify-between rounded-xl border border-zinc-800 bg-zinc-900/40 px-4 py-2.5 text-sm">
         <span className="text-zinc-400">
           <span className="text-amber-400">{user}</span>
         </span>
@@ -44,7 +44,7 @@ export default function AuthBar() {
   }
 
   return (
-    <div className="mb-6 space-y-2 rounded-xl border border-zinc-800 bg-zinc-900/40 p-4">
+    <div data-reveal className="mb-6 space-y-2 rounded-xl border border-zinc-800 bg-zinc-900/40 p-4">
       <input
         value={email}
         onChange={(e) => setEmail(e.target.value)}
@@ -62,7 +62,7 @@ export default function AuthBar() {
       <div className="flex gap-2 pt-1">
         <button
           onClick={signIn}
-          className="btn-press flex-1 rounded-lg bg-amber-600 px-3 py-2.5 text-sm font-semibold text-zinc-950 transition-colors hover:bg-amber-500"
+          className="btn-3d flex-1 px-3 py-2.5 text-sm"
         >
           Se connecter
         </button>

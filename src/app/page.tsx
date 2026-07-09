@@ -356,7 +356,7 @@ export default function Home() {
       <div className="w-full max-w-md">
 
         {/* Header */}
-        <header className="mb-8">
+        <header className="mb-8" data-reveal>
           <p className="text-[11px] font-medium tracking-widest text-amber-500/80 uppercase mb-1">Collection personnelle</p>
           <h1 className="font-display text-3xl font-semibold tracking-tight text-zinc-50">La <em className="italic">Cave</em></h1>
         </header>
@@ -364,21 +364,19 @@ export default function Home() {
         <AuthBar />
 
         {/* Quick links */}
-        <div className="mb-8 grid grid-cols-2 gap-2">
+        <div className="mb-8 grid grid-cols-2 gap-3" data-reveal>
           {QUICK_LINKS.map(({ href, label, sub, Icon, primary }) => (
             <Link
               key={href}
               href={href}
-              className={`flex items-center gap-3 rounded-xl px-4 py-3 transition-colors ${
-                primary
-                  ? "bg-amber-600/10 border border-amber-600/30 hover:border-amber-500/60 hover:bg-amber-600/15"
-                  : "border border-zinc-800 bg-zinc-900/40 hover:border-zinc-700"
+              className={`flex items-center gap-3 px-4 py-3 ${
+                primary ? "btn-3d" : "surface interactive rounded-xl"
               }`}
             >
-              <Icon size={18} className={primary ? "text-amber-400 flex-shrink-0" : "text-zinc-400 flex-shrink-0"} />
+              <Icon size={18} className={`flex-shrink-0 ${primary ? "text-zinc-950" : "text-amber-400"}`} />
               <div className="min-w-0">
-                <p className={`text-sm font-medium leading-tight ${primary ? "text-amber-300" : "text-zinc-200"}`}>{label}</p>
-                <p className="text-[11px] text-zinc-500 leading-tight mt-0.5 truncate">{sub}</p>
+                <p className={`text-sm font-semibold leading-tight ${primary ? "text-zinc-950" : "text-zinc-100"}`}>{label}</p>
+                <p className={`text-[11px] leading-tight mt-0.5 truncate ${primary ? "text-zinc-950/70" : "text-zinc-400"}`}>{sub}</p>
               </div>
             </Link>
           ))}
@@ -770,18 +768,16 @@ export default function Home() {
                     <button
                       type="button"
                       onClick={() => setStatutDraft("en_cave")}
-                      className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
-                        statutDraft !== "fume" ? "bg-amber-600 text-zinc-950" : "border border-zinc-700 text-zinc-400 hover:border-zinc-600"
-                      }`}
+                      data-selected={statutDraft !== "fume"}
+                      className="option-3d flex-1 px-3 py-2 text-xs font-medium"
                     >
                       En cave
                     </button>
                     <button
                       type="button"
                       onClick={() => setStatutDraft("fume")}
-                      className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
-                        statutDraft === "fume" ? "bg-amber-600 text-zinc-950" : "border border-zinc-700 text-zinc-400 hover:border-zinc-600"
-                      }`}
+                      data-selected={statutDraft === "fume"}
+                      className="option-3d flex-1 px-3 py-2 text-xs font-medium"
                     >
                       Fumé
                     </button>

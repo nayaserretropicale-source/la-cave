@@ -29,7 +29,7 @@ export default function Actu() {
   return (
     <main className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col items-center px-4 py-10">
       <div className="w-full max-w-md">
-        <header className="mb-8">
+        <header className="mb-8" data-reveal>
           <p className="text-[11px] font-medium tracking-widest text-amber-500/80 uppercase mb-1">Presse</p>
           <h1 className="font-display text-3xl font-semibold tracking-tight text-zinc-50">Actu cigares</h1>
         </header>
@@ -47,7 +47,7 @@ export default function Actu() {
         ) : articles.length === 0 ? (
           <p className="py-8 text-center text-sm text-zinc-600">Pas d&apos;actualité disponible pour l&apos;instant.</p>
         ) : (
-          <div className="stagger overflow-hidden rounded-2xl border border-zinc-800">
+          <div className="stagger overflow-hidden rounded-2xl border border-zinc-800" data-reveal style={{ ["--reveal-delay" as string]: "80ms" }}>
             {articles.map((a, i) => (
               <button
                 key={i}
@@ -73,7 +73,7 @@ export default function Actu() {
           onClick={() => setSel(null)}
         >
           <div
-            className="my-auto w-full max-w-md rounded-2xl border border-zinc-800 bg-zinc-950 p-5 shadow-2xl"
+            className="glass my-auto w-full max-w-md rounded-2xl p-5 shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             <p className="text-[10px] font-medium uppercase tracking-widest text-zinc-500">
@@ -88,7 +88,7 @@ export default function Actu() {
                   href={sel.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex-1 rounded-xl bg-amber-600 px-4 py-2.5 text-center text-sm font-semibold text-zinc-950 transition-colors hover:bg-amber-500"
+                  className="btn-3d flex-1 px-4 py-2.5 text-center text-sm"
                 >
                   Lire sur {sel.source}
                 </a>

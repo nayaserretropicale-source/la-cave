@@ -235,7 +235,7 @@ export default function Communaute() {
   }
 
   const pageHeader = (
-    <header className="mb-8">
+    <header className="mb-8" data-reveal>
       <p className="text-[11px] font-medium tracking-widest text-amber-500/80 uppercase mb-1">
         Cercle{isAdmin ? " · admin" : ""}
       </p>
@@ -260,10 +260,10 @@ export default function Communaute() {
       <main className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col items-center px-4 py-10">
         <div className="w-full max-w-md">
           {pageHeader}
-          <div className="rounded-2xl border border-amber-700/30 bg-amber-950/15 p-5">
+          <div className="rounded-2xl border border-amber-700/30 bg-amber-950/15 p-5" data-reveal>
             <p className="text-zinc-200 leading-relaxed">Espace réservé aux personnes ayant l&apos;âge légal pour le tabac (18 ans ou plus).</p>
             <p className="mt-2 text-sm text-zinc-400">Le cigare se savoure avec modération. En continuant, tu confirmes avoir l&apos;âge légal.</p>
-            <button onClick={confirmMajeur} className="btn-press mt-5 w-full rounded-xl bg-amber-600 px-4 py-2.5 text-sm font-semibold text-zinc-950 transition-colors hover:bg-amber-500">
+            <button onClick={confirmMajeur} className="btn-3d mt-5 w-full px-4 py-2.5 text-sm">
               Je confirme avoir 18 ans ou plus
             </button>
           </div>
@@ -284,11 +284,11 @@ export default function Communaute() {
 
         {/* Compose */}
         {!pseudo ? (
-          <div className="mb-8 rounded-xl border border-zinc-800 bg-zinc-900/40 px-4 py-3.5 text-sm text-zinc-400">
+          <div className="mb-8 rounded-xl border border-zinc-800 bg-zinc-900/40 px-4 py-3.5 text-sm text-zinc-400" data-reveal>
             Choisis un pseudo dans ton <Link href="/profil" className="text-amber-400 underline underline-offset-2">profil</Link> pour publier.
           </div>
         ) : (
-          <div className="mb-8 space-y-3 rounded-2xl border border-zinc-800 bg-zinc-900/40 p-5">
+          <div className="mb-8 space-y-3 rounded-2xl border border-zinc-800 bg-zinc-900/40 p-5" data-reveal>
             <input
               value={cNom}
               onChange={(e) => setCNom(e.target.value)}
@@ -328,7 +328,7 @@ export default function Communaute() {
               </label>
               <button
                 onClick={publish}
-                className="btn-press flex flex-1 items-center justify-center gap-2 rounded-xl bg-amber-600 px-4 py-2 text-sm font-semibold text-zinc-950 transition-colors hover:bg-amber-500"
+                className="btn-3d flex flex-1 items-center justify-center gap-2 px-4 py-2 text-sm"
               >
                 <IconPlus size={15} />
                 Publier
@@ -339,7 +339,7 @@ export default function Communaute() {
         )}
 
         {/* Feed filter */}
-        <div className="mb-5 flex gap-2">
+        <div className="mb-5 flex gap-2" data-reveal>
           {[
             { val: false, label: "Tous" },
             { val: true, label: "Amis" },
@@ -362,7 +362,7 @@ export default function Communaute() {
             {onlyFriends ? "Aucune publication de tes amis." : "Aucune publication. Sois le premier à partager !"}
           </p>
         ) : (
-          <div className="stagger space-y-4">
+          <div className="stagger space-y-4" data-reveal>
             {visiblePosts.map((p) => {
               const rel = p.user_id !== userId ? relation(p.user_id) : null;
               return (
@@ -464,7 +464,7 @@ export default function Communaute() {
                           placeholder="Commenter…"
                           className="flex-1 rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-400 outline-none focus:border-zinc-700 transition-colors"
                         />
-                        <button onClick={() => addComment(p.id)} className="btn-press rounded-xl bg-amber-600 px-3 py-2 text-sm font-semibold text-zinc-950 transition-colors hover:bg-amber-500">
+                        <button onClick={() => addComment(p.id)} className="btn-3d px-3 py-2 text-sm">
                           Envoyer
                         </button>
                       </div>

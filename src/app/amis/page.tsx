@@ -118,13 +118,13 @@ export default function Amis() {
   return (
     <main className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col items-center px-4 py-10">
       <div className="w-full max-w-md">
-        <header className="mb-8">
+        <header className="mb-8" data-reveal style={{ ["--reveal-delay"]: "80ms" } as React.CSSProperties}>
           <p className="text-[11px] font-medium tracking-widest text-amber-500/80 uppercase mb-1">Réseau</p>
           <h1 className="text-3xl font-semibold tracking-tight text-zinc-50">Mes amis</h1>
         </header>
 
         {/* Search */}
-        <div className="mb-8 rounded-2xl border border-zinc-800 bg-zinc-900/40 p-4">
+        <div className="mb-8 rounded-2xl border border-zinc-800 bg-zinc-900/40 p-4" data-reveal style={{ ["--reveal-delay"]: "160ms" } as React.CSSProperties}>
           <p className="mb-3 text-xs font-medium uppercase tracking-wider text-zinc-500">Trouver un membre</p>
           <div className="flex gap-2">
             <input
@@ -134,7 +134,7 @@ export default function Amis() {
               placeholder="Pseudo…"
               className="flex-1 rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-zinc-100 placeholder-zinc-400 outline-none focus:border-zinc-700 transition-colors"
             />
-            <button onClick={search} className="btn-press rounded-xl bg-amber-600 px-4 py-2.5 text-sm font-semibold text-zinc-950 transition-colors hover:bg-amber-500">
+            <button onClick={search} className="btn-3d px-4 py-2.5 text-sm">
               Chercher
             </button>
           </div>
@@ -150,7 +150,7 @@ export default function Amis() {
                     {rel.state === "none" && <button onClick={() => addFriend(r.id)} className="rounded-lg border border-zinc-700 px-3 py-1.5 text-xs font-medium text-zinc-400 transition-colors hover:border-zinc-600 hover:text-zinc-200">Ajouter</button>}
                     {rel.state === "sent" && <span className="text-xs text-zinc-600">En attente</span>}
                     {rel.state === "friends" && <span className="text-xs text-amber-400">Ami</span>}
-                    {rel.state === "incoming" && rel.row && <button onClick={() => accept(rel.row!.id)} className="btn-press rounded-lg bg-amber-600 px-3 py-1.5 text-xs font-semibold text-zinc-950 transition-colors hover:bg-amber-500">Accepter</button>}
+                    {rel.state === "incoming" && rel.row && <button onClick={() => accept(rel.row!.id)} className="btn-3d px-3 py-1.5 text-xs">Accepter</button>}
                   </div>
                 );
               })}
@@ -160,7 +160,7 @@ export default function Amis() {
 
         {/* Incoming requests */}
         {incoming.length > 0 && (
-          <div className="mb-8">
+          <div className="mb-8" data-reveal>
             <p className="mb-2 text-xs font-medium uppercase tracking-widest text-amber-500/80">Demandes reçues</p>
             <div className="stagger overflow-hidden rounded-2xl border border-zinc-800">
               {incoming.map((f, i) => (
@@ -169,7 +169,7 @@ export default function Amis() {
                   profile={profiles[otherOf(f)]}
                   right={
                     <div className={`flex gap-2 ${i < incoming.length - 1 ? "" : ""}`}>
-                      <button onClick={() => accept(f.id)} className="btn-press rounded-lg bg-amber-600 px-3 py-1.5 text-xs font-semibold text-zinc-950 transition-colors hover:bg-amber-500">Accepter</button>
+                      <button onClick={() => accept(f.id)} className="btn-3d px-3 py-1.5 text-xs">Accepter</button>
                       <button onClick={() => removeLink(f.id)} className="rounded-lg border border-zinc-700 px-3 py-1.5 text-xs text-zinc-400 transition-colors hover:border-orange-400/40 hover:text-orange-400">Refuser</button>
                     </div>
                   }
@@ -184,7 +184,7 @@ export default function Amis() {
         {friends.length === 0 ? (
           <p className="py-6 text-center text-sm text-zinc-600">Pas encore d&apos;amis. Cherche un pseudo ci-dessus.</p>
         ) : (
-          <div className="stagger overflow-hidden rounded-2xl border border-zinc-800">
+          <div className="stagger overflow-hidden rounded-2xl border border-zinc-800" data-reveal>
             {friends.map((f, i) => (
               <div key={f.id} className={`bg-zinc-900/40 ${i < friends.length - 1 ? "border-b border-zinc-800/60" : ""}`}>
                 <FriendRow
@@ -202,7 +202,7 @@ export default function Amis() {
 
         {/* Outgoing */}
         {outgoing.length > 0 && (
-          <div className="mt-8">
+          <div className="mt-8" data-reveal>
             <p className="mb-2 text-xs font-medium uppercase tracking-widest text-zinc-500">Demandes envoyées</p>
             <div className="stagger overflow-hidden rounded-2xl border border-zinc-800">
               {outgoing.map((f, i) => (

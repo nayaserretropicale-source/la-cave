@@ -30,7 +30,7 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
           <div
             role="alertdialog"
             aria-modal="true"
-            className="rise w-full max-w-sm rounded-2xl border border-zinc-800 bg-zinc-950 p-5 shadow-2xl"
+            className="glass rise w-full max-w-sm rounded-2xl p-5"
             onClick={(e) => e.stopPropagation()}
           >
             {pending.title && <h2 className="font-display text-lg font-semibold text-zinc-50">{pending.title}</h2>}
@@ -44,8 +44,10 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
               </button>
               <button
                 onClick={() => close(true)}
-                className={`btn-press flex-1 rounded-xl px-4 py-2.5 text-sm font-semibold text-zinc-950 ${
-                  pending.danger ? "bg-orange-500 hover:bg-orange-400" : "bg-amber-600 hover:bg-amber-500"
+                className={`flex-1 px-4 py-2.5 text-sm ${
+                  pending.danger
+                    ? "btn-press rounded-xl font-semibold text-zinc-950 bg-orange-500 hover:bg-orange-400"
+                    : "btn-3d"
                 }`}
               >
                 {pending.confirmLabel ?? "Confirmer"}

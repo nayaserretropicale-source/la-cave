@@ -107,7 +107,7 @@ export default function CeSoir() {
   return (
     <main className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col items-center px-4 py-10">
       <div className="w-full max-w-md">
-        <header className="mb-8">
+        <header className="mb-8" data-reveal>
           <p className="text-[11px] font-medium tracking-widest text-amber-500/80 uppercase mb-1">Suggestion</p>
           <h1 className="font-display text-3xl font-semibold tracking-tight text-zinc-50">Ce soir</h1>
         </header>
@@ -123,7 +123,7 @@ export default function CeSoir() {
           </p>
         ) : (
           <>
-            <div className="space-y-5 rounded-2xl border border-zinc-800 bg-zinc-900/40 p-5">
+            <div className="space-y-5 rounded-2xl border border-zinc-800 bg-zinc-900/40 p-5" data-reveal style={{ "--reveal-delay": "80ms" } as React.CSSProperties}>
               <FilterRow label="Temps disponible" values={TEMPS} current={temps} set={setTemps} />
               <FilterRow label="Occasion" values={OCCASION} current={occasion} set={setOccasion} />
               <FilterRow label="Accord" values={ACCORD} current={accord} set={setAccord} />
@@ -140,7 +140,7 @@ export default function CeSoir() {
               <button
                 onClick={suggest}
                 disabled={loading}
-                className="btn-press w-full rounded-xl bg-amber-600 px-4 py-3 text-sm font-semibold text-zinc-950 transition-colors hover:bg-amber-500 disabled:opacity-50"
+                className="btn-3d w-full px-4 py-3 text-sm disabled:opacity-50"
               >
                 {loading ? "Analyse en cours…" : "Trouver un cigare"}
               </button>

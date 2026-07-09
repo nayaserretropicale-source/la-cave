@@ -137,7 +137,7 @@ export default function Boutiques() {
           <p className="text-sm text-zinc-400">Connecte-toi pour voir et enrichir l&apos;annuaire des boutiques.</p>
         ) : (
           <>
-            <button onClick={() => setShowAdd((v) => !v)} className="btn-press mb-6 w-full rounded-lg bg-amber-600 px-4 py-2.5 font-medium text-zinc-950 transition hover:bg-amber-500">
+            <button onClick={() => setShowAdd((v) => !v)} className="btn-3d mb-6 w-full px-4 py-2.5">
               {showAdd ? "Fermer" : "+ Ajouter une boutique"}
             </button>
 
@@ -150,7 +150,7 @@ export default function Boutiques() {
                 <input value={adresse} onChange={(e) => setAdresse(e.target.value)} placeholder="Adresse / repère (optionnel)" className="w-full rounded-xl border border-zinc-800 bg-zinc-900/60 px-3 py-2.5 text-sm text-zinc-100 placeholder-zinc-400 outline-none focus:border-zinc-700 transition-colors" />
                 <textarea value={note} onChange={(e) => setNote(e.target.value)} rows={2} placeholder="Note (horaires, spécialité…)" className="w-full rounded-xl border border-zinc-800 bg-zinc-900/60 px-3 py-2.5 text-sm text-zinc-100 placeholder-zinc-400 outline-none focus:border-zinc-700 transition-colors" />
                 <p className="text-xs text-zinc-600">Ton ajout est visible par toute la communauté.</p>
-                <button onClick={add} className="btn-press w-full rounded-lg bg-amber-600 px-4 py-2.5 font-medium text-zinc-950 transition hover:bg-amber-500">Ajouter à l&apos;annuaire</button>
+                <button onClick={add} className="btn-3d w-full px-4 py-2.5">Ajouter à l&apos;annuaire</button>
                 {msg && <p className="text-sm text-amber-500">{msg}</p>}
               </div>
             )}
@@ -198,7 +198,7 @@ export default function Boutiques() {
               </div>
             )}
 
-            <div className="mt-10 rounded-xl border border-zinc-800 bg-zinc-900/40 p-4">
+            <div data-reveal className="mt-10 rounded-xl border border-zinc-800 bg-zinc-900/40 p-4">
               <p className="text-sm font-medium text-amber-500">Trouver des boutiques (IA)</p>
               <p className="mt-1 text-xs text-zinc-500">Suggestions issues du web — <span className="text-zinc-400">à vérifier</span> avant de t&apos;y rendre.</p>
               <div className="mt-3 space-y-2">

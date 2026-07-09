@@ -5,6 +5,7 @@ import NavBar from "@/components/NavBar";
 import AvatarBadge from "@/components/AvatarBadge";
 import AgeGate from "@/components/AgeGate";
 import PushSetup from "@/components/PushSetup";
+import ScrollReveal from "@/components/ScrollReveal";
 import { ConfirmProvider } from "@/components/Confirm";
 
 const geistSans = Geist({
@@ -45,6 +46,7 @@ export default function RootLayout({
           <AgeGate />
           <AvatarBadge />
           <PushSetup />
+          <ScrollReveal />
           {children}
           <NavBar />
         </ConfirmProvider>

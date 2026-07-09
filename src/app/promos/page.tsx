@@ -76,7 +76,7 @@ export default function Promos() {
   return (
     <main className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col items-center px-4 py-10">
       <div className="w-full max-w-md">
-        <header className="mb-8">
+        <header data-reveal className="mb-8">
           <p className="text-[11px] font-medium tracking-widest text-amber-500/80 uppercase mb-1">Deals</p>
           <h1 className="font-display text-3xl font-semibold tracking-tight text-zinc-50">Bons plans</h1>
         </header>
@@ -93,7 +93,7 @@ export default function Promos() {
         ) : (
           <>
             {matchCount > 0 && (
-              <div className="mb-5 rounded-xl border border-amber-600/30 bg-amber-950/15 px-4 py-3">
+              <div data-reveal className="mb-5 rounded-xl border border-amber-600/30 bg-amber-950/15 px-4 py-3">
                 <p className="text-sm text-amber-300">
                   {matchCount === 1
                     ? "Un cigare de tes envies est en promo"
@@ -105,7 +105,7 @@ export default function Promos() {
             {deals.length === 0 ? (
               <p className="py-4 text-sm text-zinc-500">Rien trouvé à l&apos;instant — vois les sites de référence ci-dessous.</p>
             ) : (
-              <div className="stagger mb-8 overflow-hidden rounded-2xl border border-zinc-800">
+              <div data-reveal style={{ ["--reveal-delay"]: "80ms" } as React.CSSProperties} className="stagger mb-8 overflow-hidden rounded-2xl border border-zinc-800">
                 {deals.map((d, i) => (
                   <div
                     key={i}
@@ -155,7 +155,7 @@ export default function Promos() {
             )}
 
             <p className="mb-3 text-xs font-medium uppercase tracking-widest text-zinc-500">Sites de référence</p>
-            <div className="stagger overflow-hidden rounded-2xl border border-zinc-800">
+            <div data-reveal style={{ ["--reveal-delay"]: "160ms" } as React.CSSProperties} className="stagger overflow-hidden rounded-2xl border border-zinc-800">
               {SHORTCUTS.map((s, i) => (
                 <a
                   key={s.url}

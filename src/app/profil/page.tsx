@@ -78,13 +78,13 @@ export default function Profil() {
   return (
     <main className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col items-center px-4 py-10">
       <div className="w-full max-w-md">
-        <header className="mb-8">
+        <header className="mb-8" data-reveal>
           <p className="text-[11px] font-medium tracking-widest text-amber-500/80 uppercase mb-1">Compte</p>
           <h1 className="text-3xl font-semibold tracking-tight text-zinc-50">Mon profil</h1>
         </header>
 
         {/* Avatar */}
-        <div className="mb-6 flex flex-col items-center gap-4">
+        <div className="mb-6 flex flex-col items-center gap-4" data-reveal style={{ ["--reveal-delay" as string]: "80ms" }}>
           <div className="relative">
             {avatarUrl ? (
               <Image src={avatarUrl} alt="avatar" width={96} height={96} className="h-24 w-24 rounded-full border-2 border-zinc-700 object-cover" />
@@ -104,6 +104,8 @@ export default function Profil() {
         {/* Amis */}
         <Link
           href="/amis"
+          data-reveal
+          style={{ ["--reveal-delay" as string]: "160ms" }}
           className="interactive mb-6 flex items-center justify-between rounded-xl border border-zinc-800 bg-zinc-900/40 px-4 py-3.5 hover:border-zinc-700"
         >
           <div className="flex items-center gap-3">
@@ -114,7 +116,7 @@ export default function Profil() {
         </Link>
 
         {/* Formulaire */}
-        <div className="space-y-4">
+        <div className="space-y-4" data-reveal>
           <div>
             <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-zinc-500">Pseudo</label>
             <input
@@ -137,7 +139,7 @@ export default function Profil() {
           <p className="text-xs text-zinc-600">{email}</p>
           <button
             onClick={save}
-            className="btn-press w-full rounded-xl bg-amber-600 px-4 py-2.5 text-sm font-semibold text-zinc-950 transition-colors hover:bg-amber-500"
+            className="btn-3d w-full px-4 py-2.5 text-sm"
           >
             Enregistrer
           </button>

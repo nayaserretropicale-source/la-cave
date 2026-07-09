@@ -138,7 +138,7 @@ export default function Journal() {
   return (
     <main className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col items-center px-4 py-10">
       <div className="w-full max-w-md">
-        <header className="mb-8">
+        <header className="mb-8" data-reveal>
           <p className="text-[11px] font-medium tracking-widest text-amber-500/80 uppercase mb-1">Carnet</p>
           <h1 className="font-display text-3xl font-semibold tracking-tight text-zinc-50">Journal</h1>
         </header>
@@ -146,7 +146,7 @@ export default function Journal() {
         <AuthBar />
 
         {hasData && (
-          <div className="stagger mb-6 grid grid-cols-2 gap-2">
+          <div className="stagger mb-6 grid grid-cols-2 gap-2" data-reveal>
             <Stat label="En cave" value={String(cave.length)} />
             <Stat label="Dégustations" value={String(sessions.length)} />
             <Stat label="Ce mois-ci" value={String(moisCount)} />
@@ -160,13 +160,13 @@ export default function Journal() {
 
         <button
           onClick={() => setOpen((v) => !v)}
-          className="btn-press mb-6 flex w-full items-center justify-center gap-2 rounded-xl bg-amber-600 px-4 py-2.5 text-sm font-semibold text-zinc-950 transition-colors hover:bg-amber-500"
+          className="btn-3d mb-6 flex w-full items-center justify-center gap-2 px-4 py-2.5 text-sm"
         >
           {open ? "Fermer" : <><IconPlus size={15} /> Nouvelle dégustation</>}
         </button>
 
         {open && (
-          <div className="mb-8 space-y-4 rounded-2xl border border-zinc-800 bg-zinc-900/40 p-5">
+          <div className="mb-8 space-y-4 rounded-2xl border border-zinc-800 bg-zinc-900/40 p-5" data-reveal>
             <div>
               <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-zinc-500">Cigare</label>
               <select
@@ -237,7 +237,7 @@ export default function Journal() {
 
             <button
               onClick={save}
-              className="btn-press w-full rounded-xl bg-amber-600 px-4 py-2.5 text-sm font-semibold text-zinc-950 transition-colors hover:bg-amber-500"
+              className="btn-3d w-full px-4 py-2.5 text-sm"
             >
               Enregistrer la dégustation
             </button>
@@ -250,7 +250,7 @@ export default function Journal() {
         {sessions.length === 0 ? (
           <p className="py-8 text-center text-sm text-zinc-600">Aucune dégustation pour l&apos;instant.</p>
         ) : (
-          <div className="stagger overflow-hidden rounded-2xl border border-zinc-800">
+          <div className="stagger overflow-hidden rounded-2xl border border-zinc-800" data-reveal>
             {sessions.map((s, i) => (
               <div
                 key={s.id}

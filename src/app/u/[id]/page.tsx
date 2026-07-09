@@ -115,7 +115,7 @@ export default function PublicProfile() {
         <Link href="/communaute" className="text-sm text-zinc-500 transition-colors hover:text-zinc-300">← Communauté</Link>
 
         {/* Profile header */}
-        <div className="mt-6 flex items-center gap-4">
+        <div data-reveal className="mt-6 flex items-center gap-4">
           {prof.avatar_url ? (
             <Image src={prof.avatar_url} alt="" width={72} height={72} className="h-18 w-18 rounded-full border-2 border-zinc-700 object-cover flex-shrink-0" />
           ) : (
@@ -138,7 +138,7 @@ export default function PublicProfile() {
                   </button>
                 )}
                 {rel.state === "incoming" && rel.row && (
-                  <button onClick={() => accept(rel.row!.id)} className="rounded-lg bg-amber-600 px-3 py-1.5 text-xs font-semibold text-zinc-950 transition-colors hover:bg-amber-500">
+                  <button onClick={() => accept(rel.row!.id)} className="btn-3d px-3 py-1.5 text-xs">
                     Accepter la demande
                   </button>
                 )}
@@ -161,7 +161,7 @@ export default function PublicProfile() {
         {posts.length === 0 ? (
           <p className="py-6 text-center text-sm text-zinc-600">Aucune publication.</p>
         ) : (
-          <div className="space-y-4">
+          <div data-reveal style={{ ["--reveal-delay" as string]: "80ms" }} className="space-y-4">
             {posts.map((p) => (
               <div key={p.id} className="overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900/40">
                 <div className="px-4 py-3">

@@ -2,28 +2,34 @@
 
 @theme {
   /*
-   * Palette « cave » — les échelles zinc/amber sont redéfinies avec une teinte
-   * chaude (tabac, braise) : tout l'existant se rethème sans toucher aux pages.
-   * Contrastes vérifiés AA sur fond sombre.
+   * Palette « cave » v2 — espresso chaud relevé (moins sombre qu'avant), braise
+   * vive + accent jade (feuille de tabac) pour la couleur. Les échelles zinc/amber
+   * sont redéfinies : tout l'existant se rethème sans toucher aux pages.
+   * Contrastes vérifiés AA sur le fond relevé (zinc-950 = L 0.20).
    */
-  --color-zinc-950: oklch(0.13 0.008 60);
-  --color-zinc-900: oklch(0.18 0.01 55);
-  --color-zinc-800: oklch(0.26 0.012 50);
-  --color-zinc-700: oklch(0.36 0.013 48);
-  --color-zinc-600: oklch(0.58 0.012 52); /* remonté pour AA sur texte secondaire (fond ~0.13) */
-  --color-zinc-500: oklch(0.62 0.012 55);
-  --color-zinc-400: oklch(0.72 0.01 60);
-  --color-zinc-300: oklch(0.81 0.01 65);
-  --color-zinc-200: oklch(0.88 0.008 70);
-  --color-zinc-100: oklch(0.93 0.006 70);
-  --color-zinc-50: oklch(0.96 0.006 70);
+  --color-zinc-950: oklch(0.2 0.012 55);   /* fond app — charcoal chaud, relevé */
+  --color-zinc-900: oklch(0.25 0.014 52);  /* surface / carte */
+  --color-zinc-800: oklch(0.32 0.016 50);  /* surface haute / bordure */
+  --color-zinc-700: oklch(0.42 0.016 48);  /* séparateur */
+  --color-zinc-600: oklch(0.64 0.014 52);  /* texte tertiaire — AA mini sur fond 0.20 */
+  --color-zinc-500: oklch(0.7 0.014 55);
+  --color-zinc-400: oklch(0.78 0.012 60);  /* texte secondaire */
+  --color-zinc-300: oklch(0.85 0.01 65);
+  --color-zinc-200: oklch(0.9 0.008 70);
+  --color-zinc-100: oklch(0.95 0.006 75);  /* texte principal */
+  --color-zinc-50: oklch(0.98 0.005 75);
 
-  /* Braise / cuivre */
-  --color-amber-300: oklch(0.84 0.11 70);
-  --color-amber-400: oklch(0.76 0.14 62);
-  --color-amber-500: oklch(0.7 0.16 55);
-  --color-amber-600: oklch(0.6 0.15 50);
-  --color-amber-700: oklch(0.5 0.13 48);
+  /* Braise / cuivre — plus saturée */
+  --color-amber-300: oklch(0.86 0.12 75);
+  --color-amber-400: oklch(0.8 0.15 68);
+  --color-amber-500: oklch(0.74 0.17 60);
+  --color-amber-600: oklch(0.66 0.17 52);
+  --color-amber-700: oklch(0.56 0.15 48);
+
+  /* Accent jade — feuille de tabac. Usage rare (états, dégradés glass). */
+  --color-jade-400: oklch(0.8 0.1 165);
+  --color-jade-500: oklch(0.72 0.11 168);
+  --color-jade-600: oklch(0.62 0.1 170);
 
   --ease-cave: cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -36,15 +42,20 @@
 
 body {
   background-color: var(--color-zinc-950);
-  color: oklch(0.95 0.006 70);
+  color: oklch(0.95 0.006 75);
   font-family: var(--font-sans), system-ui, sans-serif;
-  /* Profondeur de cave : halo de braise en haut, pénombre en bas */
+  /* Profondeur : halo de braise en haut, lueur jade discrète en bas */
   background-image:
-    radial-gradient(120% 70% at 50% -10%, oklch(0.28 0.05 55 / 0.22), transparent 60%),
-    radial-gradient(90% 50% at 100% 110%, oklch(0.2 0.035 40 / 0.14), transparent 55%);
+    radial-gradient(120% 70% at 50% -10%, oklch(0.5 0.13 58 / 0.16), transparent 60%),
+    radial-gradient(90% 55% at 100% 108%, oklch(0.55 0.09 168 / 0.08), transparent 55%);
   background-attachment: fixed;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Titres display : tracking serré sur les grandes tailles (cf. apple-design) */
+h1, h2, .display {
+  letter-spacing: -0.02em;
 }
 
 :focus-visible {
@@ -53,8 +64,7 @@ body {
   border-radius: 4px;
 }
 
-/* a11y : zone tactile minimale 44px (WCAG / HIG) sur tous les contrôles.
-   Les boutons icône-seuls reçoivent en plus une largeur 44px dans les composants. */
+/* a11y : cible tactile minimale 44px (WCAG / HIG) */
 button,
 select,
 input:not([type="file"]):not([type="checkbox"]):not([type="radio"]) {
@@ -64,33 +74,17 @@ input:not([type="file"]):not([type="checkbox"]):not([type="radio"]) {
 /* ---- Animations d'entrée ---- */
 
 @keyframes rise {
-  from {
-    opacity: 0;
-    transform: translateY(12px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
 }
-
 @keyframes fade-in {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
-.rise {
-  animation: rise 360ms var(--ease-cave) both;
-}
+.rise { animation: rise 360ms var(--ease-cave) both; }
 
-/* Cascade : chaque enfant entre avec un léger décalage */
-.stagger > * {
-  animation: rise 360ms var(--ease-cave) both;
-}
+.stagger > * { animation: rise 360ms var(--ease-cave) both; }
 .stagger > *:nth-child(1) { animation-delay: 40ms; }
 .stagger > *:nth-child(2) { animation-delay: 90ms; }
 .stagger > *:nth-child(3) { animation-delay: 140ms; }
@@ -98,14 +92,27 @@ input:not([type="file"]):not([type="checkbox"]):not([type="radio"]) {
 .stagger > *:nth-child(5) { animation-delay: 235ms; }
 .stagger > *:nth-child(n + 6) { animation-delay: 270ms; }
 
+/* ---- Scroll reveal (piloté par ScrollReveal.tsx via IntersectionObserver) ---- */
+
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(22px);
+  transition:
+    opacity 620ms var(--ease-cave),
+    transform 620ms var(--ease-cave);
+  transition-delay: var(--reveal-delay, 0ms);
+  will-change: opacity, transform;
+}
+[data-reveal].is-visible {
+  opacity: 1;
+  transform: none;
+}
+
 /* ---- Skeletons (remplacent les spinners) ---- */
 
 @keyframes shimmer {
-  100% {
-    background-position: -200% 0;
-  }
+  100% { background-position: -200% 0; }
 }
-
 .skeleton {
   background: linear-gradient(
     90deg,
@@ -118,15 +125,91 @@ input:not([type="file"]):not([type="checkbox"]):not([type="radio"]) {
   border-radius: 0.75rem;
 }
 
-/* ---- Surfaces & micro-interactions ---- */
+/* ---- Surfaces & liquid glass ---- */
 
 .surface {
-  background: linear-gradient(180deg, oklch(0.19 0.011 55 / 0.9), oklch(0.15 0.009 55 / 0.95));
-  border: 1px solid oklch(0.76 0.14 62 / 0.08);
+  background: linear-gradient(180deg, oklch(0.27 0.014 55 / 0.92), oklch(0.22 0.012 55 / 0.95));
+  border: 1px solid oklch(0.8 0.15 62 / 0.1);
   box-shadow:
-    0 1px 0 0 oklch(1 0 0 / 0.03) inset,
-    0 8px 24px -12px oklch(0 0 0 / 0.6);
+    0 1px 0 0 oklch(1 0 0 / 0.05) inset,
+    0 10px 30px -14px oklch(0 0 0 / 0.6);
 }
+
+/* Liquid glass Apple : couche translucide, bord haut lumineux, blur + saturate.
+   Ne jamais empiler deux glass légers (lisibilité). */
+.glass {
+  background: oklch(0.3 0.014 55 / 0.55);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid oklch(1 0 0 / 0.08);
+  border-top-color: oklch(1 0 0 / 0.22); /* lumière qui accroche le matériau */
+  box-shadow:
+    0 1px 0 0 oklch(1 0 0 / 0.06) inset,
+    0 12px 40px -16px oklch(0 0 0 / 0.55);
+}
+.glass-strong {
+  background: oklch(0.24 0.012 55 / 0.72);
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  border-top: 1px solid oklch(1 0 0 / 0.16);
+}
+
+/* ---- Boutons 3D (braise, matière) ---- */
+
+.btn-3d {
+  position: relative;
+  border-radius: 0.9rem;
+  background: linear-gradient(180deg, var(--color-amber-400), var(--color-amber-600));
+  color: var(--color-zinc-950);
+  font-weight: 600;
+  box-shadow:
+    0 1px 0 0 oklch(1 0 0 / 0.45) inset,      /* reflet haut */
+    0 -1px 0 0 oklch(0 0 0 / 0.2) inset,       /* ombre basse interne */
+    0 5px 0 0 var(--color-amber-700),          /* épaisseur du bouton */
+    0 12px 22px -8px oklch(0.66 0.17 52 / 0.5);/* halo coloré */
+  transition:
+    transform 120ms var(--ease-cave),
+    box-shadow 120ms var(--ease-cave),
+    filter 120ms ease;
+}
+.btn-3d:hover { filter: brightness(1.06); }
+.btn-3d:active {
+  transform: translateY(4px);
+  box-shadow:
+    0 1px 0 0 oklch(1 0 0 / 0.35) inset,
+    0 1px 0 0 var(--color-amber-700),
+    0 5px 12px -8px oklch(0.66 0.17 52 / 0.5);
+}
+
+/* ---- Options / sélecteurs 3D (relief, enfoncé quand actif) ---- */
+
+.option-3d {
+  border-radius: 0.9rem;
+  background: linear-gradient(180deg, var(--color-zinc-800), var(--color-zinc-900));
+  border: 1px solid oklch(1 0 0 / 0.06);
+  color: var(--color-zinc-200);
+  box-shadow:
+    0 1px 0 0 oklch(1 0 0 / 0.06) inset,
+    0 4px 0 0 oklch(0 0 0 / 0.32),
+    0 9px 18px -10px oklch(0 0 0 / 0.5);
+  transition:
+    transform 130ms var(--ease-cave),
+    box-shadow 130ms var(--ease-cave),
+    background-color 130ms ease,
+    color 130ms ease;
+}
+.option-3d:active { transform: translateY(2px); }
+.option-3d[aria-pressed="true"],
+.option-3d[data-selected="true"] {
+  background: linear-gradient(180deg, var(--color-amber-500), var(--color-amber-600));
+  color: var(--color-zinc-950);
+  transform: translateY(3px);
+  box-shadow:
+    inset 0 2px 7px oklch(0 0 0 / 0.28),
+    0 1px 0 0 var(--color-amber-700);
+}
+
+/* ---- Micro-interactions ---- */
 
 .interactive {
   transition:
@@ -136,22 +219,17 @@ input:not([type="file"]):not([type="checkbox"]):not([type="radio"]) {
     box-shadow 160ms ease;
 }
 .interactive:hover {
-  transform: translateY(-1px);
-  border-color: oklch(0.76 0.14 62 / 0.35);
+  transform: translateY(-2px);
+  border-color: oklch(0.8 0.15 62 / 0.4);
+  box-shadow: 0 16px 40px -18px oklch(0 0 0 / 0.7);
 }
-.interactive:active {
-  transform: translateY(0) scale(0.99);
-}
+.interactive:active { transform: translateY(0) scale(0.99); }
 
 .btn-press {
   transition: transform 160ms var(--ease-cave), filter 160ms ease;
 }
-.btn-press:hover {
-  filter: brightness(1.1);
-}
-.btn-press:active {
-  transform: scale(0.97);
-}
+.btn-press:hover { filter: brightness(1.1); }
+.btn-press:active { transform: scale(0.97); }
 
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -161,7 +239,14 @@ input:not([type="file"]):not([type="checkbox"]):not([type="radio"]) {
     transition-duration: 0.01ms !important;
   }
   .rise,
-  .stagger > * {
-    animation: fade-in 0.01ms both;
+  .stagger > * { animation: fade-in 0.01ms both; }
+  [data-reveal] { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .glass, .glass-strong {
+    background: var(--color-zinc-900);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
   }
 }

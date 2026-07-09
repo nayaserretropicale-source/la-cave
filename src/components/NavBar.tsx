@@ -16,7 +16,7 @@ const tabs = [
 export default function NavBar() {
   const pathname = usePathname();
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-zinc-800/80 bg-zinc-950/95 backdrop-blur-md">
+    <nav className="glass-strong fixed bottom-0 left-0 right-0 z-50 border-t border-white/10">
       <div className="mx-auto flex max-w-md items-stretch justify-around">
         {tabs.map(({ href, label, Icon }) => {
           const active = pathname === href;

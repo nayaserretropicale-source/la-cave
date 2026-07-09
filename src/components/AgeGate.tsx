@@ -20,7 +20,7 @@ export default function AgeGate() {
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-zinc-950 px-6">
-      <div className="rise w-full max-w-sm rounded-2xl border border-zinc-800 bg-zinc-900 p-6 text-center text-zinc-100">
+      <div className="glass rise w-full max-w-sm rounded-2xl p-6 text-center text-zinc-100">
         <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-amber-600/10 text-amber-400">
           <IconCave size={24} />
         </div>
@@ -32,7 +32,7 @@ export default function AgeGate() {
               Cette application traite de cigares et s&apos;adresse exclusivement aux adultes.
               As-tu 18 ans ou plus ?
             </p>
-            <button onClick={accept} className="btn-press mt-5 w-full rounded-lg bg-amber-600 px-4 py-2.5 font-medium text-zinc-950 transition hover:bg-amber-500">
+            <button onClick={accept} className="btn-3d mt-5 w-full px-4 py-2.5">
               Oui, j&apos;ai 18 ans ou plus
             </button>
             <button onClick={() => setStatus("denied")} className="mt-2 w-full rounded-lg border border-zinc-700 px-4 py-2.5 text-sm text-zinc-300 transition hover:border-zinc-500">

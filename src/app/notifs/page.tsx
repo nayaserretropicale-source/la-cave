@@ -128,7 +128,7 @@ export default function Notifs() {
   return (
     <main className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col items-center px-4 py-10">
       <div className="w-full max-w-md">
-        <header className="mb-8">
+        <header data-reveal className="mb-8">
           <p className="text-[11px] font-medium tracking-widest text-amber-500/80 uppercase mb-1">Activité</p>
           <h1 className="font-display text-3xl font-semibold tracking-tight text-zinc-50">Notifications</h1>
         </header>
@@ -159,7 +159,7 @@ export default function Notifs() {
         )}
 
         {notifs.length > 0 && (
-          <div className="stagger overflow-hidden rounded-2xl border border-zinc-800">
+          <div data-reveal className="stagger overflow-hidden rounded-2xl border border-zinc-800">
             {notifs.map((n, i) => (
               <div
                 key={n.key}
@@ -187,7 +187,7 @@ export default function Notifs() {
                 {n.type === "friend" && n.friendshipId && (
                   <button
                     onClick={() => acceptFriend(n.friendshipId!)}
-                    className="btn-press flex-shrink-0 rounded-lg bg-amber-600 px-2.5 py-1 text-xs font-semibold text-zinc-950 transition-colors hover:bg-amber-500"
+                    className="btn-3d flex-shrink-0 px-2.5 py-1 text-xs"
                   >
                     Accepter
                   </button>
