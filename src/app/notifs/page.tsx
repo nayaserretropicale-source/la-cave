@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { supabase } from "@/lib/supabase";
-import { IconUser } from "@/components/Icons";
 
 type Author = { pseudo: string | null; avatar_url: string | null };
 type Notif = {
@@ -138,7 +137,7 @@ export default function Notifs() {
         )}
 
         {loading && signedIn !== false && (
-          <div className="overflow-hidden rounded-2xl border border-zinc-800">
+          <div data-reveal className="overflow-hidden rounded-2xl border border-zinc-800">
             {[0, 1, 2].map((i) => (
               <div key={i} className={`flex items-center gap-3 p-3.5 ${i < 2 ? "border-b border-zinc-800/60" : ""}`}>
                 <div className="skeleton h-8 w-8 rounded-full" />
@@ -152,14 +151,14 @@ export default function Notifs() {
         )}
 
         {!loading && signedIn && notifs.length === 0 && (
-          <p className="py-8 text-center text-sm text-zinc-600">
+          <p data-reveal className="py-8 text-center text-sm text-zinc-600">
             Rien de nouveau. Partage une dégustation dans le{" "}
             <Link href="/communaute" className="text-amber-400 underline underline-offset-2">Cercle</Link>.
           </p>
         )}
 
         {notifs.length > 0 && (
-          <div data-reveal className="stagger overflow-hidden rounded-2xl border border-zinc-800">
+          <div data-reveal style={{ ["--reveal-delay" as string]: "80ms" }} className="stagger overflow-hidden rounded-2xl border border-zinc-800">
             {notifs.map((n, i) => (
               <div
                 key={n.key}
@@ -168,12 +167,12 @@ export default function Notifs() {
                 } ${i < notifs.length - 1 ? "border-b border-zinc-800/60" : ""}`}
               >
                 {n.isNew && <div className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-amber-500" />}
-                <Link href={`/u/${n.userId}`} className="flex-shrink-0">
+                <Link href={`/u/${n.userId}`} className="emoji-tap flex-shrink-0">
                   {n.author?.avatar_url ? (
                     <Image src={n.author.avatar_url} alt="" width={32} height={32} className="h-8 w-8 rounded-full border border-zinc-700 object-cover" />
                   ) : (
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-zinc-800 text-zinc-500">
-                      <IconUser size={14} />
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-zinc-800 text-base leading-none">
+                      <span className="emoji" aria-hidden>👤</span>
                     </div>
                   )}
                 </Link>

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
-import { IconChevronRight, IconPlus } from "@/components/Icons";
+import { IconChevronRight } from "@/components/Icons";
 
 type Deal = { retailer: string; title: string; url: string; match?: string };
 
@@ -103,7 +103,7 @@ export default function Promos() {
             )}
 
             {deals.length === 0 ? (
-              <p className="py-4 text-sm text-zinc-500">Rien trouvé à l&apos;instant — vois les sites de référence ci-dessous.</p>
+              <p className="py-4 text-sm text-zinc-500"><span aria-hidden className="mr-1.5">🔍</span>Rien trouvé à l&apos;instant — vois les sites de référence ci-dessous.</p>
             ) : (
               <div data-reveal style={{ ["--reveal-delay"]: "80ms" } as React.CSSProperties} className="stagger mb-8 overflow-hidden rounded-2xl border border-zinc-800">
                 {deals.map((d, i) => (
@@ -132,13 +132,13 @@ export default function Promos() {
                         onClick={() => addToEnvies(d, i)}
                         disabled={added[i] === "ok" || added[i] === "busy"}
                         aria-label="Ajouter à mes envies"
-                        className={`flex-shrink-0 flex items-center gap-1 rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-colors ${
+                        className={`emoji-tap flex-shrink-0 flex items-center gap-1 rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-colors ${
                           added[i] === "ok"
                             ? "border-amber-600/40 text-amber-400"
                             : "border-zinc-700 text-zinc-400 hover:border-zinc-600 hover:text-zinc-200"
                         }`}
                       >
-                        {added[i] === "ok" ? "Ajouté" : added[i] === "busy" ? "…" : <><IconPlus size={12} /> Envies</>}
+                        {added[i] === "ok" ? "Ajouté" : added[i] === "busy" ? "…" : <><span aria-hidden className="emoji">❤️</span> Envies</>}
                       </button>
                     </div>
                     {added[i] === "login" && (

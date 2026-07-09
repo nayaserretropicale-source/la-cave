@@ -5,7 +5,6 @@ import Link from "next/link";
 import Image from "next/image";
 import { useParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
-import { IconUser, IconStar } from "@/components/Icons";
 
 type Profile = { id: string; pseudo: string | null; avatar_url: string | null; bio: string | null };
 type Friendship = { id: string; requester_id: string; addressee_id: string; status: string };
@@ -119,8 +118,8 @@ export default function PublicProfile() {
           {prof.avatar_url ? (
             <Image src={prof.avatar_url} alt="" width={72} height={72} className="h-18 w-18 rounded-full border-2 border-zinc-700 object-cover flex-shrink-0" />
           ) : (
-            <div className="flex h-[72px] w-[72px] flex-shrink-0 items-center justify-center rounded-full border-2 border-zinc-700 bg-zinc-800 text-zinc-500">
-              <IconUser size={28} />
+            <div className="flex h-[72px] w-[72px] flex-shrink-0 items-center justify-center rounded-full border-2 border-zinc-700 bg-zinc-800">
+              <span aria-hidden className="text-3xl">🎩</span>
             </div>
           )}
           <div className="min-w-0 flex-1">
@@ -171,7 +170,7 @@ export default function PublicProfile() {
                   </p>
                   {p.rating ? (
                     <div className="mt-1 flex gap-0.5">
-                      {Array.from({ length: p.rating }).map((_, i) => <IconStar key={i} size={12} filled className="text-amber-400" />)}
+                      {Array.from({ length: p.rating }).map((_, i) => <span key={i} aria-hidden className="text-xs leading-none">⭐️</span>)}
                     </div>
                   ) : null}
                   {p.photo_url && (

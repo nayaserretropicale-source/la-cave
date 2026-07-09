@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import AuthBar from "@/components/AuthBar";
 import { supabase } from "@/lib/supabase";
-import { IconUser, IconX, IconStar, IconCamera, IconPlus } from "@/components/Icons";
+import { IconStar } from "@/components/Icons";
 import { useConfirm } from "@/components/Confirm";
 
 type Author = { pseudo: string | null; avatar_url: string | null };
@@ -30,7 +30,7 @@ function Avatar({ url, size = 32 }: { url?: string | null; size?: number }) {
   if (url) return <Image src={url} alt="" width={size} height={size} className="rounded-full border border-zinc-700 object-cover" style={{ width: size, height: size }} />;
   return (
     <div className="flex flex-shrink-0 items-center justify-center rounded-full bg-zinc-800 text-zinc-500" style={{ width: size, height: size }}>
-      <IconUser size={size * 0.45} />
+      <span aria-hidden className="leading-none" style={{ fontSize: size * 0.5 }}>🎩</span>
     </div>
   );
 }
@@ -321,16 +321,16 @@ export default function Communaute() {
               </div>
             )}
             <div className="flex gap-2">
-              <label className="flex cursor-pointer items-center gap-2 rounded-xl border border-zinc-800 px-3 py-2 text-sm text-zinc-400 transition-colors hover:border-zinc-700 hover:text-zinc-200">
-                <IconCamera size={14} />
+              <label className="emoji-tap flex cursor-pointer items-center gap-2 rounded-xl border border-zinc-800 px-3 py-2 text-sm text-zinc-400 transition-colors hover:border-zinc-700 hover:text-zinc-200">
+                <span aria-hidden className="emoji text-base leading-none">📷</span>
                 {busy ? "Envoi…" : cPhoto ? "Changer" : "Photo"}
                 <input type="file" accept="image/*" onChange={onComposePhoto} className="hidden" />
               </label>
               <button
                 onClick={publish}
-                className="btn-3d flex flex-1 items-center justify-center gap-2 px-4 py-2 text-sm"
+                className="btn-3d emoji-tap flex flex-1 items-center justify-center gap-2 px-4 py-2 text-sm"
               >
-                <IconPlus size={15} />
+                <span aria-hidden className="emoji text-base leading-none">🚬</span>
                 Publier
               </button>
             </div>
@@ -339,7 +339,7 @@ export default function Communaute() {
         )}
 
         {/* Feed filter */}
-        <div className="mb-5 flex gap-2" data-reveal>
+        <div className="mb-5 flex gap-2" data-reveal style={{ ["--reveal-delay" as string]: "80ms" }}>
           {[
             { val: false, label: "Tous" },
             { val: true, label: "Amis" },
@@ -347,9 +347,8 @@ export default function Communaute() {
             <button
               key={label}
               onClick={() => setOnlyFriends(val)}
-              className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
-                onlyFriends === val ? "bg-amber-600 text-zinc-950" : "border border-zinc-800 text-zinc-400 hover:border-zinc-700"
-              }`}
+              data-selected={onlyFriends === val}
+              className="option-3d rounded-full px-4 py-1.5 text-sm font-medium"
             >
               {label}
             </button>
@@ -362,7 +361,7 @@ export default function Communaute() {
             {onlyFriends ? "Aucune publication de tes amis." : "Aucune publication. Sois le premier à partager !"}
           </p>
         ) : (
-          <div className="stagger space-y-4" data-reveal>
+          <div className="stagger space-y-4" data-reveal style={{ ["--reveal-delay" as string]: "160ms" }}>
             {visiblePosts.map((p) => {
               const rel = p.user_id !== userId ? relation(p.user_id) : null;
               return (
@@ -381,7 +380,7 @@ export default function Communaute() {
                       )}
                       {rel?.state === "sent" && <span className="text-xs text-zinc-600">En attente</span>}
                       {rel?.state === "incoming" && rel.row && (
-                        <button onClick={() => acceptFriend(rel.row!.id)} className="btn-press rounded-lg bg-amber-600 px-2.5 py-1 text-xs font-semibold text-zinc-950 transition-colors hover:bg-amber-500">Accepter</button>
+                        <button onClick={() => acceptFriend(rel.row!.id)} className="btn-3d px-2.5 py-1 text-xs font-semibold">Accepter</button>
                       )}
                       {rel?.state === "friends" && <span className="text-xs text-amber-400">Ami</span>}
                       {(p.user_id === userId || isAdmin) && (
@@ -390,7 +389,7 @@ export default function Communaute() {
                           className="flex h-7 w-7 items-center justify-center rounded-lg text-zinc-600 transition-colors hover:bg-zinc-800 hover:text-orange-400"
                           aria-label="Supprimer"
                         >
-                          <IconX size={13} />
+                          <span aria-hidden className="text-sm leading-none">✕</span>
                         </button>
                       )}
                     </div>
@@ -452,7 +451,7 @@ export default function Communaute() {
                               className="flex-shrink-0 text-zinc-700 transition-colors hover:text-orange-400"
                               aria-label="Supprimer"
                             >
-                              <IconX size={12} />
+                              <span aria-hidden className="text-xs leading-none">✕</span>
                             </button>
                           )}
                         </div>

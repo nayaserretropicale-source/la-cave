@@ -9,7 +9,7 @@ import { compressImage } from "@/lib/image";
 import { useConfirm } from "@/components/Confirm";
 import {
   IconCamera, IconPlus, IconEdit, IconX, IconStar,
-  IconBook, IconChevronRight,
+  IconChevronRight,
 } from "@/components/Icons";
 
 type Evolution = { premier_tiers?: string; deuxieme_tiers?: string; troisieme_tiers?: string };
@@ -364,7 +364,7 @@ export default function Home() {
         <AuthBar />
 
         {/* Quick links */}
-        <div className="mb-8 grid grid-cols-2 gap-3" data-reveal>
+        <div className="mb-8 grid grid-cols-2 gap-3" data-reveal style={{ ["--reveal-delay" as string]: "80ms" }}>
           {QUICK_LINKS.map(({ href, label, sub, emoji, primary }) => (
             <Link
               key={href}
@@ -384,10 +384,10 @@ export default function Home() {
 
         {/* Scan zone */}
         {!fiche && !loading && (
-          <div className="mb-3">
-            <label className="group flex flex-col items-center gap-3 cursor-pointer rounded-2xl border border-dashed border-zinc-700 bg-zinc-900/30 px-6 py-8 text-center transition-colors hover:border-amber-600/50 hover:bg-zinc-900/50">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-zinc-800 text-zinc-400 transition-colors group-hover:bg-amber-600/10 group-hover:text-amber-400">
-                <IconCamera size={22} />
+          <div className="mb-3" data-reveal>
+            <label className="emoji-tap group flex flex-col items-center gap-3 cursor-pointer rounded-2xl border border-dashed border-zinc-700 bg-zinc-900/30 px-6 py-8 text-center transition-colors hover:border-amber-600/50 hover:bg-zinc-900/50">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-zinc-800 transition-colors group-hover:bg-amber-600/10">
+                <span aria-hidden className="emoji text-2xl">📷</span>
               </div>
               <div>
                 <p className="text-sm font-medium text-zinc-200">Scanner un cigare</p>
@@ -407,7 +407,7 @@ export default function Home() {
 
         {/* Empty state — nouvel utilisateur, cave vide */}
         {cave.length === 0 && !fiche && !loading && !preview && (
-          <div className="mb-6 rounded-2xl border border-zinc-800 bg-zinc-900/30 px-5 py-6 text-center">
+          <div className="mb-6 rounded-2xl border border-zinc-800 bg-zinc-900/30 px-5 py-6 text-center" data-reveal style={{ ["--reveal-delay" as string]: "80ms" }}>
             <p className="text-sm font-medium text-zinc-200">Ta cave est vide</p>
             <p className="mt-1.5 text-xs leading-relaxed text-zinc-500">
               Scanne la bague d&apos;un cigare pour l&apos;identifier et le ranger dans ta cave — ou ajoute-le à la main. Connecte-toi pour que ta collection soit sauvegardée.
@@ -488,7 +488,7 @@ export default function Home() {
 
             <div className="mt-5 flex gap-2">
               {fiche.identifie && (
-                <button onClick={saveToCave} className="btn-press flex-1 rounded-xl bg-amber-600 px-4 py-2.5 text-sm font-semibold text-zinc-950 transition-colors hover:bg-amber-500">
+                <button onClick={saveToCave} className="btn-3d flex-1 px-4 py-2.5 text-sm font-semibold">
                   Ajouter à ma cave
                 </button>
               )}
@@ -502,7 +502,7 @@ export default function Home() {
 
         {/* Cave list */}
         {cave.length > 0 && (
-          <div className="mt-4">
+          <div className="mt-4" data-reveal>
             {/* Stats */}
             <div className="mb-5 flex items-baseline justify-between">
               <div>
@@ -593,8 +593,8 @@ export default function Home() {
                               className="h-11 w-11 flex-shrink-0 rounded-lg object-cover"
                             />
                           ) : (
-                            <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-zinc-800 to-zinc-900 text-amber-700/50">
-                              <IconBook size={18} />
+                            <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-zinc-800 to-zinc-900">
+                              <span aria-hidden className="text-xl">🚬</span>
                             </div>
                           )}
                           <div className="min-w-0 flex-1">
@@ -662,8 +662,8 @@ export default function Home() {
                 <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/80 to-transparent" />
               </div>
             ) : (
-              <div className="flex h-36 w-full items-center justify-center rounded-t-2xl border-b border-zinc-800 bg-zinc-900 text-zinc-700">
-                <IconCamera size={32} />
+              <div className="flex h-36 w-full items-center justify-center rounded-t-2xl border-b border-zinc-800 bg-zinc-900">
+                <span aria-hidden className="text-4xl opacity-60">📷</span>
               </div>
             )}
 
@@ -793,9 +793,9 @@ export default function Home() {
                   <button
                     onClick={fetchHistoire}
                     disabled={histoireLoading}
-                    className="flex w-full items-center justify-center gap-2 rounded-xl border border-zinc-800 px-4 py-2.5 text-sm text-zinc-400 transition-colors hover:border-zinc-700 hover:text-zinc-200 disabled:opacity-40"
+                    className="emoji-tap flex w-full items-center justify-center gap-2 rounded-xl border border-zinc-800 px-4 py-2.5 text-sm text-zinc-400 transition-colors hover:border-zinc-700 hover:text-zinc-200 disabled:opacity-40"
                   >
-                    <IconBook size={14} />
+                    <span aria-hidden className="emoji text-base">📖</span>
                     {histoireLoading ? "Recherche…" : "Histoire de la marque"}
                   </button>
                 )}
@@ -832,7 +832,7 @@ export default function Home() {
 
               {/* Actions */}
               <div className="mt-5 flex gap-2">
-                <button onClick={saveDetail} className="btn-press flex-1 rounded-xl bg-amber-600 px-4 py-2.5 text-sm font-semibold text-zinc-950 transition-colors hover:bg-amber-500">
+                <button onClick={saveDetail} className="btn-3d flex-1 px-4 py-2.5 text-sm font-semibold">
                   Enregistrer
                 </button>
                 <button onClick={requestCloseDetail} className="rounded-xl border border-zinc-800 px-4 py-2.5 text-sm text-zinc-400 transition-colors hover:border-zinc-700">
@@ -874,7 +874,7 @@ export default function Home() {
             {manualMsg && <p className="mt-3 text-sm text-amber-400">{manualMsg}</p>}
 
             <div className="mt-5 flex gap-2">
-              <button onClick={saveManual} className="btn-press flex-1 rounded-xl bg-amber-600 px-4 py-2.5 text-sm font-semibold text-zinc-950 transition-colors hover:bg-amber-500">
+              <button onClick={saveManual} className="btn-3d flex-1 px-4 py-2.5 text-sm font-semibold">
                 Ajouter à ma cave
               </button>
               <button onClick={requestCloseManual} className="rounded-xl border border-zinc-800 px-4 py-2.5 text-sm text-zinc-400 transition-colors hover:border-zinc-700">

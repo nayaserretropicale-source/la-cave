@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { supabase } from "@/lib/supabase";
-import { IconUser, IconX } from "@/components/Icons";
+import { IconX } from "@/components/Icons";
 
 type Profile = { id: string; pseudo: string | null; avatar_url: string | null };
 type Friendship = { id: string; requester_id: string; addressee_id: string; status: string };
@@ -12,7 +12,7 @@ function Avatar({ url, size = 36 }: { url?: string | null; size?: number }) {
   if (url) return <Image src={url} alt="" width={size} height={size} className="flex-shrink-0 rounded-full border border-zinc-700 object-cover" style={{ width: size, height: size }} />;
   return (
     <div className="flex flex-shrink-0 items-center justify-center rounded-full bg-zinc-800 text-zinc-500" style={{ width: size, height: size }}>
-      <IconUser size={size * 0.45} />
+      <span aria-hidden style={{ fontSize: size * 0.5, lineHeight: 1 }}>🎩</span>
     </div>
   );
 }

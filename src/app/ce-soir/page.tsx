@@ -5,7 +5,6 @@ import Link from "next/link";
 import Image from "next/image";
 import AuthBar from "@/components/AuthBar";
 import { supabase } from "@/lib/supabase";
-import { IconBook } from "@/components/Icons";
 
 type Cig = {
   id: string;
@@ -160,8 +159,8 @@ export default function CeSoir() {
                         {choix.photo_url ? (
                           <Image src={choix.photo_url} alt={choix.nom} width={64} height={64} className="h-16 w-16 flex-shrink-0 rounded-xl object-cover" />
                         ) : (
-                          <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-xl bg-zinc-800 text-zinc-600">
-                            <IconBook size={20} />
+                          <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-xl bg-zinc-800 text-2xl">
+                            <span aria-hidden>🚬</span>
                           </div>
                         )}
                         <div className="min-w-0">

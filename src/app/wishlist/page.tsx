@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import AuthBar from "@/components/AuthBar";
 import { supabase } from "@/lib/supabase";
-import { IconX, IconPlus, IconChevronRight } from "@/components/Icons";
+import { IconX, IconChevronRight } from "@/components/Icons";
 import { useConfirm } from "@/components/Confirm";
 
 type Envie = { id: string; nom: string; marque: string | null; note: string | null };
@@ -94,16 +94,19 @@ export default function Wishlist() {
           />
           <button
             onClick={add}
-            className="btn-3d flex w-full items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold"
+            className="btn-3d emoji-tap flex w-full items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold"
           >
-            <IconPlus size={15} />
+            <span className="emoji" aria-hidden>✨</span>
             Ajouter une envie
           </button>
           {msg && <p className="text-sm text-amber-400">{msg}</p>}
         </div>
 
         {items.length === 0 ? (
-          <p className="py-8 text-center text-sm text-zinc-600">Aucune envie pour l&apos;instant.</p>
+          <div className="py-10 text-center" data-reveal>
+            <span aria-hidden className="mb-2 block text-4xl">⭐️</span>
+            <p className="text-sm text-zinc-600">Aucune envie pour l&apos;instant.</p>
+          </div>
         ) : (
           <div className="stagger overflow-hidden rounded-2xl border border-zinc-800" data-reveal style={{ ["--reveal-delay"]: "160ms" } as React.CSSProperties}>
             {items.map((it, i) => (

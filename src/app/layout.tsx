@@ -41,7 +41,7 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="fr">
-      <body className={`${geistSans.variable} ${geistMono.variable} ${fraunces.variable} antialiased min-h-full flex flex-col pb-20`}>
+      <body className={`${geistSans.variable} ${geistMono.variable} ${fraunces.variable} antialiased min-h-full flex flex-col pb-28`}>
         <ConfirmProvider>
           <AgeGate />
           <AvatarBadge />

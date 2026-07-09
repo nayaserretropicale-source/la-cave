@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import AuthBar from "@/components/AuthBar";
 import { supabase } from "@/lib/supabase";
-import { IconX, IconStar, IconPlus } from "@/components/Icons";
+import { IconStar } from "@/components/Icons";
 import { useConfirm } from "@/components/Confirm";
 
 type CaveLite = { id: string; nom: string; origine: string | null; photo_url: string | null };
@@ -146,7 +146,7 @@ export default function Journal() {
         <AuthBar />
 
         {hasData && (
-          <div className="stagger mb-6 grid grid-cols-2 gap-2" data-reveal>
+          <div className="stagger mb-6 grid grid-cols-2 gap-2" data-reveal style={{ ["--reveal-delay" as string]: "80ms" }}>
             <Stat label="En cave" value={String(cave.length)} />
             <Stat label="Dégustations" value={String(sessions.length)} />
             <Stat label="Ce mois-ci" value={String(moisCount)} />
@@ -160,13 +160,13 @@ export default function Journal() {
 
         <button
           onClick={() => setOpen((v) => !v)}
-          className="btn-3d mb-6 flex w-full items-center justify-center gap-2 px-4 py-2.5 text-sm"
+          className="btn-3d emoji-tap mb-6 flex w-full items-center justify-center gap-2 px-4 py-2.5 text-sm"
         >
-          {open ? "Fermer" : <><IconPlus size={15} /> Nouvelle dégustation</>}
+          {open ? "Fermer" : <><span className="emoji" aria-hidden>🚬</span> Nouvelle dégustation</>}
         </button>
 
         {open && (
-          <div className="mb-8 space-y-4 rounded-2xl border border-zinc-800 bg-zinc-900/40 p-5" data-reveal>
+          <div className="mb-8 space-y-4 rounded-2xl border border-zinc-800 bg-zinc-900/40 p-5" data-reveal style={{ ["--reveal-delay" as string]: "160ms" }}>
             <div>
               <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-zinc-500">Cigare</label>
               <select
@@ -248,7 +248,10 @@ export default function Journal() {
         {shareMsg && <p className="mb-4 text-sm text-amber-400">{shareMsg}</p>}
 
         {sessions.length === 0 ? (
-          <p className="py-8 text-center text-sm text-zinc-600">Aucune dégustation pour l&apos;instant.</p>
+          <div className="py-8 text-center" data-reveal>
+            <p className="text-4xl" aria-hidden>📖</p>
+            <p className="mt-2 text-sm text-zinc-600">Aucune dégustation pour l&apos;instant.</p>
+          </div>
         ) : (
           <div className="stagger overflow-hidden rounded-2xl border border-zinc-800" data-reveal>
             {sessions.map((s, i) => (
@@ -263,10 +266,10 @@ export default function Journal() {
                   </div>
                   <button
                     onClick={() => removeSession(s.id)}
-                    className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg text-zinc-600 transition-colors hover:bg-zinc-800 hover:text-orange-400"
+                    className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg text-sm text-zinc-600 transition-colors hover:bg-zinc-800 hover:text-orange-400"
                     aria-label="Supprimer"
                   >
-                    <IconX size={13} />
+                    <span aria-hidden>✕</span>
                   </button>
                 </div>
 

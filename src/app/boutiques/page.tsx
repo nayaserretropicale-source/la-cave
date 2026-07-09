@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import AuthBar from "@/components/AuthBar";
-import { IconMap } from "@/components/Icons";
 import { useConfirm } from "@/components/Confirm";
 import { supabase } from "@/lib/supabase";
 
@@ -172,10 +171,10 @@ export default function Boutiques() {
             {filtered.length === 0 ? (
               <p className="text-sm text-zinc-500">Aucune boutique dans l&apos;annuaire pour l&apos;instant. Ajoute-en une, ou utilise les suggestions ci-dessous.</p>
             ) : (
-              <div className="space-y-6">
+              <div data-reveal style={{ ["--reveal-delay" as string]: "80ms" }} className="space-y-6">
                 {groupNames.map((name) => (
                   <div key={name}>
-                    <p className="mb-2 flex items-center gap-1.5 text-sm font-medium text-amber-500"><IconMap size={14} />{name}</p>
+                    <p className="mb-2 flex items-center gap-1.5 text-sm font-medium text-amber-500"><span aria-hidden>📍</span>{name}</p>
                     <div className="stagger space-y-2">
                       {groups[name].map((l) => (
                         <div key={l.id} className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-4">
@@ -198,7 +197,7 @@ export default function Boutiques() {
               </div>
             )}
 
-            <div data-reveal className="mt-10 rounded-xl border border-zinc-800 bg-zinc-900/40 p-4">
+            <div data-reveal style={{ ["--reveal-delay" as string]: "160ms" }} className="mt-10 rounded-xl border border-zinc-800 bg-zinc-900/40 p-4">
               <p className="text-sm font-medium text-amber-500">Trouver des boutiques (IA)</p>
               <p className="mt-1 text-xs text-zinc-500">Suggestions issues du web — <span className="text-zinc-400">à vérifier</span> avant de t&apos;y rendre.</p>
               <div className="mt-3 space-y-2">

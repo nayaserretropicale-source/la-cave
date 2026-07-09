@@ -45,7 +45,10 @@ export default function Actu() {
             ))}
           </div>
         ) : articles.length === 0 ? (
-          <p className="py-8 text-center text-sm text-zinc-600">Pas d&apos;actualité disponible pour l&apos;instant.</p>
+          <div className="py-10 text-center" data-reveal>
+            <span aria-hidden className="mb-3 block text-4xl">📰</span>
+            <p className="text-sm text-zinc-600">Pas d&apos;actualité disponible pour l&apos;instant.</p>
+          </div>
         ) : (
           <div className="stagger overflow-hidden rounded-2xl border border-zinc-800" data-reveal style={{ ["--reveal-delay" as string]: "80ms" }}>
             {articles.map((a, i) => (
