@@ -26,22 +26,8 @@ export default function AuthBar() {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     setMsg(error ? error.message : "");
   }
-  async function signOut() {
-    await supabase.auth.signOut();
-  }
-
-  if (user) {
-    return (
-      <div data-reveal className="mb-6 flex items-center justify-between rounded-xl border border-zinc-800 bg-zinc-900/40 px-4 py-2.5 text-sm">
-        <span className="text-zinc-400">
-          <span className="text-amber-400">{user}</span>
-        </span>
-        <button onClick={signOut} className="btn-press text-xs text-zinc-500 transition-colors hover:text-zinc-300">
-          Déconnexion
-        </button>
-      </div>
-    );
-  }
+  // Connecté : rien sur l'accueil — le mail et la déconnexion vivent dans la page Profil.
+  if (user) return null;
 
   return (
     <div data-reveal className="mb-6 space-y-2 rounded-xl border border-zinc-800 bg-zinc-900/40 p-4">
