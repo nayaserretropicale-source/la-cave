@@ -84,12 +84,12 @@ input:not([type="file"]):not([type="checkbox"]):not([type="radio"]) {
 
 .rise { animation: rise 360ms var(--ease-cave) both; }
 
-/* Transition de page (template.tsx) : entrée douce à chaque navigation */
+/* Transition de page (template.tsx) : entrée douce et bien visible à chaque navigation */
 @keyframes page-enter {
-  from { opacity: 0; transform: translateY(10px); }
+  from { opacity: 0; transform: translateY(24px) scale(0.985); }
   to { opacity: 1; transform: none; }
 }
-.page-enter { animation: page-enter 380ms var(--ease-cave) both; }
+.page-enter { animation: page-enter 560ms var(--ease-cave) both; }
 
 .stagger > * { animation: rise 360ms var(--ease-cave) both; }
 .stagger > *:nth-child(1) { animation-delay: 40ms; }
@@ -103,7 +103,7 @@ input:not([type="file"]):not([type="checkbox"]):not([type="radio"]) {
 
 [data-reveal] {
   opacity: 0;
-  transform: translateY(22px);
+  transform: translateY(32px);
   transition:
     opacity 620ms var(--ease-cave),
     transform 620ms var(--ease-cave);
@@ -237,6 +237,20 @@ input:not([type="file"]):not([type="checkbox"]):not([type="radio"]) {
 }
 .btn-press:hover { filter: brightness(1.1); }
 .btn-press:active { transform: scale(0.97); }
+
+/* Clic : retour tactile sur TOUS les boutons (hors reliefs 3D qui ont déjà le leur).
+   On garde les transitions de couleur/bordure au survol en plus du scale. */
+button:not(.btn-3d):not(.option-3d):not(:disabled) {
+  transition:
+    transform 130ms var(--ease-cave),
+    color 130ms ease,
+    border-color 130ms ease,
+    background-color 130ms ease,
+    filter 130ms ease;
+}
+button:not(.btn-3d):not(.option-3d):not(:disabled):active {
+  transform: scale(0.95);
+}
 
 /* ---- Emoji interactifs (remplacent les icônes) ---- */
 

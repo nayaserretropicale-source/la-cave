@@ -63,7 +63,7 @@ export default function Profil() {
 
   if (!userId) {
     return (
-      <main className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col items-center px-4 py-10">
+      <main className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col items-center px-4 py-8">
         <div className="w-full max-w-md">
           <header className="mb-8">
             <p className="text-[11px] font-medium tracking-widest text-amber-500/80 uppercase mb-1">Compte</p>
@@ -76,7 +76,7 @@ export default function Profil() {
   }
 
   return (
-    <main className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col items-center px-4 py-10">
+    <main className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col items-center px-4 py-8">
       <div className="w-full max-w-md">
         <header className="mb-8" data-reveal>
           <p className="text-[11px] font-medium tracking-widest text-amber-500/80 uppercase mb-1">Compte</p>
@@ -136,17 +136,25 @@ export default function Profil() {
               className="w-full resize-none rounded-xl border border-zinc-800 bg-zinc-900/60 px-3 py-2.5 text-sm text-zinc-100 placeholder-zinc-400 outline-none focus:border-zinc-700 transition-colors"
             />
           </div>
-          <p className="text-xs text-zinc-600">{email}</p>
-          <button
-            onClick={save}
-            className="btn-3d w-full px-4 py-2.5 text-sm"
-          >
+          <button onClick={save} className="btn-3d w-full px-4 py-2.5 text-sm">
             Enregistrer
           </button>
           {msg && <p className="text-sm text-amber-400">{msg}</p>}
+        </div>
+
+        {/* Compte : mail + déconnexion, rangés à part */}
+        <div
+          className="mt-6 space-y-3 border-t border-zinc-800/80 pt-6"
+          data-reveal
+          style={{ ["--reveal-delay" as string]: "80ms" }}
+        >
+          <div className="flex items-center justify-between rounded-xl border border-zinc-800 bg-zinc-900/40 px-4 py-3">
+            <span className="text-xs font-medium uppercase tracking-wider text-zinc-500">Connecté</span>
+            <span className="truncate pl-3 text-sm text-zinc-300">{email}</span>
+          </div>
           <button
             onClick={() => supabase.auth.signOut()}
-            className="w-full rounded-xl border border-zinc-800 px-4 py-2.5 text-sm text-zinc-400 transition-colors hover:border-zinc-700 hover:text-zinc-200"
+            className="w-full rounded-xl border border-zinc-800 px-4 py-2.5 text-sm text-zinc-400 hover:border-zinc-700 hover:text-zinc-200"
           >
             Se déconnecter
           </button>
