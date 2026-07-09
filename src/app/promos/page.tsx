@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { IconChevronRight } from "@/components/Icons";
 
@@ -27,7 +26,6 @@ export default function Promos() {
   const [deals, setDeals] = useState<Deal[]>([]);
   const [loading, setLoading] = useState(true);
   const [matchCount, setMatchCount] = useState(0);
-  const [added, setAdded] = useState<Record<number, "ok" | "login" | "busy">>({});
 
   useEffect(() => {
     async function loadAll() {
@@ -60,18 +58,6 @@ export default function Promos() {
     }
     loadAll();
   }, []);
-
-  async function addToEnvies(d: Deal, i: number) {
-    if (added[i] === "ok" || added[i] === "busy") return;
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) { setAdded((m) => ({ ...m, [i]: "login" })); return; }
-    setAdded((m) => ({ ...m, [i]: "busy" }));
-    const { error } = await supabase.from("wishlist").insert({
-      nom: d.title.slice(0, 120),
-      note: `Bon plan vu chez ${d.retailer} — ${d.url}`,
-    });
-    setAdded((m) => ({ ...m, [i]: error ? "login" : "ok" }));
-  }
 
   return (
     <main className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col items-center px-4 py-10">
@@ -118,37 +104,21 @@ export default function Promos() {
                         Dans tes envies · {d.match}
                       </p>
                     )}
-                    <div className="flex items-start gap-3">
+                    <div className="flex items-center gap-3">
+                      <div className="min-w-0 flex-1">
+                        <span className="text-[10px] font-medium uppercase tracking-widest text-zinc-500">{d.retailer}</span>
+                        <p className="mt-0.5 text-sm font-medium text-zinc-100 leading-snug">{d.title}</p>
+                      </div>
                       <a
                         href={d.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="min-w-0 flex-1 transition-colors hover:text-amber-400"
+                        aria-label={`Voir l'offre chez ${d.retailer}`}
+                        className="btn-3d emoji-tap flex flex-shrink-0 items-center gap-1 px-3 py-1.5 text-xs"
                       >
-                        <span className="text-[10px] font-medium uppercase tracking-widest text-zinc-500">{d.retailer}</span>
-                        <p className="mt-0.5 text-sm font-medium text-zinc-100 leading-snug">{d.title}</p>
+                        <span aria-hidden className="emoji">🔥</span> Voir l&apos;offre
                       </a>
-                      <button
-                        onClick={() => addToEnvies(d, i)}
-                        disabled={added[i] === "ok" || added[i] === "busy"}
-                        aria-label="Ajouter à mes envies"
-                        className={`emoji-tap flex-shrink-0 flex items-center gap-1 rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-colors ${
-                          added[i] === "ok"
-                            ? "border-amber-600/40 text-amber-400"
-                            : "border-zinc-700 text-zinc-400 hover:border-zinc-600 hover:text-zinc-200"
-                        }`}
-                      >
-                        {added[i] === "ok" ? "Ajouté" : added[i] === "busy" ? "…" : <><span aria-hidden className="emoji">❤️</span> Envies</>}
-                      </button>
                     </div>
-                    {added[i] === "login" && (
-                      <p className="mt-2 text-xs text-zinc-500">Connecte-toi pour ajouter à tes envies.</p>
-                    )}
-                    {added[i] === "ok" && (
-                      <p className="mt-2 text-xs text-zinc-500">
-                        Ajouté à <Link href="/wishlist" className="text-amber-400 underline underline-offset-2">Mes envies</Link>
-                      </p>
-                    )}
                   </div>
                 ))}
               </div>
