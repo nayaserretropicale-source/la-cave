@@ -6,7 +6,7 @@ import { supabase } from "@/lib/supabase";
 import { IconStar } from "@/components/Icons";
 import { useConfirm } from "@/components/Confirm";
 
-type CaveLite = { id: string; nom: string; origine: string | null; photo_url: string | null };
+type CaveLite = { id: string; nom: string; origine: string | null; photo_url: string | null; accord: string | null; note_perso: string | null };
 type Session = {
   id: string;
   cigare_id: string | null;
@@ -45,7 +45,7 @@ export default function Journal() {
   }
 
   async function loadCave() {
-    const { data } = await supabase.from("cave").select("id,nom,origine,photo_url").order("nom");
+    const { data } = await supabase.from("cave").select("id,nom,origine,photo_url,accord,note_perso").order("nom");
     setCave((data ?? []) as CaveLite[]);
   }
   async function loadSessions() {
@@ -171,7 +171,14 @@ export default function Journal() {
               <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-zinc-500">Cigare</label>
               <select
                 value={cigareId}
-                onChange={(e) => setCigareId(e.target.value)}
+                onChange={(e) => {
+                  const id = e.target.value;
+                  setCigareId(id);
+                  // Pré-remplit accord & ressenti avec ce qui est déjà noté dans la cave (éditable)
+                  const cig = cave.find((c) => c.id === id);
+                  setAccord(cig?.accord ?? "");
+                  setCommentaire(cig?.note_perso ?? "");
+                }}
                 className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-zinc-100 outline-none focus:border-zinc-700 transition-colors"
               >
                 <option value="">— Choisir dans ma cave —</option>
