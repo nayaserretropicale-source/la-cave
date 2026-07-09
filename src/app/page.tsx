@@ -9,7 +9,7 @@ import { compressImage } from "@/lib/image";
 import { useConfirm } from "@/components/Confirm";
 import {
   IconCamera, IconPlus, IconEdit, IconX, IconStar,
-  IconMoon, IconCaviste, IconMap, IconHeart, IconBook, IconChevronRight,
+  IconBook, IconChevronRight,
 } from "@/components/Icons";
 
 type Evolution = { premier_tiers?: string; deuxieme_tiers?: string; troisieme_tiers?: string };
@@ -65,10 +65,10 @@ const EMPTY: Editable = {
 };
 
 const QUICK_LINKS = [
-  { href: "/ce-soir", label: "Ce soir", sub: "Que fumer ?", Icon: IconMoon, primary: true },
-  { href: "/caviste", label: "Caviste", sub: "Conseil expert", Icon: IconCaviste, primary: false },
-  { href: "/boutiques", label: "Boutiques", sub: "Trouver près de moi", Icon: IconMap, primary: false },
-  { href: "/wishlist", label: "Envies", sub: "Ma liste", Icon: IconHeart, primary: false },
+  { href: "/ce-soir", label: "Ce soir", sub: "Que fumer ?", emoji: "🌙", primary: true },
+  { href: "/caviste", label: "Caviste", sub: "Conseil expert", emoji: "🎩", primary: false },
+  { href: "/boutiques", label: "Boutiques", sub: "Trouver près de moi", emoji: "📍", primary: false },
+  { href: "/wishlist", label: "Envies", sub: "Ma liste", emoji: "❤️", primary: false },
 ];
 
 export default function Home() {
@@ -365,15 +365,15 @@ export default function Home() {
 
         {/* Quick links */}
         <div className="mb-8 grid grid-cols-2 gap-3" data-reveal>
-          {QUICK_LINKS.map(({ href, label, sub, Icon, primary }) => (
+          {QUICK_LINKS.map(({ href, label, sub, emoji, primary }) => (
             <Link
               key={href}
               href={href}
-              className={`flex items-center gap-3 px-4 py-3 ${
+              className={`emoji-tap group flex items-center gap-3 px-4 py-3 ${
                 primary ? "btn-3d" : "surface interactive rounded-xl"
               }`}
             >
-              <Icon size={18} className={`flex-shrink-0 ${primary ? "text-zinc-950" : "text-amber-400"}`} />
+              <span aria-hidden className="emoji flex-shrink-0 text-2xl">{emoji}</span>
               <div className="min-w-0">
                 <p className={`text-sm font-semibold leading-tight ${primary ? "text-zinc-950" : "text-zinc-100"}`}>{label}</p>
                 <p className={`text-[11px] leading-tight mt-0.5 truncate ${primary ? "text-zinc-950/70" : "text-zinc-400"}`}>{sub}</p>

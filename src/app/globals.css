@@ -231,6 +231,45 @@ input:not([type="file"]):not([type="checkbox"]):not([type="radio"]) {
 .btn-press:hover { filter: brightness(1.1); }
 .btn-press:active { transform: scale(0.97); }
 
+/* ---- Emoji interactifs (remplacent les icônes) ---- */
+
+@keyframes emoji-pop {
+  0% { transform: scale(1); }
+  45% { transform: scale(1.4); }
+  100% { transform: scale(1); }
+}
+
+/* Emoji cliquable : rebond au tap, léger grossissement au survol */
+.emoji {
+  display: inline-block;
+  line-height: 1;
+  transition: transform 220ms var(--ease-cave), filter 220ms ease;
+  transform-origin: center;
+}
+.emoji-tap { cursor: pointer; }
+.emoji-tap:hover .emoji { transform: scale(1.12) rotate(-4deg); }
+.emoji-tap:active .emoji { transform: scale(0.82); }
+.emoji-pop { animation: emoji-pop 420ms var(--ease-cave); }
+
+/* Nav : emoji discret/grisé quand inactif, couleur pleine + rebond + halo quand actif */
+.tab-emoji {
+  display: inline-block;
+  line-height: 1;
+  filter: grayscale(0.75) brightness(0.82);
+  opacity: 0.62;
+  transition:
+    transform 240ms var(--ease-cave),
+    filter 240ms ease,
+    opacity 240ms ease;
+}
+.tab-emoji-active {
+  filter: none;
+  opacity: 1;
+  transform: translateY(-2px) scale(1.18);
+  animation: emoji-pop 420ms var(--ease-cave);
+  text-shadow: 0 4px 12px oklch(0.72 0.17 60 / 0.5);
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
