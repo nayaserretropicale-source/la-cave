@@ -156,25 +156,33 @@ input:not([type="file"]):not([type="checkbox"]):not([type="radio"]) {
     0 12px 40px -16px oklch(0 0 0 / 0.55);
 }
 .glass-strong {
-  background: oklch(0.24 0.012 55 / 0.72);
-  backdrop-filter: blur(28px) saturate(180%);
-  -webkit-backdrop-filter: blur(28px) saturate(180%);
-  border-top: 1px solid oklch(1 0 0 / 0.16);
+  /* Liquid glass façon WhatsApp iOS 26 : très translucide (le contenu défile
+     visiblement dessous), fort flou + saturation, bord haut lumineux. */
+  background: oklch(0.27 0.014 55 / 0.5);
+  backdrop-filter: blur(34px) saturate(210%);
+  -webkit-backdrop-filter: blur(34px) saturate(210%);
+  border-top: 1px solid oklch(1 0 0 / 0.24);
+  box-shadow:
+    0 1px 0 0 oklch(1 0 0 / 0.1) inset,
+    0 -1px 0 0 oklch(0 0 0 / 0.18) inset;
 }
 
 /* Pastille active de la nav : matériau glass braise qui GLISSE d'un onglet à
    l'autre (translateX animé). Transition douce type ressort Apple. */
 .nav-pill {
-  background: oklch(0.8 0.15 68 / 0.16);
-  border: 1px solid oklch(0.85 0.14 70 / 0.3);
+  /* Capsule active : verre dépoli clair et neutre (façon WhatsApp), bord haut
+     lumineux, légère chaleur ambre en fond. Glisse d'un onglet à l'autre. */
+  background: oklch(1 0 0 / 0.14);
+  border: 1px solid oklch(1 0 0 / 0.2);
   box-shadow:
-    0 1px 0 0 oklch(1 0 0 / 0.14) inset,
-    0 6px 18px -6px oklch(0.66 0.17 52 / 0.45);
-  backdrop-filter: blur(6px) saturate(150%);
-  -webkit-backdrop-filter: blur(6px) saturate(150%);
+    0 1px 0 0 oklch(1 0 0 / 0.28) inset,
+    0 0 0 0.5px oklch(0.8 0.15 68 / 0.18) inset,
+    0 6px 16px -6px oklch(0 0 0 / 0.5);
+  backdrop-filter: blur(10px) saturate(180%);
+  -webkit-backdrop-filter: blur(10px) saturate(180%);
   transition:
-    transform 480ms cubic-bezier(0.22, 1, 0.28, 1),
-    width 480ms cubic-bezier(0.22, 1, 0.28, 1);
+    transform 460ms cubic-bezier(0.22, 1, 0.28, 1),
+    width 460ms cubic-bezier(0.22, 1, 0.28, 1);
   will-change: transform, width;
 }
 @media (prefers-reduced-motion: reduce) {
