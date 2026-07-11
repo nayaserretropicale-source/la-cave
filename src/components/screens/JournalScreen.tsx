@@ -18,7 +18,7 @@ type Session = {
   commentaire: string | null;
 };
 
-export default function Journal() {
+export default function Journal({ embedded = false }: { embedded?: boolean } = {}) {
   const confirm = useConfirm();
   const [cave, setCave] = useState<CaveLite[]>([]);
   const [sessions, setSessions] = useState<Session[]>([]);
@@ -138,10 +138,12 @@ export default function Journal() {
   return (
     <main className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col items-center px-4 py-10">
       <div className="w-full max-w-md">
-        <header className="mb-8" data-reveal>
-          <p className="text-[11px] font-medium tracking-widest text-amber-500/80 uppercase mb-1">Carnet</p>
-          <h1 className="font-display text-3xl font-semibold tracking-tight text-zinc-50">Journal</h1>
-        </header>
+        {!embedded && (
+          <header className="mb-8" data-reveal>
+            <p className="text-[11px] font-medium tracking-widest text-amber-500/80 uppercase mb-1">Carnet</p>
+            <h1 className="font-display text-3xl font-semibold tracking-tight text-zinc-50">Journal</h1>
+          </header>
+        )}
 
         <AuthBar />
 

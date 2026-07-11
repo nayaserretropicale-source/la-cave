@@ -71,7 +71,7 @@ const QUICK_LINKS = [
   { href: "/wishlist", label: "Envies", sub: "Ma liste", emoji: "❤️", primary: false },
 ];
 
-export default function Home() {
+export default function Home({ embedded = false }: { embedded?: boolean } = {}) {
   const [loading, setLoading] = useState(false);
   const [fiche, setFiche] = useState<Fiche | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
@@ -356,10 +356,12 @@ export default function Home() {
       <div className="w-full max-w-md">
 
         {/* Header */}
-        <header className="mb-8" data-reveal>
-          <p className="text-[11px] font-medium tracking-widest text-amber-500/80 uppercase mb-1">Collection personnelle</p>
-          <h1 className="font-display text-3xl font-semibold tracking-tight text-zinc-50">La <em className="italic">Cave</em></h1>
-        </header>
+        {!embedded && (
+          <header className="mb-8" data-reveal>
+            <p className="text-[11px] font-medium tracking-widest text-amber-500/80 uppercase mb-1">Collection personnelle</p>
+            <h1 className="font-display text-3xl font-semibold tracking-tight text-zinc-50">La <em className="italic">Cave</em></h1>
+          </header>
+        )}
 
         <AuthBar />
 

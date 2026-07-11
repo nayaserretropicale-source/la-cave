@@ -156,15 +156,24 @@ input:not([type="file"]):not([type="checkbox"]):not([type="radio"]) {
     0 12px 40px -16px oklch(0 0 0 / 0.55);
 }
 .glass-strong {
-  /* Liquid glass façon WhatsApp iOS 26 : très translucide (le contenu défile
-     visiblement dessous), fort flou + saturation, bord haut lumineux. */
-  background: oklch(0.3 0.014 55 / 0.34);
-  backdrop-filter: blur(30px) saturate(200%);
-  -webkit-backdrop-filter: blur(30px) saturate(200%);
-  border-top: 1px solid oklch(1 0 0 / 0.26);
+  /* Liquid Glass iOS 26 : verre transparent + brillant. Dégradé glossy (reflet
+     haut lumineux) + backdrop blur/saturate/brightness (le verre "éclaire" et
+     réfracte ce qui défile dessous) + liseré spéculaire sur le bord haut. */
+  background: linear-gradient(
+    to bottom,
+    oklch(1 0 0 / 0.16),
+    oklch(0.34 0.012 55 / 0.24) 45%,
+    oklch(0.3 0.012 55 / 0.3)
+  );
+  backdrop-filter: blur(22px) saturate(190%) brightness(1.15);
+  -webkit-backdrop-filter: blur(22px) saturate(190%) brightness(1.15);
+  border: 1px solid oklch(1 0 0 / 0.16);
+  border-top-color: oklch(1 0 0 / 0.45);
   box-shadow:
-    0 1px 0 0 oklch(1 0 0 / 0.1) inset,
-    0 -1px 0 0 oklch(0 0 0 / 0.18) inset;
+    inset 0 1px 0 0 oklch(1 0 0 / 0.4),
+    inset 0 0 12px 0 oklch(1 0 0 / 0.08),
+    inset 0 -1px 0 0 oklch(0 0 0 / 0.15),
+    0 18px 50px -12px oklch(0 0 0 / 0.6);
 }
 
 /* Pastille active de la nav : matériau glass braise qui GLISSE d'un onglet à

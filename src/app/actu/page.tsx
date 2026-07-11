@@ -19,7 +19,7 @@ export default function Infos() {
           onChange={setTab}
         />
       </div>
-      {tab === "actu" ? <ActuScreen /> : <PromosScreen />}
+      {tab === "actu" ? <ActuScreen embedded /> : <PromosScreen embedded />}
     </>
   );
 }

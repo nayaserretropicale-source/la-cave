@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 
 type Article = { title: string; snippet: string; url: string; source: string; date: string };
 
-export default function Actu() {
+export default function Actu({ embedded = false }: { embedded?: boolean } = {}) {
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
   const [sel, setSel] = useState<Article | null>(null);
@@ -29,10 +29,12 @@ export default function Actu() {
   return (
     <main className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col items-center px-4 py-10">
       <div className="w-full max-w-md">
-        <header className="mb-8" data-reveal>
-          <p className="text-[11px] font-medium tracking-widest text-amber-500/80 uppercase mb-1">Presse</p>
-          <h1 className="font-display text-3xl font-semibold tracking-tight text-zinc-50">Actu cigares</h1>
-        </header>
+        {!embedded && (
+          <header className="mb-8" data-reveal>
+            <p className="text-[11px] font-medium tracking-widest text-amber-500/80 uppercase mb-1">Presse</p>
+            <h1 className="font-display text-3xl font-semibold tracking-tight text-zinc-50">Actu cigares</h1>
+          </header>
+        )}
 
         {loading ? (
           <div className="overflow-hidden rounded-2xl border border-zinc-800">

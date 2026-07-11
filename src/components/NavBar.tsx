@@ -138,7 +138,7 @@ export default function NavBar() {
             swallowClick.current = false;
           }
         }}
-        className="glass-strong relative flex w-full max-w-md touch-none items-stretch gap-0.5 rounded-[26px] border border-white/10 p-1.5 shadow-[0_16px_44px_-10px_rgba(0,0,0,0.65)]"
+        className="glass-strong relative flex w-full max-w-md touch-none items-stretch gap-0.5 rounded-[26px] p-1.5"
       >
         {/* Pastille glass unique : glisse d'un onglet à l'autre, suit le doigt au swipe */}
         {pill && (

@@ -22,7 +22,7 @@ function motsCles(s: string) {
   return norm(s).split(/[^a-z0-9]+/).filter((w) => w.length >= 4 && !STOPWORDS.has(w));
 }
 
-export default function Promos() {
+export default function Promos({ embedded = false }: { embedded?: boolean } = {}) {
   const [deals, setDeals] = useState<Deal[]>([]);
   const [loading, setLoading] = useState(true);
   const [matchCount, setMatchCount] = useState(0);
@@ -62,10 +62,12 @@ export default function Promos() {
   return (
     <main className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col items-center px-4 py-10">
       <div className="w-full max-w-md">
-        <header data-reveal className="mb-8">
-          <p className="text-[11px] font-medium tracking-widest text-amber-500/80 uppercase mb-1">Deals</p>
-          <h1 className="font-display text-3xl font-semibold tracking-tight text-zinc-50">Bons plans</h1>
-        </header>
+        {!embedded && (
+          <header data-reveal className="mb-8">
+            <p className="text-[11px] font-medium tracking-widest text-amber-500/80 uppercase mb-1">Deals</p>
+            <h1 className="font-display text-3xl font-semibold tracking-tight text-zinc-50">Bons plans</h1>
+          </header>
+        )}
 
         {loading ? (
           <div className="mb-8 overflow-hidden rounded-2xl border border-zinc-800">

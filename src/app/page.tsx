@@ -19,7 +19,7 @@ export default function Home() {
           onChange={setTab}
         />
       </div>
-      {tab === "cave" ? <CaveScreen /> : <JournalScreen />}
+      {tab === "cave" ? <CaveScreen embedded /> : <JournalScreen embedded />}
     </>
   );
 }
