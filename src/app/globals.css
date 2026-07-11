@@ -191,6 +191,29 @@ input:not([type="file"]):not([type="checkbox"]):not([type="radio"]) {
   );
   mix-blend-mode: screen;
 }
+/* Traînée lumineuse qui traverse lentement le verre (une passe toutes les 8s) */
+.glass-strong::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(
+    100deg,
+    transparent 32%,
+    oklch(1 0 0 / 0.16) 47%,
+    oklch(1 0 0 / 0.3) 50%,
+    oklch(1 0 0 / 0.16) 53%,
+    transparent 68%
+  );
+  background-size: 250% 100%;
+  mix-blend-mode: screen;
+  animation: glass-sweep 8s ease-in-out infinite;
+}
+@keyframes glass-sweep {
+  0% { background-position: 220% 0; }
+  55%, 100% { background-position: -120% 0; }
+}
 
 /* Pastille active de la nav : matériau glass braise qui GLISSE d'un onglet à
    l'autre (translateX animé). Transition douce type ressort Apple. */
