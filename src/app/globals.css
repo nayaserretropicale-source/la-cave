@@ -158,10 +158,10 @@ input:not([type="file"]):not([type="checkbox"]):not([type="radio"]) {
 .glass-strong {
   /* Liquid glass façon WhatsApp iOS 26 : très translucide (le contenu défile
      visiblement dessous), fort flou + saturation, bord haut lumineux. */
-  background: oklch(0.27 0.014 55 / 0.5);
-  backdrop-filter: blur(34px) saturate(210%);
-  -webkit-backdrop-filter: blur(34px) saturate(210%);
-  border-top: 1px solid oklch(1 0 0 / 0.24);
+  background: oklch(0.3 0.014 55 / 0.34);
+  backdrop-filter: blur(30px) saturate(200%);
+  -webkit-backdrop-filter: blur(30px) saturate(200%);
+  border-top: 1px solid oklch(1 0 0 / 0.26);
   box-shadow:
     0 1px 0 0 oklch(1 0 0 / 0.1) inset,
     0 -1px 0 0 oklch(0 0 0 / 0.18) inset;

@@ -6,11 +6,9 @@ import { useEffect, useRef, useState } from "react";
 
 const tabs = [
   { href: "/", label: "Cave", emoji: "🚬" },
-  { href: "/journal", label: "Journal", emoji: "📖" },
-  { href: "/communaute", label: "Cercle", emoji: "👥" },
+  { href: "/communaute", label: "Club", emoji: "👥" },
   { href: "/caviste", label: "Caviste", emoji: "🎩" },
-  { href: "/actu", label: "Actu", emoji: "📰" },
-  { href: "/promos", label: "Promos", emoji: "🏷️" },
+  { href: "/actu", label: "Infos", emoji: "📰" },
 ];
 
 export default function NavBar() {
