@@ -60,7 +60,7 @@ export default function RootLayout({
                   />
                 </feTurbulence>
                 <feGaussianBlur in="n" stdDeviation={1.2} result="nb" />
-                <feDisplacementMap in="SourceGraphic" in2="nb" scale={62} xChannelSelector="R" yChannelSelector="G" />
+                <feDisplacementMap in="SourceGraphic" in2="nb" scale={40} xChannelSelector="R" yChannelSelector="G" />
               </filter>
             </defs>
           </svg>
