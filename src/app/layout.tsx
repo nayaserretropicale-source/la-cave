@@ -51,9 +51,16 @@ export default function RootLayout({
           <svg width="0" height="0" aria-hidden style={{ position: "absolute" }}>
             <defs>
               <filter id="liquid-glass" x="-20%" y="-20%" width="140%" height="140%" colorInterpolationFilters="sRGB">
-                <feTurbulence type="fractalNoise" baseFrequency="0.012 0.015" numOctaves={2} seed={7} result="n" />
-                <feGaussianBlur in="n" stdDeviation={1.4} result="nb" />
-                <feDisplacementMap in="SourceGraphic" in2="nb" scale={34} xChannelSelector="R" yChannelSelector="G" />
+                <feTurbulence type="fractalNoise" baseFrequency="0.011 0.014" numOctaves={2} seed={7} result="n">
+                  <animate
+                    attributeName="baseFrequency"
+                    dur="8s"
+                    values="0.011 0.014;0.018 0.010;0.011 0.014"
+                    repeatCount="indefinite"
+                  />
+                </feTurbulence>
+                <feGaussianBlur in="n" stdDeviation={1.2} result="nb" />
+                <feDisplacementMap in="SourceGraphic" in2="nb" scale={62} xChannelSelector="R" yChannelSelector="G" />
               </filter>
             </defs>
           </svg>
