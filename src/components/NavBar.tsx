@@ -11,17 +11,6 @@ const tabs = [
   { href: "/actu", label: "Infos", emoji: "📰" },
 ];
 
-// Bloom lumineux au point de contact (animation liquid glass au toucher).
-function spawnRipple(bar: HTMLElement, layer: HTMLElement, clientX: number, clientY: number) {
-  const b = bar.getBoundingClientRect();
-  const dot = document.createElement("span");
-  dot.className = "nav-ripple";
-  dot.style.left = `${clientX - b.left}px`;
-  dot.style.top = `${clientY - b.top}px`;
-  layer.appendChild(dot);
-  dot.addEventListener("animationend", () => dot.remove());
-}
-
 export default function NavBar() {
   const pathname = usePathname();
   const router = useRouter();
@@ -30,7 +19,6 @@ export default function NavBar() {
   const barRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef<(HTMLAnchorElement | null)[]>([]);
   const pillRef = useRef<HTMLSpanElement>(null);
-  const rippleRef = useRef<HTMLSpanElement>(null);
   const [pill, setPill] = useState<{ x: number; w: number } | null>(null);
   const [hidden, setHidden] = useState(false);
 
@@ -82,7 +70,6 @@ export default function NavBar() {
   const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     if (!e.isPrimary) return;
     const bar = barRef.current;
-    if (bar && rippleRef.current) spawnRipple(bar, rippleRef.current, e.clientX, e.clientY);
     const g = geomFor(activeIndex);
     const first = geomFor(0);
     const last = geomFor(tabs.length - 1);
@@ -172,12 +159,6 @@ export default function NavBar() {
         }}
         className="glass-strong relative flex w-full max-w-md touch-none items-stretch gap-0.5 rounded-[26px] p-1.5"
       >
-        {/* Couche des ripples (clippée aux coins arrondis) */}
-        <span
-          ref={rippleRef}
-          aria-hidden
-          className="pointer-events-none absolute inset-0 z-0 overflow-hidden rounded-[26px]"
-        />
         {/* Pastille glass unique : glisse d'un onglet à l'autre, suit le doigt au swipe */}
         {pill && (
           <span

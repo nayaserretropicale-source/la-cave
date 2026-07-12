@@ -159,22 +159,26 @@ input:not([type="file"]):not([type="checkbox"]):not([type="radio"]) {
   /* Liquid Glass iOS 26 : verre transparent + brillant. Dégradé glossy (reflet
      haut lumineux) + backdrop blur/saturate/brightness (le verre "éclaire" et
      réfracte ce qui défile dessous) + liseré spéculaire sur le bord haut. */
+  /* Verre CLAIR et réfractif : peu de flou (le contenu reste vif et visible à
+     travers, comme Threads/iOS 26), forte saturation/contraste, arête de verre
+     lumineuse tout autour + remontée de lumière en bas (effet lentille). */
   background: linear-gradient(
     to bottom,
-    oklch(1 0 0 / 0.3) 0%,
-    oklch(1 0 0 / 0.1) 16%,
-    oklch(0.34 0.012 55 / 0.22) 55%,
-    oklch(0.3 0.012 55 / 0.32) 100%
+    oklch(1 0 0 / 0.22) 0%,
+    oklch(1 0 0 / 0.06) 20%,
+    oklch(0.42 0.01 55 / 0.08) 55%,
+    oklch(0.36 0.01 55 / 0.14) 100%
   );
-  backdrop-filter: blur(22px) saturate(200%) brightness(1.22);
-  -webkit-backdrop-filter: blur(22px) saturate(200%) brightness(1.22);
-  border: 1px solid oklch(1 0 0 / 0.18);
-  border-top-color: oklch(1 0 0 / 0.6);
+  backdrop-filter: blur(9px) saturate(210%) brightness(1.16) contrast(1.05);
+  -webkit-backdrop-filter: blur(9px) saturate(210%) brightness(1.16) contrast(1.05);
+  border: 1px solid oklch(1 0 0 / 0.22);
+  border-top-color: oklch(1 0 0 / 0.65);
   box-shadow:
     inset 0 1px 0 0 oklch(1 0 0 / 0.6),
-    inset 0 3px 8px -3px oklch(1 0 0 / 0.28),
-    inset 0 -1px 0 0 oklch(0 0 0 / 0.15),
-    0 18px 50px -12px oklch(0 0 0 / 0.6);
+    inset 0 0 0 1px oklch(1 0 0 / 0.08),
+    inset 0 -9px 18px -8px oklch(1 0 0 / 0.16),
+    inset 0 9px 16px -10px oklch(0 0 0 / 0.2),
+    0 18px 50px -12px oklch(0 0 0 / 0.55);
 }
 /* Balayage spéculaire : la lumière qui glisse sur le verre */
 .glass-strong::before {
@@ -220,47 +224,21 @@ input:not([type="file"]):not([type="checkbox"]):not([type="radio"]) {
 .nav-pill {
   /* Capsule active : verre dépoli clair et neutre (façon WhatsApp), bord haut
      lumineux, légère chaleur ambre en fond. Glisse d'un onglet à l'autre. */
-  background: oklch(1 0 0 / 0.14);
-  border: 1px solid oklch(1 0 0 / 0.2);
+  background: oklch(1 0 0 / 0.1);
+  border: 1px solid oklch(1 0 0 / 0.28);
   box-shadow:
-    0 1px 0 0 oklch(1 0 0 / 0.28) inset,
-    0 0 0 0.5px oklch(0.8 0.15 68 / 0.18) inset,
-    0 6px 16px -6px oklch(0 0 0 / 0.5);
-  backdrop-filter: blur(10px) saturate(180%);
-  -webkit-backdrop-filter: blur(10px) saturate(180%);
+    0 1px 0 0 oklch(1 0 0 / 0.45) inset,
+    0 0 0 1px oklch(1 0 0 / 0.06) inset,
+    0 -5px 10px -5px oklch(1 0 0 / 0.14) inset,
+    0 6px 16px -6px oklch(0 0 0 / 0.45);
+  backdrop-filter: blur(6px) saturate(190%) brightness(1.1);
+  -webkit-backdrop-filter: blur(6px) saturate(190%) brightness(1.1);
   transition:
     transform 460ms cubic-bezier(0.22, 1, 0.28, 1),
     width 460ms cubic-bezier(0.22, 1, 0.28, 1);
   will-change: transform, width;
 }
 
-/* Bloom au toucher : lueur qui fleurit au point de contact sur le verre */
-.nav-ripple {
-  position: absolute;
-  width: 12px;
-  height: 12px;
-  margin: -6px 0 0 -6px;
-  border-radius: 50%;
-  background: radial-gradient(
-    circle,
-    oklch(1 0 0 / 0.55),
-    oklch(1 0 0 / 0.2) 40%,
-    transparent 70%
-  );
-  pointer-events: none;
-  transform: scale(0);
-  mix-blend-mode: screen;
-  animation: nav-ripple 620ms cubic-bezier(0.22, 1, 0.28, 1) forwards;
-}
-@keyframes nav-ripple {
-  to {
-    transform: scale(11);
-    opacity: 0;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .nav-ripple { display: none; }
-}
 @media (prefers-reduced-motion: reduce) {
   .nav-pill { transition: none; }
 }
