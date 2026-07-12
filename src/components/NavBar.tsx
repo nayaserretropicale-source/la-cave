@@ -11,6 +11,17 @@ const tabs = [
   { href: "/actu", label: "Infos", emoji: "📰" },
 ];
 
+// Bloom lumineux au point de contact (animation liquid glass au toucher).
+function spawnRipple(bar: HTMLElement, layer: HTMLElement, clientX: number, clientY: number) {
+  const b = bar.getBoundingClientRect();
+  const dot = document.createElement("span");
+  dot.className = "nav-ripple";
+  dot.style.left = `${clientX - b.left}px`;
+  dot.style.top = `${clientY - b.top}px`;
+  layer.appendChild(dot);
+  dot.addEventListener("animationend", () => dot.remove());
+}
+
 export default function NavBar() {
   const pathname = usePathname();
   const router = useRouter();
@@ -19,7 +30,23 @@ export default function NavBar() {
   const barRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef<(HTMLAnchorElement | null)[]>([]);
   const pillRef = useRef<HTMLSpanElement>(null);
+  const rippleRef = useRef<HTMLSpanElement>(null);
   const [pill, setPill] = useState<{ x: number; w: number } | null>(null);
+  const [hidden, setHidden] = useState(false);
+
+  // Masque la barre au scroll vers le bas, la remontre au scroll vers le haut.
+  useEffect(() => {
+    let lastY = window.scrollY;
+    const onScroll = () => {
+      const y = window.scrollY;
+      if (y < 40) setHidden(false);
+      else if (y - lastY > 6) setHidden(true);
+      else if (lastY - y > 6) setHidden(false);
+      lastY = y;
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   // Géométrie (x relatif à la barre, largeur) d'un onglet.
   const geomFor = (i: number) => {
@@ -55,6 +82,7 @@ export default function NavBar() {
   const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     if (!e.isPrimary) return;
     const bar = barRef.current;
+    if (bar && rippleRef.current) spawnRipple(bar, rippleRef.current, e.clientX, e.clientY);
     const g = geomFor(activeIndex);
     const first = geomFor(0);
     const last = geomFor(tabs.length - 1);
@@ -123,7 +151,11 @@ export default function NavBar() {
   };
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-50 flex justify-center px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+    <nav
+      className={`fixed inset-x-0 bottom-0 z-50 flex justify-center px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] transition-[transform,opacity] duration-[400ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${
+        hidden ? "pointer-events-none translate-y-[160%] opacity-0" : "translate-y-0 opacity-100"
+      }`}
+    >
       {/* Barre flottante arrondie, liquid glass, style App Store */}
       <div
         ref={barRef}
@@ -140,6 +172,12 @@ export default function NavBar() {
         }}
         className="glass-strong relative flex w-full max-w-md touch-none items-stretch gap-0.5 rounded-[26px] p-1.5"
       >
+        {/* Couche des ripples (clippée aux coins arrondis) */}
+        <span
+          ref={rippleRef}
+          aria-hidden
+          className="pointer-events-none absolute inset-0 z-0 overflow-hidden rounded-[26px]"
+        />
         {/* Pastille glass unique : glisse d'un onglet à l'autre, suit le doigt au swipe */}
         {pill && (
           <span
