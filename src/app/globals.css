@@ -219,6 +219,14 @@ input:not([type="file"]):not([type="checkbox"]):not([type="radio"]) {
   55%, 100% { background-position: -120% 0; }
 }
 
+/* Couche de réfraction : déforme le contenu derrière la barre (Chrome/Android).
+   iOS Safari ne supporte pas url() en backdrop-filter → couche inerte, le verre
+   de base (.glass-strong) reste intact. */
+.glass-refract {
+  -webkit-backdrop-filter: url(#liquid-glass);
+  backdrop-filter: url(#liquid-glass);
+}
+
 /* Pastille active de la nav : matériau glass braise qui GLISSE d'un onglet à
    l'autre (translateX animé). Transition douce type ressort Apple. */
 .nav-pill {

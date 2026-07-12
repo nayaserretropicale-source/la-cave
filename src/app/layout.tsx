@@ -47,6 +47,16 @@ export default function RootLayout({
           <AvatarBadge />
           <PushSetup />
           <ScrollReveal />
+          {/* Filtre de réfraction "liquid glass" (Chrome/Android ; ignoré par iOS Safari) */}
+          <svg width="0" height="0" aria-hidden style={{ position: "absolute" }}>
+            <defs>
+              <filter id="liquid-glass" x="-20%" y="-20%" width="140%" height="140%" colorInterpolationFilters="sRGB">
+                <feTurbulence type="fractalNoise" baseFrequency="0.012 0.015" numOctaves={2} seed={7} result="n" />
+                <feGaussianBlur in="n" stdDeviation={1.4} result="nb" />
+                <feDisplacementMap in="SourceGraphic" in2="nb" scale={34} xChannelSelector="R" yChannelSelector="G" />
+              </filter>
+            </defs>
+          </svg>
           {children}
           <NavBar />
         </ConfirmProvider>

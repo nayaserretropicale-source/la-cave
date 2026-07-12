@@ -159,6 +159,8 @@ export default function NavBar() {
         }}
         className="glass-strong relative flex w-full max-w-md touch-none items-stretch gap-0.5 rounded-[26px] p-1.5"
       >
+        {/* Couche de réfraction liquid glass (déforme le contenu derrière — Chrome/Android) */}
+        <span aria-hidden className="glass-refract pointer-events-none absolute inset-0 z-0 rounded-[26px]" />
         {/* Pastille glass unique : glisse d'un onglet à l'autre, suit le doigt au swipe */}
         {pill && (
           <span
