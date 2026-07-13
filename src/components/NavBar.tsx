@@ -55,7 +55,6 @@ export default function NavBar() {
     reposition();
     window.addEventListener("resize", reposition);
     return () => window.removeEventListener("resize", reposition);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeIndex]);
 
   // ---- Swipe au doigt : la pastille suit le doigt, snap au relâcher ----
