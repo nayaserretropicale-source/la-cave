@@ -72,7 +72,7 @@ export default function Wishlist() {
 
         <AuthBar />
 
-        <div className="mb-8 space-y-3 rounded-2xl border border-zinc-800 bg-zinc-900/40 p-5" data-reveal style={{ ["--reveal-delay"]: "80ms" } as React.CSSProperties}>
+        <div className="mb-8 space-y-3 surface rounded-2xl p-5" data-reveal style={{ ["--reveal-delay"]: "80ms" } as React.CSSProperties}>
           <input
             value={nom}
             onChange={(e) => setNom(e.target.value)}
@@ -94,9 +94,8 @@ export default function Wishlist() {
           />
           <button
             onClick={add}
-            className="btn-3d emoji-tap flex w-full items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold"
+            className="btn-3d flex w-full items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold"
           >
-            <span className="emoji" aria-hidden>✨</span>
             Ajouter une envie
           </button>
           {msg && <p className="text-sm text-amber-400">{msg}</p>}
@@ -108,11 +107,12 @@ export default function Wishlist() {
             <p className="text-sm text-zinc-600">Aucune envie pour l&apos;instant.</p>
           </div>
         ) : (
-          <div className="stagger overflow-hidden rounded-2xl border border-zinc-800" data-reveal style={{ ["--reveal-delay"]: "160ms" } as React.CSSProperties}>
-            {items.map((it, i) => (
+          <div className="stagger space-y-2" data-reveal style={{ ["--reveal-delay"]: "160ms" } as React.CSSProperties}>
+            {items.map((it) => (
               <div
                 key={it.id}
-                className={`bg-zinc-900/40 p-4 ${i < items.length - 1 ? "border-b border-zinc-800/60" : ""}`}
+                data-liquid
+                className="surface rounded-2xl p-4"
               >
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0 flex-1">
@@ -129,7 +129,7 @@ export default function Wishlist() {
                   </div>
                   <button
                     onClick={() => remove(it.id)}
-                    className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg text-zinc-600 transition-colors hover:bg-zinc-800 hover:text-orange-400"
+                    className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg text-zinc-600 transition-colors hover:bg-zinc-800 hover:text-wine-400"
                     aria-label="Retirer"
                   >
                     <IconX size={13} />

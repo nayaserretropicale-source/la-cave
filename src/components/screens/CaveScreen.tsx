@@ -9,7 +9,7 @@ import { compressImage } from "@/lib/image";
 import { useConfirm } from "@/components/Confirm";
 import {
   IconCamera, IconPlus, IconEdit, IconX, IconStar,
-  IconChevronRight,
+  IconChevronRight, IconMoon, IconCaviste, IconMap, IconHeart,
 } from "@/components/Icons";
 
 type Evolution = { premier_tiers?: string; deuxieme_tiers?: string; troisieme_tiers?: string };
@@ -65,10 +65,10 @@ const EMPTY: Editable = {
 };
 
 const QUICK_LINKS = [
-  { href: "/ce-soir", label: "Ce soir", sub: "Que fumer ?", emoji: "🌙", primary: true },
-  { href: "/caviste", label: "Caviste", sub: "Conseil expert", emoji: "🎩", primary: false },
-  { href: "/boutiques", label: "Boutiques", sub: "Trouver près de moi", emoji: "📍", primary: false },
-  { href: "/wishlist", label: "Envies", sub: "Ma liste", emoji: "❤️", primary: false },
+  { href: "/ce-soir", label: "Ce soir", sub: "Que fumer ?", Icon: IconMoon, primary: true },
+  { href: "/caviste", label: "Caviste", sub: "Conseil expert", Icon: IconCaviste, primary: false },
+  { href: "/boutiques", label: "Boutiques", sub: "Trouver près de moi", Icon: IconMap, primary: false },
+  { href: "/wishlist", label: "Envies", sub: "Ma liste", Icon: IconHeart, primary: false },
 ];
 
 export default function Home({ embedded = false }: { embedded?: boolean } = {}) {
@@ -367,15 +367,16 @@ export default function Home({ embedded = false }: { embedded?: boolean } = {}) 
 
         {/* Quick links */}
         <div className="mb-8 grid grid-cols-2 gap-3" data-reveal style={{ ["--reveal-delay" as string]: "80ms" }}>
-          {QUICK_LINKS.map(({ href, label, sub, emoji, primary }) => (
+          {QUICK_LINKS.map(({ href, label, sub, Icon, primary }) => (
             <Link
               key={href}
               href={href}
-              className={`emoji-tap group flex items-center gap-3 px-4 py-3 ${
+              data-liquid
+              className={`group flex items-center gap-3 px-4 py-3 ${
                 primary ? "btn-3d" : "surface interactive rounded-xl"
               }`}
             >
-              <span aria-hidden className="emoji flex-shrink-0 text-2xl">{emoji}</span>
+              <Icon size={22} className={`flex-shrink-0 ${primary ? "text-zinc-950" : "text-amber-400"}`} />
               <div className="min-w-0">
                 <p className={`text-sm font-semibold leading-tight ${primary ? "text-zinc-950" : "text-zinc-100"}`}>{label}</p>
                 <p className={`text-[11px] leading-tight mt-0.5 truncate ${primary ? "text-zinc-950/70" : "text-zinc-400"}`}>{sub}</p>
@@ -387,9 +388,9 @@ export default function Home({ embedded = false }: { embedded?: boolean } = {}) 
         {/* Scan zone */}
         {!fiche && !loading && (
           <div className="mb-3" data-reveal>
-            <label className="emoji-tap group flex flex-col items-center gap-3 cursor-pointer rounded-2xl border border-dashed border-zinc-700 bg-zinc-900/30 px-6 py-8 text-center transition-colors hover:border-amber-600/50 hover:bg-zinc-900/50">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-zinc-800 transition-colors group-hover:bg-amber-600/10">
-                <span aria-hidden className="emoji text-2xl">📷</span>
+            <label className="surface group flex flex-col items-center gap-3 cursor-pointer rounded-2xl px-6 py-8 text-center">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full border border-amber-500/30 bg-amber-600/10">
+                <IconCamera size={21} className="text-amber-400" />
               </div>
               <div>
                 <p className="text-sm font-medium text-zinc-200">Scanner un cigare</p>
@@ -577,14 +578,15 @@ export default function Home({ embedded = false }: { embedded?: boolean } = {}) 
                 {groupNames.map((name) => (
                   <div key={name}>
                     <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-zinc-500">{name}</p>
-                    <div className="overflow-hidden rounded-xl border border-zinc-800">
-                      {groups[name].map((c, i) => (
+                    <div className="space-y-2">
+                      {groups[name].map((c) => (
                         <div
                           key={c.id}
                           onClick={() => openDetail(c)}
-                          className={`interactive flex cursor-pointer items-center gap-3 bg-zinc-900/40 px-3 py-3 ${
-                            i < groups[name].length - 1 ? "border-b border-zinc-800/60" : ""
-                          } ${c.statut === "fume" ? "opacity-50" : ""}`}
+                          data-liquid
+                          className={`surface interactive flex cursor-pointer items-center gap-3 rounded-2xl px-3 py-3 ${
+                            c.statut === "fume" ? "opacity-50" : ""
+                          }`}
                         >
                           {c.photo_url ? (
                             <Image
@@ -596,7 +598,7 @@ export default function Home({ embedded = false }: { embedded?: boolean } = {}) 
                             />
                           ) : (
                             <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-zinc-800 to-zinc-900">
-                              <span aria-hidden className="text-xl">🚬</span>
+                              <span aria-hidden className="font-display text-lg text-amber-300">{(c.marque || c.nom || "?").trim().charAt(0).toUpperCase()}</span>
                             </div>
                           )}
                           <div className="min-w-0 flex-1">
@@ -650,13 +652,14 @@ export default function Home({ embedded = false }: { embedded?: boolean } = {}) 
       {/* Detail modal */}
       {selected && (
         <div
-          className="fixed inset-0 z-[60] flex items-end justify-center overflow-y-auto bg-black/80 backdrop-blur-sm p-4 sm:items-center"
+          className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 backdrop-blur-md"
           onClick={requestCloseDetail}
         >
           <div
-            className="rise my-auto w-full max-w-md rounded-2xl border border-zinc-800 bg-zinc-950 shadow-2xl shadow-black/60"
+            className="rise w-full max-w-md max-h-[92vh] overflow-y-auto rounded-t-[28px] border-t border-x border-white/10 bg-zinc-950/90 backdrop-blur-2xl shadow-2xl shadow-black/60"
             onClick={(e) => e.stopPropagation()}
           >
+            <div className="h-1 w-9 rounded-full bg-zinc-100/20 mx-auto mt-2.5" />
             {/* Photo */}
             {selected.photo_url ? (
               <div className="relative h-56 w-full overflow-hidden rounded-t-2xl">
@@ -677,7 +680,7 @@ export default function Home({ embedded = false }: { embedded?: boolean } = {}) 
               </label>
 
               <div className="mb-4">
-                <h2 className="text-xl font-semibold tracking-tight text-zinc-50">{selected.nom}</h2>
+                <h2 className="font-display text-xl font-semibold tracking-tight text-zinc-50">{selected.nom}</h2>
                 <div className="mt-0.5 flex items-center gap-2">
                   {selected.marque && <p className="text-sm text-amber-400">{selected.marque}</p>}
                   {selected.source === "wishlist" && (

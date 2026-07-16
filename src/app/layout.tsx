@@ -6,6 +6,7 @@ import AvatarBadge from "@/components/AvatarBadge";
 import AgeGate from "@/components/AgeGate";
 import PushSetup from "@/components/PushSetup";
 import ScrollReveal from "@/components/ScrollReveal";
+import LiquidTouch from "@/components/LiquidTouch";
 import { ConfirmProvider } from "@/components/Confirm";
 
 const geistSans = Geist({
@@ -33,7 +34,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0a0a0a",
+  themeColor: "#0E0B08",
 };
 
 export default function RootLayout({
@@ -47,6 +48,7 @@ export default function RootLayout({
           <AvatarBadge />
           <PushSetup />
           <ScrollReveal />
+          <LiquidTouch />
           {/* Filtre de réfraction "liquid glass" (Chrome/Android ; ignoré par iOS Safari) */}
           <svg width="0" height="0" aria-hidden style={{ position: "absolute" }}>
             <defs>

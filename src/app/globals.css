@@ -2,36 +2,50 @@
 
 @theme {
   /*
-   * Palette « cave » v2 — espresso chaud relevé (moins sombre qu'avant), braise
-   * vive + accent jade (feuille de tabac) pour la couleur. Les échelles zinc/amber
-   * sont redéfinies : tout l'existant se rethème sans toucher aux pages.
-   * Contrastes vérifiés AA sur le fond relevé (zinc-950 = L 0.20).
+   * Palette « cave » v3 — Liquid Glass. Fond quasi-noir chaud (#0E0B08),
+   * accent cognac (#C88A3D), texte crème fumée (#EDE3D4), bordeaux pour les
+   * alertes. Les échelles zinc/amber/orange sont redéfinies : tout l'existant
+   * se rethème sans toucher aux pages.
    */
-  --color-zinc-950: oklch(0.2 0.012 55);   /* fond app — charcoal chaud, relevé */
-  --color-zinc-900: oklch(0.25 0.014 52);  /* surface / carte */
-  --color-zinc-800: oklch(0.32 0.016 50);  /* surface haute / bordure */
-  --color-zinc-700: oklch(0.42 0.016 48);  /* séparateur */
-  --color-zinc-600: oklch(0.64 0.014 52);  /* texte tertiaire — AA mini sur fond 0.20 */
-  --color-zinc-500: oklch(0.7 0.014 55);
-  --color-zinc-400: oklch(0.78 0.012 60);  /* texte secondaire */
-  --color-zinc-300: oklch(0.85 0.01 65);
-  --color-zinc-200: oklch(0.9 0.008 70);
-  --color-zinc-100: oklch(0.95 0.006 75);  /* texte principal */
-  --color-zinc-50: oklch(0.98 0.005 75);
+  --color-zinc-950: oklch(0.148 0.008 60);  /* fond app — #0E0B08 quasi-noir chaud */
+  --color-zinc-900: oklch(0.19 0.011 58);   /* surface / carte */
+  --color-zinc-800: oklch(0.25 0.013 55);   /* surface haute / bordure */
+  --color-zinc-700: oklch(0.34 0.015 52);   /* séparateur */
+  --color-zinc-600: oklch(0.6 0.02 62);     /* texte tertiaire — AA mini */
+  --color-zinc-500: oklch(0.67 0.022 65);
+  --color-zinc-400: oklch(0.76 0.024 70);   /* texte secondaire */
+  --color-zinc-300: oklch(0.83 0.024 75);
+  --color-zinc-200: oklch(0.885 0.023 78);
+  --color-zinc-100: oklch(0.925 0.021 80);  /* texte principal — #EDE3D4 crème fumée */
+  --color-zinc-50: oklch(0.955 0.017 82);
 
-  /* Braise / cuivre — plus saturée */
-  --color-amber-300: oklch(0.86 0.12 75);
-  --color-amber-400: oklch(0.8 0.15 68);
-  --color-amber-500: oklch(0.74 0.17 60);
-  --color-amber-600: oklch(0.66 0.17 52);
-  --color-amber-700: oklch(0.56 0.15 48);
+  /* Cognac — ancré sur #C88A3D. Moins saturé que la braise v2 : luxe, pas candy. */
+  --color-amber-300: oklch(0.82 0.09 78);
+  --color-amber-400: oklch(0.75 0.1 75);
+  --color-amber-500: oklch(0.68 0.105 72);  /* #C88A3D */
+  --color-amber-600: oklch(0.61 0.105 66);
+  --color-amber-700: oklch(0.52 0.1 60);
+  --color-amber-950: oklch(0.22 0.045 60);
 
-  /* Accent jade — feuille de tabac. Usage rare (états, dégradés glass). */
-  --color-jade-400: oklch(0.8 0.1 165);
-  --color-jade-500: oklch(0.72 0.11 168);
-  --color-jade-600: oklch(0.62 0.1 170);
+  /* Bordeaux profond — alertes / destructif. L'échelle orange est remappée
+     dessus : tous les états d'alerte existants basculent sans édition. */
+  --color-wine-300: oklch(0.72 0.09 20);
+  --color-wine-400: oklch(0.64 0.11 18);
+  --color-wine-500: oklch(0.55 0.12 16);
+  --color-wine-600: oklch(0.45 0.12 14);
+  --color-wine-900: oklch(0.24 0.06 15);
+  --color-orange-300: oklch(0.72 0.09 20);
+  --color-orange-400: oklch(0.64 0.11 18);
+  --color-orange-500: oklch(0.55 0.12 16);
+  --color-orange-950: oklch(0.22 0.055 15);
+
+  /* Jade conservé (usages existants) mais assourdi — la v3 est cognac/bordeaux. */
+  --color-jade-400: oklch(0.76 0.06 165);
+  --color-jade-500: oklch(0.68 0.07 168);
+  --color-jade-600: oklch(0.58 0.06 170);
 
   --ease-cave: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-liquid: cubic-bezier(0.3, 1.56, 0.4, 1); /* spring — gestes à élan uniquement */
 }
 
 @theme inline {
@@ -40,21 +54,29 @@
   --font-display: var(--font-fraunces);
 }
 
+:root {
+  /* Glass system v3 — une seule source de vérité pour la matière. */
+  --glass-blur: 20px;
+  --glass-tint: oklch(0.93 0.021 80 / 0.085);
+  --glass-tint-2: oklch(0.93 0.021 80 / 0.028);
+  --glass-edge: oklch(0.93 0.021 80 / 0.32);
+  --glass-edge-mid: oklch(0.93 0.021 80 / 0.05);
+  --glass-edge-low: oklch(0.93 0.021 80 / 0.13);
+}
+
 body {
   background-color: var(--color-zinc-950);
-  color: oklch(0.95 0.006 75);
+  color: var(--color-zinc-100);
   font-family: var(--font-sans), system-ui, sans-serif;
-  /* Profondeur : halo de braise en haut, lueur jade discrète en bas */
+  /* Profondeur : halo cognac en haut, souffle bordeaux en bas. */
   background-image:
-    radial-gradient(115% 65% at 50% -10%, oklch(0.56 0.15 58 / 0.2), transparent 60%),
-    radial-gradient(85% 55% at 0% 28%, oklch(0.5 0.13 22 / 0.11), transparent 55%),
-    radial-gradient(90% 55% at 100% 108%, oklch(0.58 0.1 168 / 0.1), transparent 55%);
+    radial-gradient(120% 55% at 50% -10%, oklch(0.6 0.1 70 / 0.16), transparent 62%),
+    radial-gradient(85% 50% at 108% 108%, oklch(0.4 0.11 15 / 0.13), transparent 58%);
   background-attachment: fixed;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Titres display : tracking serré sur les grandes tailles (cf. apple-design) */
 h1, h2, .display {
   letter-spacing: -0.02em;
 }
@@ -85,7 +107,6 @@ input:not([type="file"]):not([type="checkbox"]):not([type="radio"]) {
 
 .rise { animation: rise 360ms var(--ease-cave) both; }
 
-/* Transition de page (template.tsx) : entrée douce et bien visible à chaque navigation */
 @keyframes page-enter {
   from { opacity: 0; transform: translateY(24px) scale(0.985); }
   to { opacity: 1; transform: none; }
@@ -100,7 +121,7 @@ input:not([type="file"]):not([type="checkbox"]):not([type="radio"]) {
 .stagger > *:nth-child(5) { animation-delay: 235ms; }
 .stagger > *:nth-child(n + 6) { animation-delay: 270ms; }
 
-/* ---- Scroll reveal (piloté par ScrollReveal.tsx via IntersectionObserver) ---- */
+/* ---- Scroll reveal (ScrollReveal.tsx) ---- */
 
 [data-reveal] {
   opacity: 0;
@@ -116,7 +137,7 @@ input:not([type="file"]):not([type="checkbox"]):not([type="radio"]) {
   transform: none;
 }
 
-/* ---- Skeletons (remplacent les spinners) ---- */
+/* ---- Skeletons ---- */
 
 @keyframes shimmer {
   100% { background-position: -200% 0; }
@@ -133,114 +154,97 @@ input:not([type="file"]):not([type="checkbox"]):not([type="radio"]) {
   border-radius: 0.75rem;
 }
 
-/* ---- Surfaces & liquid glass ---- */
+/* ---- Surfaces & liquid glass v3 ----
+   Recette : teinte crème translucide + blur profond + bordure 1px en dégradé
+   lumineux (crème 32 % → 5 % → 13 %) + spéculaire inset. */
 
 .surface {
-  background: linear-gradient(180deg, oklch(0.27 0.014 55 / 0.92), oklch(0.22 0.012 55 / 0.95));
-  border: 1px solid oklch(0.8 0.15 62 / 0.1);
+  position: relative;
+  border: 1px solid transparent;
+  background:
+    linear-gradient(180deg, var(--glass-tint), var(--glass-tint-2)) padding-box,
+    linear-gradient(180deg, var(--glass-edge), var(--glass-edge-mid) 55%, var(--glass-edge-low)) border-box;
+  backdrop-filter: blur(var(--glass-blur)) saturate(150%);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(150%);
   box-shadow:
-    0 1px 0 0 oklch(1 0 0 / 0.05) inset,
-    0 10px 30px -14px oklch(0 0 0 / 0.6);
+    inset 0 1px 0 oklch(1 0 0 / 0.1),
+    0 12px 32px -18px oklch(0 0 0 / 0.8);
 }
 
-/* Liquid glass Apple : couche translucide, bord haut lumineux, blur + saturate.
-   Ne jamais empiler deux glass légers (lisibilité). */
 .glass {
-  background: oklch(0.3 0.014 55 / 0.55);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border: 1px solid oklch(1 0 0 / 0.08);
-  border-top-color: oklch(1 0 0 / 0.22); /* lumière qui accroche le matériau */
+  border: 1px solid transparent;
+  background:
+    linear-gradient(180deg, oklch(0.93 0.021 80 / 0.07), oklch(0.93 0.021 80 / 0.02)) padding-box,
+    linear-gradient(180deg, var(--glass-edge), var(--glass-edge-mid) 55%, var(--glass-edge-low)) border-box;
+  backdrop-filter: blur(var(--glass-blur)) saturate(160%);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(160%);
   box-shadow:
-    0 1px 0 0 oklch(1 0 0 / 0.06) inset,
-    0 12px 40px -16px oklch(0 0 0 / 0.55);
+    inset 0 1px 0 oklch(1 0 0 / 0.08),
+    0 12px 40px -16px oklch(0 0 0 / 0.6);
 }
 .glass-strong {
-  /* Liquid Glass iOS 26 : verre transparent + brillant. Dégradé glossy (reflet
-     haut lumineux) + backdrop blur/saturate/brightness (le verre "éclaire" et
-     réfracte ce qui défile dessous) + liseré spéculaire sur le bord haut. */
-  /* Verre CLAIR et réfractif : peu de flou (le contenu reste vif et visible à
-     travers, comme Threads/iOS 26), forte saturation/contraste, arête de verre
-     lumineuse tout autour + remontée de lumière en bas (effet lentille). */
-  background: linear-gradient(
-    to bottom,
-    oklch(1 0 0 / 0.22) 0%,
-    oklch(1 0 0 / 0.06) 20%,
-    oklch(0.42 0.01 55 / 0.08) 55%,
-    oklch(0.36 0.01 55 / 0.14) 100%
-  );
-  backdrop-filter: blur(9px) saturate(210%) brightness(1.16) contrast(1.05);
-  -webkit-backdrop-filter: blur(9px) saturate(210%) brightness(1.16) contrast(1.05);
-  border: 1px solid oklch(1 0 0 / 0.22);
-  border-top-color: oklch(1 0 0 / 0.65);
+  /* Chrome flottant (nav, sheets) : verre clair et réfractif, arête lumineuse. */
+  border: 1px solid transparent;
+  background:
+    linear-gradient(
+      180deg,
+      oklch(0.93 0.021 80 / 0.16) 0%,
+      oklch(0.93 0.021 80 / 0.05) 30%,
+      oklch(0.22 0.012 55 / 0.12) 70%,
+      oklch(0.22 0.012 55 / 0.2) 100%
+    ) padding-box,
+    linear-gradient(180deg, oklch(0.95 0.02 80 / 0.55), oklch(0.93 0.021 80 / 0.1) 45%, oklch(0.93 0.021 80 / 0.22)) border-box;
+  backdrop-filter: blur(22px) saturate(180%) brightness(1.1);
+  -webkit-backdrop-filter: blur(22px) saturate(180%) brightness(1.1);
   box-shadow:
-    inset 0 1px 0 0 oklch(1 0 0 / 0.6),
-    inset 0 0 0 1px oklch(1 0 0 / 0.08),
-    inset 0 -9px 18px -8px oklch(1 0 0 / 0.16),
-    inset 0 9px 16px -10px oklch(0 0 0 / 0.2),
-    0 18px 50px -12px oklch(0 0 0 / 0.55);
+    inset 0 1px 0 oklch(0.99 0.01 85 / 0.4),
+    inset 0 -9px 18px -8px oklch(1 0 0 / 0.1),
+    0 20px 46px -16px oklch(0 0 0 / 0.7);
 }
-/* Balayage spéculaire : la lumière qui glisse sur le verre */
-.glass-strong::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  pointer-events: none;
-  background: linear-gradient(
-    118deg,
-    oklch(1 0 0 / 0.3) 0%,
-    oklch(1 0 0 / 0.08) 22%,
-    transparent 42%
-  );
-  mix-blend-mode: screen;
-}
-/* Traînée lumineuse qui traverse lentement le verre (une passe toutes les 8s) */
+/* Balayage spéculaire : la lumière qui glisse sur le verre (transform only). */
 .glass-strong::after {
   content: "";
   position: absolute;
-  inset: 0;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 38%;
   border-radius: inherit;
   pointer-events: none;
   background: linear-gradient(
     100deg,
-    transparent 32%,
-    oklch(1 0 0 / 0.16) 47%,
-    oklch(1 0 0 / 0.3) 50%,
-    oklch(1 0 0 / 0.16) 53%,
-    transparent 68%
+    transparent,
+    oklch(0.98 0.02 85 / 0.13) 45%,
+    oklch(0.98 0.02 85 / 0.26) 50%,
+    oklch(0.98 0.02 85 / 0.13) 55%,
+    transparent
   );
-  background-size: 250% 100%;
-  mix-blend-mode: screen;
+  transform: translateX(-180%) skewX(-18deg);
   animation: glass-sweep 8s ease-in-out infinite;
+  mix-blend-mode: screen;
 }
 @keyframes glass-sweep {
-  0% { background-position: 220% 0; }
-  55%, 100% { background-position: -120% 0; }
+  0% { transform: translateX(-180%) skewX(-18deg); }
+  55%, 100% { transform: translateX(340%) skewX(-18deg); }
 }
 
-/* Couche de réfraction : déforme le contenu derrière la barre (Chrome/Android).
-   iOS Safari ne supporte pas url() en backdrop-filter → couche inerte, le verre
-   de base (.glass-strong) reste intact. */
+/* Couche de réfraction (Chrome/Android ; inerte sur iOS Safari). */
 .glass-refract {
   -webkit-backdrop-filter: url(#liquid-glass);
   backdrop-filter: url(#liquid-glass);
 }
 
-/* Pastille active de la nav : matériau glass braise qui GLISSE d'un onglet à
-   l'autre (translateX animé). Transition douce type ressort Apple. */
+/* Pastille active de la nav : verre dépoli clair, glisse d'un onglet à l'autre. */
 .nav-pill {
-  /* Capsule active : verre dépoli clair et neutre (façon WhatsApp), bord haut
-     lumineux, légère chaleur ambre en fond. Glisse d'un onglet à l'autre. */
-  background: oklch(1 0 0 / 0.1);
-  border: 1px solid oklch(1 0 0 / 0.28);
+  background: oklch(0.93 0.021 80 / 0.1);
+  border: 1px solid oklch(0.93 0.021 80 / 0.26);
   box-shadow:
-    0 1px 0 0 oklch(1 0 0 / 0.45) inset,
-    0 0 0 1px oklch(1 0 0 / 0.06) inset,
-    0 -5px 10px -5px oklch(1 0 0 / 0.14) inset,
-    0 6px 16px -6px oklch(0 0 0 / 0.45);
-  backdrop-filter: blur(6px) saturate(190%) brightness(1.1);
-  -webkit-backdrop-filter: blur(6px) saturate(190%) brightness(1.1);
+    0 1px 0 0 oklch(1 0 0 / 0.4) inset,
+    0 0 0 1px oklch(1 0 0 / 0.05) inset,
+    0 -5px 10px -5px oklch(1 0 0 / 0.12) inset,
+    0 6px 16px -6px oklch(0 0 0 / 0.5);
+  backdrop-filter: blur(6px) saturate(180%) brightness(1.08);
+  -webkit-backdrop-filter: blur(6px) saturate(180%) brightness(1.08);
   transition:
     transform 460ms cubic-bezier(0.22, 1, 0.28, 1),
     width 460ms cubic-bezier(0.22, 1, 0.28, 1);
@@ -251,43 +255,75 @@ input:not([type="file"]):not([type="checkbox"]):not([type="radio"]) {
   .nav-pill { transition: none; }
 }
 
-/* ---- Boutons 3D (braise, matière) ---- */
+/* ---- Signature : réfraction liquide au toucher (LiquidTouch.tsx) ----
+   Pose data-liquid sur une carte : le verre s'incline vers le doigt, un
+   spéculaire suit le point de contact, retour en spring au relâcher.
+   GPU only — transform + opacity. */
+
+[data-liquid] {
+  position: relative;
+  overflow: hidden;
+  transform: perspective(700px);
+  will-change: transform;
+}
+[data-liquid] > .liquid-spec {
+  position: absolute;
+  left: -55%;
+  top: -55%;
+  width: 210%;
+  height: 210%;
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(
+    circle,
+    oklch(0.95 0.02 80 / 0.2) 0%,
+    oklch(0.95 0.02 80 / 0.06) 32%,
+    transparent 62%
+  );
+  will-change: transform, opacity;
+}
+
+/* ---- Boutons 3D → cognac glass ---- */
 
 .btn-3d {
   position: relative;
   border-radius: 0.9rem;
-  background: linear-gradient(180deg, var(--color-amber-400), var(--color-amber-600));
-  color: var(--color-zinc-950);
+  border: 1px solid oklch(0.94 0.05 82 / 0.4);
+  background: linear-gradient(180deg, oklch(0.74 0.1 74 / 0.97), oklch(0.59 0.104 64 / 0.95));
+  color: oklch(0.17 0.02 60);
   font-weight: 600;
   box-shadow:
-    0 1px 0 0 oklch(1 0 0 / 0.45) inset,      /* reflet haut */
-    0 -1px 0 0 oklch(0 0 0 / 0.2) inset,       /* ombre basse interne */
-    0 5px 0 0 var(--color-amber-700),          /* épaisseur du bouton */
-    0 12px 22px -8px oklch(0.66 0.17 52 / 0.5);/* halo coloré */
+    0 1px 0 0 oklch(0.99 0.02 85 / 0.5) inset,
+    0 -1px 0 0 oklch(0 0 0 / 0.18) inset,
+    0 4px 0 0 var(--color-amber-700),
+    0 14px 26px -12px oklch(0.68 0.105 72 / 0.5);
   transition:
     transform 120ms var(--ease-cave),
     box-shadow 120ms var(--ease-cave),
     filter 120ms ease;
 }
-.btn-3d:hover { filter: brightness(1.06); }
+.btn-3d:hover { filter: brightness(1.05); }
 .btn-3d:active {
-  transform: translateY(4px);
+  transform: translateY(3px);
   box-shadow:
-    0 1px 0 0 oklch(1 0 0 / 0.35) inset,
+    0 1px 0 0 oklch(0.99 0.02 85 / 0.35) inset,
     0 1px 0 0 var(--color-amber-700),
-    0 5px 12px -8px oklch(0.66 0.17 52 / 0.5);
+    0 5px 12px -8px oklch(0.68 0.105 72 / 0.5);
 }
 
-/* ---- Options / sélecteurs 3D (relief, enfoncé quand actif) ---- */
+/* ---- Options / sélecteurs (relief verre, enfoncé quand actif) ---- */
 
 .option-3d {
   border-radius: 0.9rem;
-  background: linear-gradient(180deg, var(--color-zinc-800), var(--color-zinc-900));
-  border: 1px solid oklch(1 0 0 / 0.06);
+  border: 1px solid oklch(0.93 0.021 80 / 0.09);
+  background: linear-gradient(180deg, oklch(0.93 0.021 80 / 0.07), oklch(0.93 0.021 80 / 0.02));
   color: var(--color-zinc-200);
+  backdrop-filter: blur(12px) saturate(150%);
+  -webkit-backdrop-filter: blur(12px) saturate(150%);
   box-shadow:
-    0 1px 0 0 oklch(1 0 0 / 0.06) inset,
-    0 4px 0 0 oklch(0 0 0 / 0.32),
+    0 1px 0 0 oklch(1 0 0 / 0.08) inset,
+    0 3px 0 0 oklch(0 0 0 / 0.3),
     0 9px 18px -10px oklch(0 0 0 / 0.5);
   transition:
     transform 130ms var(--ease-cave),
@@ -298,12 +334,13 @@ input:not([type="file"]):not([type="checkbox"]):not([type="radio"]) {
 .option-3d:active { transform: translateY(2px); }
 .option-3d[aria-pressed="true"],
 .option-3d[data-selected="true"] {
-  background: linear-gradient(180deg, var(--color-amber-500), var(--color-amber-600));
-  color: var(--color-zinc-950);
-  transform: translateY(3px);
+  border-color: oklch(0.75 0.1 75 / 0.45);
+  background: linear-gradient(180deg, oklch(0.68 0.105 72 / 0.24), oklch(0.68 0.105 72 / 0.12));
+  color: var(--color-amber-300);
+  transform: translateY(2px);
   box-shadow:
     inset 0 2px 7px oklch(0 0 0 / 0.28),
-    0 1px 0 0 var(--color-amber-700);
+    0 1px 0 0 oklch(0.52 0.1 60 / 0.6);
 }
 
 /* ---- Micro-interactions ---- */
@@ -317,7 +354,7 @@ input:not([type="file"]):not([type="checkbox"]):not([type="radio"]) {
 }
 .interactive:hover {
   transform: translateY(-2px);
-  border-color: oklch(0.8 0.15 62 / 0.4);
+  border-color: oklch(0.75 0.1 75 / 0.4);
   box-shadow: 0 16px 40px -18px oklch(0 0 0 / 0.7);
 }
 .interactive:active { transform: translateY(0) scale(0.99); }
@@ -328,8 +365,6 @@ input:not([type="file"]):not([type="checkbox"]):not([type="radio"]) {
 .btn-press:hover { filter: brightness(1.1); }
 .btn-press:active { transform: scale(0.97); }
 
-/* Clic : retour tactile sur TOUS les boutons (hors reliefs 3D qui ont déjà le leur).
-   On garde les transitions de couleur/bordure au survol en plus du scale. */
 button:not(.btn-3d):not(.option-3d):not(:disabled) {
   transition:
     transform 130ms var(--ease-cave),
@@ -342,15 +377,40 @@ button:not(.btn-3d):not(.option-3d):not(:disabled):active {
   transform: scale(0.95);
 }
 
-/* ---- Emoji interactifs (remplacent les icônes) ---- */
+/* ---- Badge envies ⭐ : pulse doux ---- */
+
+@keyframes star-pulse {
+  0%, 100% { transform: scale(1); opacity: 0.85; }
+  50% { transform: scale(1.16); opacity: 1; }
+}
+.pulse-star {
+  animation: star-pulse 2.4s ease-in-out infinite;
+  transform-origin: center;
+  will-change: transform, opacity;
+}
+
+/* ---- Icônes de nav (trait 1.5px — remplacent les emoji) ---- */
+
+.tab-icon {
+  opacity: 0.5;
+  transition:
+    transform 240ms var(--ease-cave),
+    opacity 240ms ease;
+  will-change: transform;
+}
+.tab-icon-active {
+  opacity: 1;
+  transform: translateY(-2px) scale(1.1);
+  filter: drop-shadow(0 4px 10px oklch(0.68 0.105 72 / 0.55));
+}
+
+/* ---- Emoji interactifs (encore utilisés hors P1 — conservés) ---- */
 
 @keyframes emoji-pop {
   0% { transform: scale(1); }
   45% { transform: scale(1.4); }
   100% { transform: scale(1); }
 }
-
-/* Emoji cliquable : rebond au tap, léger grossissement au survol */
 .emoji {
   display: inline-block;
   line-height: 1;
@@ -361,8 +421,6 @@ button:not(.btn-3d):not(.option-3d):not(:disabled):active {
 .emoji-tap:hover .emoji { transform: scale(1.12) rotate(-4deg); }
 .emoji-tap:active .emoji { transform: scale(0.82); }
 .emoji-pop { animation: emoji-pop 420ms var(--ease-cave); }
-
-/* Nav : emoji discret/grisé quand inactif, couleur pleine + rebond + halo quand actif */
 .tab-emoji {
   display: inline-block;
   line-height: 1;
@@ -378,7 +436,7 @@ button:not(.btn-3d):not(.option-3d):not(:disabled):active {
   opacity: 1;
   transform: translateY(-2px) scale(1.18);
   animation: emoji-pop 420ms var(--ease-cave);
-  text-shadow: 0 4px 12px oklch(0.72 0.17 60 / 0.5);
+  text-shadow: 0 4px 12px oklch(0.68 0.105 72 / 0.5);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -391,10 +449,11 @@ button:not(.btn-3d):not(.option-3d):not(:disabled):active {
   .rise,
   .stagger > * { animation: fade-in 0.01ms both; }
   [data-reveal] { opacity: 1; transform: none; }
+  [data-liquid] { transform: none; }
 }
 
 @media (prefers-reduced-transparency: reduce) {
-  .glass, .glass-strong {
+  .glass, .glass-strong, .surface {
     background: var(--color-zinc-900);
     backdrop-filter: none;
     -webkit-backdrop-filter: none;

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { IconChevronRight } from "@/components/Icons";
+import { IconChevronRight, IconStar } from "@/components/Icons";
 
 type Deal = { retailer: string; title: string; url: string; match?: string };
 
@@ -81,7 +81,10 @@ export default function Promos({ embedded = false }: { embedded?: boolean } = {}
         ) : (
           <>
             {matchCount > 0 && (
-              <div data-reveal className="mb-5 rounded-xl border border-amber-600/30 bg-amber-950/15 px-4 py-3">
+              <div data-reveal className="surface mb-5 flex items-center gap-3 rounded-2xl border-amber-500/30 bg-amber-950/15 px-4 py-3">
+                <span className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full border border-amber-500/40 bg-amber-600/15">
+                  <IconStar size={13} filled className="text-amber-400 pulse-star" />
+                </span>
                 <p className="text-sm text-amber-300">
                   {matchCount === 1
                     ? "Un cigare de tes envies est en promo"
@@ -93,16 +96,18 @@ export default function Promos({ embedded = false }: { embedded?: boolean } = {}
             {deals.length === 0 ? (
               <p className="py-4 text-sm text-zinc-500"><span aria-hidden className="mr-1.5">🔍</span>Rien trouvé à l&apos;instant — vois les sites de référence ci-dessous.</p>
             ) : (
-              <div data-reveal style={{ ["--reveal-delay"]: "80ms" } as React.CSSProperties} className="stagger mb-8 overflow-hidden rounded-2xl border border-zinc-800">
+              <div data-reveal style={{ ["--reveal-delay"]: "80ms" } as React.CSSProperties} className="stagger mb-8 space-y-2">
                 {deals.map((d, i) => (
                   <div
                     key={i}
-                    className={`p-4 ${d.match ? "bg-amber-950/10" : "bg-zinc-900/40"} ${
-                      i < deals.length - 1 ? "border-b border-zinc-800/60" : ""
-                    }`}
+                    data-liquid
+                    className="surface rounded-2xl p-4"
                   >
                     {d.match && (
-                      <p className="mb-1.5 text-[10px] font-medium uppercase tracking-widest text-amber-400">
+                      <p className="mb-1.5 flex items-center gap-2 text-[10px] font-medium uppercase tracking-widest text-amber-400">
+                        <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border border-amber-500/40 bg-amber-600/15">
+                          <IconStar size={17} filled className="text-amber-400 pulse-star" />
+                        </span>
                         Dans tes envies · {d.match}
                       </p>
                     )}
@@ -116,9 +121,9 @@ export default function Promos({ embedded = false }: { embedded?: boolean } = {}
                         target="_blank"
                         rel="noopener noreferrer"
                         aria-label={`Voir l'offre chez ${d.retailer}`}
-                        className="btn-3d emoji-tap flex flex-shrink-0 items-center gap-1 px-3 py-1.5 text-xs"
+                        className="btn-3d flex flex-shrink-0 items-center gap-1 px-3 py-1.5 text-xs"
                       >
-                        <span aria-hidden className="emoji">🔥</span> Voir l&apos;offre
+                        Voir l&apos;offre
                       </a>
                     </div>
                   </div>

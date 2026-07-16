@@ -1,23 +1,22 @@
-# La Cave — Design System (v2)
+# La Cave — Design System (v3 · Liquid Glass)
 
-> Cave à cigares personnelle. Ambiance : cave chaude, braise, cuivre, feuille de tabac.
-> **v2 : moins sombre, plus de couleur, matière (liquid glass), relief 3D, mouvement au scroll.**
-> Luxe chaud et vivant, jamais tape-à-l'œil. Mobile-first, PWA, thème sombre relevé.
+> Cave à cigares personnelle. Ambiance : humidor sombre, **cognac**, crème fumée, cuir.
+> **v3 : verre translucide (liquid glass) + réfraction au toucher, palette cognac/bordeaux, icônes fines.**
+> Luxe chaud et vivant, jamais tape-à-l'œil. Mobile-first, PWA, thème sombre.
 > Réfère-toi à ce fichier avant toute UI. Les tokens vivent dans `src/app/globals.css` (`@theme`).
 >
-> **App sombre par conception** (texte clair partout, boutons à texte foncé sur ambre).
-> Un vrai *light mode* est un chantier séparé — ne pas basculer le fond en clair sans
-> reprendre le contraste de chaque page.
+> **App sombre par conception** (texte crème partout, boutons à texte foncé sur cognac).
+> Light mode = chantier séparé (ne pas basculer le fond sans reprendre le contraste des pages).
 
 ## Principes
 
-1. **Charcoal chaud relevé, pas noir.** Fond `zinc-950` = L 0.20 (teinte tabac ~55°), pas du near-black. Jamais de gris froid.
-2. **Deux accents.** Braise (`amber`) = CTA / actif / focus. Jade (`--color-jade-*`, feuille de tabac) = touche de couleur rare (états, dégradés glass). Une seule action ambre pleine par écran.
-3. **Matière & profondeur.** Chrome flottant en *liquid glass* (`.glass` / `.glass-strong`), contenu qui défile dessous. Bord haut lumineux. Ne jamais empiler deux glass légers.
-4. **Relief.** CTA en `.btn-3d` (épaisseur + halo, s'enfonce au press). Sélecteurs en `.option-3d` (relief, enfoncé quand actif).
-5. **Mouvement.** Entrées `rise`/`stagger`, révélation au scroll via `data-reveal`. Easing unique `--ease-cave`. Pas de bounce par défaut (réservé aux gestes à élan). Toujours respecter `prefers-reduced-motion`.
-6. **Contraste AA garanti.** Texte secondaire ≥ `zinc-600` sur fond `zinc-950`. Ne jamais descendre en dessous.
-7. **Cibles tactiles 44px.** Tout contrôle a `min-height: 2.75rem` (déjà global). Boutons icône : 44px de large aussi.
+1. **Quasi-noir chaud, pas noir clinique.** Fond `zinc-950` = `#0E0B08` (L 0.148, teinte 60). Halos cognac (haut) + bordeaux (bas) sur le body. Jamais de gris froid ni de fond plat.
+2. **Accent unique cognac.** `amber-*` ancré sur `#C88A3D` (cognac, peu saturé — luxe, pas candy) = CTA / actif / focus. **Bordeaux** (`wine-*`, échelle `orange` remappée) = alertes/destructif. Jade assourdi, résiduel. Une seule action `btn-3d` pleine par écran.
+3. **Matière liquid glass.** `.surface` (cartes), `.glass` / `.glass-strong` (chrome flottant) : teinte crème translucide + blur 20–22px + **bordure 1px en dégradé lumineux** (double background padding-box/border-box) + spéculaire inset. Le contenu défile dessous. Ne jamais empiler deux glass légers.
+4. **Réfraction au toucher.** Attribut `data-liquid` sur une carte → elle s'incline vers le doigt + spéculaire qui suit le contact (géré par `LiquidTouch.tsx`, monté globalement). GPU only.
+5. **Relief.** CTA en `.btn-3d` (cognac, s'enfonce au press). Sélecteurs en `.option-3d`.
+6. **Mouvement.** `rise`/`stagger`, `data-reveal` au scroll, `page-enter` par navigation. Easing `--ease-cave` ; spring `--ease-liquid` réservé aux gestes. Toujours `prefers-reduced-motion`.
+7. **Contraste AA + 44px.** Texte secondaire ≥ `zinc-600` ; tout contrôle `min-height: 2.75rem`.
 
 ## Couleurs
 
@@ -25,19 +24,19 @@
 
 | Rôle | Token | OKLCH |
 |------|-------|-------|
-| Fond app | `zinc-950` | `0.20 0.012 55` |
-| Surface / carte | `zinc-900` | `0.25 0.014 52` |
-| Surface haute / bordure | `zinc-800` | `0.32 0.016 50` |
-| Séparateur | `zinc-700` | `0.42 0.016 48` |
-| Texte tertiaire (mini AA) | `zinc-600` | `0.64 0.014 52` |
-| Texte secondaire | `zinc-400` | `0.78 0.012 60` |
-| Texte principal | `zinc-100` | `0.95 0.006 75` |
-| **Braise (CTA, actif)** | `amber-600` | `0.66 0.17 52` |
-| Braise hover | `amber-500` | `0.74 0.17 60` |
-| Braise claire (accents, focus) | `amber-400` | `0.80 0.15 68` |
-| Accent jade (rare) | `jade-500` | `0.72 0.11 168` |
+| Fond app (`#0E0B08`) | `zinc-950` | `0.148 0.008 60` |
+| Surface / carte | `zinc-900` | `0.19 0.011 58` |
+| Surface haute / bordure | `zinc-800` | `0.25 0.013 55` |
+| Séparateur | `zinc-700` | `0.34 0.015 52` |
+| Texte tertiaire (mini AA) | `zinc-600` | `0.60 0.02 62` |
+| Texte secondaire | `zinc-400` | `0.76 0.024 70` |
+| Texte principal (crème `#EDE3D4`) | `zinc-100` | `0.925 0.021 80` |
+| **Cognac (CTA, actif) `#C88A3D`** | `amber-500` | `0.68 0.105 72` |
+| Cognac clair (accents/focus) | `amber-400` | `0.75 0.1 75` |
+| **Bordeaux (alertes/destructif)** | `wine-500` | `0.55 0.12 16` |
+| Jade assourdi (résiduel) | `jade-500` | `0.68 0.07 168` |
 
-Fond du `body` : `zinc-950` + deux `radial-gradient` (halo braise haut, lueur jade bas), `background-attachment: fixed`. Ne pas remettre un fond plat.
+L'échelle `orange` est remappée sur le bordeaux : les états d'alerte existants basculent sans édition (préférer `wine-*` pour le nouveau markup). Fond du `body` : `zinc-950` + halos `radial-gradient` cognac (haut) / bordeaux (bas), `background-attachment: fixed`. Jamais de fond plat.
 
 ## Typographie
 
@@ -53,9 +52,13 @@ Poids UI : `font-medium` / `font-semibold`. Le texte sur bouton ambre est `text-
 
 ## Composants (utilitaires dans globals.css)
 
-- **`.surface`** — carte : dégradé haut→bas, bordure ambre à 10 %, ombre portée + liseré interne. Brique de base des blocs.
-- **`.glass` / `.glass-strong`** — liquid glass : `backdrop-filter: blur() saturate()`, bord haut lumineux. Pour le chrome flottant (nav, barres, sheets). `-strong` = plus opaque/flou (nav). Passe en surface opaque sous `prefers-reduced-transparency`.
-- **`.btn-3d`** — CTA en relief : dégradé braise, épaisseur (`box-shadow` bas), halo coloré, s'enfonce de 4px au `:active`. Texte foncé (`text-zinc-950`).
+- **`.surface`** — carte liquid glass (v3) : teinte crème translucide + blur 20px + **bordure 1px en dégradé lumineux** (crème 32→5→13 %, via double background padding-box/border-box) + spéculaire inset. Brique de base des blocs/cartes.
+- **`.glass` / `.glass-strong`** — chrome flottant (nav, sheets). `-strong` = verre clair réfractif + balayage spéculaire animé + arête lumineuse. Passe en surface opaque sous `prefers-reduced-transparency`.
+- **`data-liquid`** — réfraction au toucher (v3) : la carte s'incline vers le doigt + spéculaire qui suit le contact, retour spring `--ease-liquid`. Piloté par `LiquidTouch.tsx` (monté dans le layout, délégué global) — poser l'attribut suffit, rien à importer.
+- **`.glass-refract`** — couche `backdrop-filter: url(#liquid-glass)` (déforme le contenu derrière ; Chrome/Android, inerte iOS Safari). Filtre SVG dans `layout.tsx` (feDisplacementMap `scale=35`, turbulence animée).
+- **`.btn-3d`** — CTA en relief **cognac** (v3) : dégradé cognac, épaisseur `box-shadow`, s'enfonce de 3px au `:active`. Texte foncé. **Une seule action pleine par écran.**
+- **`.tab-icon` / `.tab-icon-active`** — icônes fines de nav (opacity 0.5 → 1 + drop-shadow cognac quand actif). Emoji nav remplacés par icônes 1.5px.
+- **`.pulse-star`** — pulsation douce (2.4s) pour l'étoile ⭐ « envies ».
 - **`.option-3d`** — bouton de sélection en relief. Actif via `aria-pressed="true"` **ou** `data-selected="true"` → passe braise + s'enfonce.
 - **`.interactive`** — hover : `translateY(-2px)` + bordure ambre + ombre. Sur cartes/tuiles cliquables.
 - **`.btn-press`** — retour tactile léger (hover `brightness`, active `scale`). Pour boutons plats sans relief.

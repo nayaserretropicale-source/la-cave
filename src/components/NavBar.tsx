@@ -3,12 +3,14 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { IconCave, IconCercle, IconCaviste, IconActu } from "@/components/Icons";
 
+// v3 : icônes fines (trait 1.5px) à la place des emoji.
 const tabs = [
-  { href: "/", label: "Cave", emoji: "🚬" },
-  { href: "/communaute", label: "Club", emoji: "👥" },
-  { href: "/caviste", label: "Caviste", emoji: "🎩" },
-  { href: "/actu", label: "Infos", emoji: "📰" },
+  { href: "/", label: "Cave", Icon: IconCave },
+  { href: "/communaute", label: "Club", Icon: IconCercle },
+  { href: "/caviste", label: "Caviste", Icon: IconCaviste },
+  { href: "/actu", label: "Infos", Icon: IconActu },
 ];
 
 export default function NavBar() {
@@ -143,7 +145,7 @@ export default function NavBar() {
         hidden ? "pointer-events-none translate-y-[160%] opacity-0" : "translate-y-0 opacity-100"
       }`}
     >
-      {/* Barre flottante arrondie, liquid glass, style App Store */}
+      {/* Barre flottante arrondie, liquid glass */}
       <div
         ref={barRef}
         onPointerDown={onPointerDown}
@@ -157,9 +159,9 @@ export default function NavBar() {
             swallowClick.current = false;
           }
         }}
-        className="glass-strong relative flex w-full max-w-md touch-none items-stretch gap-0.5 rounded-[26px] p-1.5"
+        className="glass-strong relative flex w-full max-w-md touch-none items-stretch gap-0.5 overflow-hidden rounded-[26px] p-1.5"
       >
-        {/* Couche de réfraction liquid glass (déforme le contenu derrière — Chrome/Android) */}
+        {/* Couche de réfraction liquid glass (Chrome/Android) */}
         <span aria-hidden className="glass-refract pointer-events-none absolute inset-0 z-0 rounded-[26px]" />
         {/* Pastille glass unique : glisse d'un onglet à l'autre, suit le doigt au swipe */}
         {pill && (
@@ -170,7 +172,7 @@ export default function NavBar() {
             style={{ transform: `translateX(${pill.x}px)`, width: pill.w }}
           />
         )}
-        {tabs.map(({ href, label, emoji }, i) => {
+        {tabs.map(({ href, label, Icon }, i) => {
           const active = i === activeIndex;
           return (
             <Link
@@ -180,16 +182,11 @@ export default function NavBar() {
               }}
               href={href}
               aria-current={active ? "page" : undefined}
-              className={`relative z-10 flex flex-1 flex-col items-center gap-0.5 rounded-[20px] py-2 text-[10px] font-medium tracking-wide transition-colors duration-300 active:scale-90 ${
+              className={`relative z-10 flex flex-1 flex-col items-center gap-1 rounded-[20px] py-2 text-[10px] font-medium tracking-wide transition-colors duration-300 active:scale-90 ${
                 active ? "text-amber-300" : "text-zinc-400 hover:text-zinc-200"
               }`}
             >
-              <span
-                aria-hidden
-                className={`relative text-[21px] ${active ? "tab-emoji tab-emoji-active" : "tab-emoji"}`}
-              >
-                {emoji}
-              </span>
+              <Icon size={21} className={active ? "tab-icon tab-icon-active" : "tab-icon"} />
               <span className="relative">{label}</span>
             </Link>
           );
