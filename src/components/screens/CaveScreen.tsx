@@ -222,7 +222,8 @@ export default function Home({ embedded = false }: { embedded?: boolean } = {}) 
 
   async function removeFromCave(id: string) {
     if (!(await confirm({ message: "Supprimer ce cigare de ta cave ?", confirmLabel: "Supprimer", danger: true }))) return;
-    await supabase.from("cave").delete().eq("id", id);
+    const { error: delErr } = await supabase.from("cave").delete().eq("id", id);
+    if (delErr) { setSaveMsg("Suppression impossible — réessaie."); return; }
     loadCave();
   }
 
@@ -276,7 +277,7 @@ export default function Home({ embedded = false }: { embedded?: boolean } = {}) 
 
   async function saveDetail() {
     if (!selected) return;
-    await supabase.from("cave").update({
+    const { error: updateErr } = await supabase.from("cave").update({
       nom: form.nom.trim() || selected.nom,
       marque: form.marque.trim() || null,
       origine: form.origine.trim() || null,
@@ -294,6 +295,7 @@ export default function Home({ embedded = false }: { embedded?: boolean } = {}) 
       quantite: qteDraft,
       statut: statutDraft,
     }).eq("id", selected.id);
+    if (updateErr) { setSaveMsg("Connecte-toi d'abord pour modifier."); return; }
     setSelected(null);
     loadCave();
   }
