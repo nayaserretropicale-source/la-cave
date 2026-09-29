@@ -1,2 +1,14 @@
+# Le CLI Vercel ignore .gitignore : tout ce qui n'est pas listé ici part avec le déploiement.
+
 # Rapports de l agent testeur (local, jamais en ligne)
 .qa
+
+# Outillage local des agents et plugins (jamais en ligne ; .impeccable peut aussi finir dans public/)
+.impeccable
+.claude
+.codex
+.agents
+.gstack
+.checks
+MEMORY.md*
+*.bak-*
