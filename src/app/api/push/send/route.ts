@@ -3,11 +3,16 @@ import { createClient } from "@supabase/supabase-js";
 import webpush from "web-push";
 import { requireUser } from "@/lib/api-guard";
 
-webpush.setVapidDetails(
-  process.env.VAPID_SUBJECT!,
-  process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
-  process.env.VAPID_PRIVATE_KEY!
-);
+let vapidInitialized = false;
+function ensureVapid() {
+  if (vapidInitialized) return;
+  const subject = process.env.VAPID_SUBJECT;
+  const pub = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+  const priv = process.env.VAPID_PRIVATE_KEY;
+  if (!subject || !pub || !priv) throw new Error("VAPID env vars not set");
+  webpush.setVapidDetails(subject, pub, priv);
+  vapidInitialized = true;
+}
 
 function authedClient(token: string) {
   return createClient(
@@ -20,6 +25,7 @@ function authedClient(token: string) {
 const TYPES = new Set(["like", "comment", "friend_request"]);
 
 export async function POST(req: NextRequest) {
+  try { ensureVapid(); } catch { return NextResponse.json({ error: "Push not configured" }, { status: 503 }); }
   const { user, error } = await requireUser(req);
   if (error) return error;
 

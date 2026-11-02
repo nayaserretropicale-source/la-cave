@@ -7,12 +7,15 @@ export default function AgeGate() {
   const [status, setStatus] = useState<"loading" | "ask" | "ok" | "denied">("loading");
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setStatus(localStorage.getItem("lacave_age_ok") === "1" ? "ok" : "ask");
+    try {
+      setStatus(localStorage.getItem("lacave_age_ok") === "1" ? "ok" : "ask");
+    } catch {
+      setStatus("ask");
+    }
   }, []);
 
   function accept() {
-    localStorage.setItem("lacave_age_ok", "1");
+    try { localStorage.setItem("lacave_age_ok", "1"); } catch { /* private browsing */ }
     setStatus("ok");
   }
 
